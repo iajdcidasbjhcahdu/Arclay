@@ -108,6 +108,35 @@ class ProductsService {
     );
   }
 
+  // Fetch hero ads
+  Future<ApiResponse<List<Map<String, dynamic>>>> getHeroAds() async {
+    final response = await _apiService.get<Map<String, dynamic>>(
+      AppConstants.productAdsEndpoint,
+      queryParams: {'position': 'hero'},
+      fromJson: (json) => json as Map<String, dynamic>,
+    );
+
+    if (response.success && response.data != null) {
+      final adsList =
+          (response.data!['ads'] as List?)
+              ?.map((e) => e as Map<String, dynamic>)
+              .toList() ??
+          [];
+      return ApiResponse(
+        success: true,
+        data: adsList,
+        message: response.message,
+        statusCode: response.statusCode,
+      );
+    }
+
+    return ApiResponse(
+      success: false,
+      message: response.message ?? 'Failed to fetch hero ads',
+      statusCode: response.statusCode,
+    );
+  }
+
   // Get product by ID — returns product, reviews, and related products
   Future<ApiResponse<ProductDetailResponse>> getProductById(String id) async {
     final response = await _apiService.get<Map<String, dynamic>>(

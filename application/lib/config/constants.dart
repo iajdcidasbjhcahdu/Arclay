@@ -12,6 +12,7 @@ class AppConstants {
   static const String resendOtpEndpoint = '/api/auth/resend-otp';
 
   static const String productsEndpoint = '/api/products';
+  static const String productAdsEndpoint = '/api/product-ads';
   static const String cartEndpoint = '/api/cart';
   static const String ordersEndpoint = '/api/orders';
   static const String addressesEndpoint = '/api/addresses';

@@ -51,6 +51,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   bool _canReview = false;
   bool _isSubmittingReview = false;
 
+  // Tabs
+  int _selectedTab = 0; // 0 for Description, 1 for Reviews
+
   @override
   void initState() {
     super.initState();
@@ -248,6 +251,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         );
                         return;
                       }
+                      final messenger = ScaffoldMessenger.of(ctx);
                       setState(() => _isSubmittingReview = true);
                       final response = await _reviewService.submitReview(
                         productId: _product!.id,
@@ -256,8 +260,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       );
                       if (!mounted) return;
                       setState(() => _isSubmittingReview = false);
+                      if (!ctx.mounted) return;
                       Navigator.pop(ctx);
-                      ScaffoldMessenger.of(context).showSnackBar(
+                      messenger.showSnackBar(
                         SnackBar(
                           content: Text(
                             response.success
@@ -568,44 +573,23 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       // ──── Pincode Check ────
                       _buildPincodeCheck(),
 
+                      // ──── Tabbed Interface (Description & Reviews) ────
                       const SizedBox(height: AppTheme.spacing24),
-
-                      // ──── Description (short) ────
-                      Text(
-                        'Description',
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                      const SizedBox(height: AppTheme.spacing8),
-                      Text(
-                        _product!.description,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppTheme.textSecondary,
-                          height: 1.5,
-                        ),
-                      ),
-
-                      // ──── Long Description ────
-                      if (_product!.longDescription.isNotEmpty) ...[
-                        const SizedBox(height: AppTheme.spacing24),
-                        Text(
-                          'Product Details',
-                          style: Theme.of(context).textTheme.titleLarge,
-                        ),
-                        const SizedBox(height: AppTheme.spacing12),
-                        Card(
-                          child: Padding(
-                            padding: const EdgeInsets.all(AppTheme.spacing16),
-                            child: _buildRichDescription(
-                              _product!.longDescription,
-                            ),
+                      Container(
+                        decoration: const BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(color: AppTheme.borderColor),
                           ),
                         ),
-                      ],
-
-                      const SizedBox(height: AppTheme.spacing24),
-
-                      // ──── Reviews ────
-                      _buildReviewsSection(),
+                        child: Row(
+                          children: [
+                            _buildTabItem(title: 'Description', index: 0),
+                            _buildTabItem(title: 'Reviews', index: 1),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: AppTheme.spacing16),
+                      _buildTabbedContent(),
 
                       const SizedBox(height: AppTheme.spacing24),
 
@@ -625,6 +609,69 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         _buildAddToCartBar(selectedVariant, price),
       ],
     );
+  }
+
+  Widget _buildTabItem({required String title, required int index}) {
+    final isSelected = _selectedTab == index;
+    return Expanded(
+      child: InkWell(
+        onTap: () => setState(() => _selectedTab = index),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(
+                color: isSelected ? AppTheme.primaryColor : Colors.transparent,
+                width: 2,
+              ),
+            ),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            title,
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              color: isSelected
+                  ? AppTheme.primaryColor
+                  : AppTheme.textSecondary,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabbedContent() {
+    if (_selectedTab == 0) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            _product!.description,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppTheme.textSecondary,
+              height: 1.5,
+            ),
+          ),
+          if (_product!.longDescription.isNotEmpty) ...[
+            const SizedBox(height: AppTheme.spacing24),
+            Text(
+              'Product Details',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: AppTheme.spacing12),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(AppTheme.spacing16),
+                child: _buildRichDescription(_product!.longDescription),
+              ),
+            ),
+          ],
+        ],
+      );
+    } else {
+      return _buildReviewsSection();
+    }
   }
 
   // ═══════════════════════════════════════
@@ -647,9 +694,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     return CachedNetworkImage(
                       imageUrl: _product!.images[index],
                       fit: BoxFit.cover,
-                      placeholder: (_, __) =>
+                      placeholder: (context, url) =>
                           const Center(child: CircularProgressIndicator()),
-                      errorWidget: (_, __, ___) => const Center(
+                      errorWidget: (context, url, error) => const Center(
                         child: Icon(Icons.error_outline, size: 64),
                       ),
                     );
@@ -1315,10 +1362,11 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               ? CachedNetworkImage(
                                   imageUrl: product.images.first,
                                   fit: BoxFit.cover,
-                                  errorWidget: (_, __, ___) => Container(
-                                    color: AppTheme.surfaceColor,
-                                    child: const Icon(Icons.image_outlined),
-                                  ),
+                                  errorWidget: (context, url, error) =>
+                                      Container(
+                                        color: AppTheme.surfaceColor,
+                                        child: const Icon(Icons.image_outlined),
+                                      ),
                                 )
                               : Container(
                                   color: AppTheme.surfaceColor,

@@ -20,77 +20,86 @@ class HomeTab extends StatefulWidget {
 
 class _HomeTabState extends State<HomeTab> {
   final _productsService = ProductsService();
-  final _apiService = ApiService();
 
-  List<Product> _featuredProducts = [];
+  List<Product> _bestSellers = [];
+  List<Product> _newArrivals = [];
   List<Category> _categories = [];
-  List<Map<String, dynamic>> _productAds = [];
+  List<Map<String, dynamic>> _heroAds = [];
   bool _isLoading = true;
 
-  // Carousel
-  final PageController _adsPageController = PageController();
-  Timer? _adsAutoScroll;
-  int _currentAdPage = 0;
+  // Hero Carousel
+  final PageController _heroPageController = PageController();
+  Timer? _heroAutoScroll;
+  int _currentHeroPage = 0;
 
   @override
   void initState() {
     super.initState();
     _loadHomeData();
+    _startHeroAutoScroll();
   }
 
   @override
   void dispose() {
-    _adsAutoScroll?.cancel();
-    _adsPageController.dispose();
+    _heroAutoScroll?.cancel();
+    _heroPageController.dispose();
     super.dispose();
   }
 
   Future<void> _loadHomeData() async {
     setState(() => _isLoading = true);
 
-    // Load products + ads in parallel
+    // Load Best Sellers (Featured) and New Arrivals in parallel
     final results = await Future.wait([
-      _productsService.getProducts(page: 1, limit: 6, sort: 'newest'),
-      _apiService.get<Map<String, dynamic>>(
-        '/api/product-ads',
-        queryParams: {'position': 'hero'},
-        fromJson: (json) => json as Map<String, dynamic>,
-      ),
+      _productsService.getProducts(
+        page: 1,
+        limit: 8,
+        sort: 'newest',
+      ), // Usually bestsellers route logic, we'll mimic
+      _productsService.getHeroAds(),
     ]);
 
     if (!mounted) return;
 
     final productsResponse = results[0] as ApiResponse<ProductsResponse>;
-    final adsResponse = results[1] as ApiResponse<Map<String, dynamic>>;
+    final adsResponse = results[1] as ApiResponse<List<Map<String, dynamic>>>;
 
     setState(() {
-      if (productsResponse.success && productsResponse.data != null) {
-        _featuredProducts = productsResponse.data!.products;
-        _categories = productsResponse.data!.categories;
+      if (adsResponse.success && adsResponse.data != null) {
+        _heroAds = adsResponse.data!;
       }
 
-      if (adsResponse.success && adsResponse.data != null) {
-        final adsList = adsResponse.data!['ads'] as List?;
-        _productAds =
-            adsList?.map((e) => Map<String, dynamic>.from(e)).toList() ?? [];
+      if (productsResponse.success && productsResponse.data != null) {
+        // Split them out for demo. Assuming backend returns all for now.
+        final allProducts = productsResponse.data!.products;
+        _categories = productsResponse.data!.categories;
+
+        if (allProducts.length >= 4) {
+          _bestSellers = allProducts.sublist(
+            0,
+            (allProducts.length / 2).ceil(),
+          );
+          _newArrivals = allProducts.sublist((allProducts.length / 2).ceil());
+        } else {
+          _bestSellers = List.from(allProducts);
+          _newArrivals = List.from(allProducts);
+        }
       }
 
       _isLoading = false;
     });
-
-    _startAdsAutoScroll();
   }
 
-  void _startAdsAutoScroll() {
-    _adsAutoScroll?.cancel();
-    if (_productAds.length <= 1) return;
-
-    _adsAutoScroll = Timer.periodic(const Duration(seconds: 4), (_) {
-      if (!mounted || !_adsPageController.hasClients) return;
-      final next = (_currentAdPage + 1) % _productAds.length;
-      _adsPageController.animateToPage(
+  void _startHeroAutoScroll() {
+    _heroAutoScroll?.cancel();
+    _heroAutoScroll = Timer.periodic(const Duration(seconds: 5), (_) {
+      if (!mounted || !_heroPageController.hasClients || _heroAds.isEmpty) {
+        return;
+      }
+      final next = (_currentHeroPage + 1) % _heroAds.length;
+      _heroPageController.animateToPage(
         next,
-        duration: const Duration(milliseconds: 500),
+        duration: const Duration(milliseconds: 600),
         curve: Curves.easeInOut,
       );
     });
@@ -102,40 +111,162 @@ class _HomeTabState extends State<HomeTab> {
       onRefresh: _loadHomeData,
       child: CustomScrollView(
         slivers: [
-          // Hero Section
+          // ──── Hero Auto-Slider (Full Width) ────
           SliverToBoxAdapter(
-            child: Container(
-              padding: const EdgeInsets.all(AppTheme.spacing24),
-              decoration: const BoxDecoration(
-                gradient: AppTheme.oliveGradient,
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(AppTheme.radius2xl),
-                  bottomRight: Radius.circular(AppTheme.radius2xl),
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            child: SizedBox(
+              height: 400,
+              child: Stack(
                 children: [
-                  const SizedBox(height: AppTheme.spacing16),
-                  Text(
-                    'Welcome to',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: AppTheme.textOnPrimary,
-                    ),
+                  PageView.builder(
+                    controller: _heroPageController,
+                    onPageChanged: (idx) =>
+                        setState(() => _currentHeroPage = idx),
+                    itemCount: _heroAds.isNotEmpty ? _heroAds.length : 1,
+                    itemBuilder: (context, index) {
+                      if (_heroAds.isEmpty) {
+                        return Container(
+                          decoration: const BoxDecoration(
+                            gradient: AppTheme.warmGradient,
+                          ),
+                          child: const Center(
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                            ),
+                          ),
+                        );
+                      }
+
+                      final banner = _heroAds[index];
+                      final hasMedia =
+                          banner['mediaUrl'] != null &&
+                          banner['mediaUrl'].toString().isNotEmpty;
+
+                      return Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          Container(color: AppTheme.oliveGradient.colors.first),
+                          if (hasMedia)
+                            CachedNetworkImage(
+                              imageUrl: banner['mediaUrl'],
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) => Container(
+                                decoration: const BoxDecoration(
+                                  gradient: AppTheme.warmGradient,
+                                ),
+                              ),
+                              errorWidget: (context, url, error) => Container(
+                                decoration: const BoxDecoration(
+                                  gradient: AppTheme.warmGradient,
+                                ),
+                              ),
+                            )
+                          else
+                            Container(
+                              decoration: const BoxDecoration(
+                                gradient: AppTheme.warmGradient,
+                              ),
+                            ),
+                          // Gradient overlay
+                          Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Colors.black.withValues(alpha: 0.7),
+                                  Colors.transparent,
+                                ],
+                                begin: Alignment.bottomCenter,
+                                end: Alignment.topCenter,
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 40,
+                            left: 20,
+                            right: 20,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.primaryColor,
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: const Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        Icons.star,
+                                        color: Colors.white,
+                                        size: 14,
+                                      ),
+                                      SizedBox(width: 4),
+                                      Text(
+                                        'Premium Artisanal Collection',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  banner['title']?.toString() ?? '',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.w900,
+                                    height: 1.1,
+                                  ),
+                                ),
+                                if (banner['description'] != null &&
+                                    banner['description']
+                                        .toString()
+                                        .isNotEmpty) ...[
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    banner['description'].toString(),
+                                    style: TextStyle(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.9,
+                                      ),
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
-                  const SizedBox(height: AppTheme.spacing4),
-                  Text(
-                    AppConstants.appName,
-                    style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                      color: AppTheme.textOnPrimary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: AppTheme.spacing8),
-                  Text(
-                    AppConstants.appDescription,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppTheme.textOnPrimary.withValues(alpha: 0.9),
+                  Positioned(
+                    bottom: 15,
+                    left: 0,
+                    right: 0,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: List.generate(
+                        _heroAds.length,
+                        (idx) => Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 4),
+                          height: 6,
+                          width: _currentHeroPage == idx ? 24 : 6,
+                          decoration: BoxDecoration(
+                            color: _currentHeroPage == idx
+                                ? Colors.white
+                                : Colors.white54,
+                            borderRadius: BorderRadius.circular(3),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -143,57 +274,71 @@ class _HomeTabState extends State<HomeTab> {
             ),
           ),
 
-          // Categories Section
+          // ──── Trust Badges Row ────
+          SliverToBoxAdapter(
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
+              color: AppTheme.surfaceColor,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildTrustBadge(
+                    Icons.local_shipping_outlined,
+                    'Free Shipping',
+                    'On orders over ₹999',
+                  ),
+                  _buildTrustBadge(
+                    Icons.eco_outlined,
+                    '100% Natural',
+                    'No preservatives',
+                  ),
+                  _buildTrustBadge(
+                    Icons.verified_outlined,
+                    'Premium',
+                    'Quality assured',
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // ──── Categories Grid ────
           if (_categories.isNotEmpty) ...[
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.all(AppTheme.spacing16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Shop by Category',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: AppTheme.spacing12),
-                  ],
+                padding: const EdgeInsets.fromLTRB(16, 32, 16, 16),
+                child: Text(
+                  'Shop by Category',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                 ),
               ),
             ),
             SliverToBoxAdapter(
               child: SizedBox(
-                height: 100,
+                height: 116,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppTheme.spacing16,
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
                   itemCount: _categories.length,
                   itemBuilder: (context, index) {
                     final category = _categories[index];
                     return GestureDetector(
-                      onTap: () {
-                        widget.onCategoryTap?.call(category.id);
-                      },
+                      onTap: () => widget.onCategoryTap?.call(category.id),
                       child: Container(
-                        width: 100,
-                        margin: const EdgeInsets.only(
-                          right: AppTheme.spacing12,
-                        ),
+                        width: 80,
+                        margin: const EdgeInsets.only(right: 16),
                         child: Column(
                           children: [
                             Container(
-                              width: 70,
-                              height: 70,
+                              width: 80,
+                              height: 80,
                               decoration: BoxDecoration(
-                                color: AppTheme.surfaceColor,
                                 shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: AppTheme.primaryColor.withValues(
-                                    alpha: 0.2,
-                                  ),
-                                  width: 2,
-                                ),
+                                color: AppTheme.surfaceColor,
+                                border: Border.all(color: AppTheme.borderColor),
+                                boxShadow: AppTheme.cardShadow,
                               ),
                               child:
                                   category.image != null &&
@@ -201,26 +346,25 @@ class _HomeTabState extends State<HomeTab> {
                                   ? ClipOval(
                                       child: CachedNetworkImage(
                                         imageUrl: category.image!,
-                                        width: 70,
-                                        height: 70,
                                         fit: BoxFit.cover,
-                                        errorWidget: (_, __, ___) => const Icon(
-                                          Icons.category_outlined,
-                                          color: AppTheme.primaryColor,
-                                          size: 32,
-                                        ),
+                                        errorWidget: (context, url, error) =>
+                                            const Icon(
+                                              Icons.category,
+                                              color: AppTheme.primaryColor,
+                                            ),
                                       ),
                                     )
                                   : const Icon(
-                                      Icons.category_outlined,
+                                      Icons.category,
                                       color: AppTheme.primaryColor,
-                                      size: 32,
+                                      size: 30,
                                     ),
                             ),
-                            const SizedBox(height: AppTheme.spacing4),
+                            const SizedBox(height: 8),
                             Text(
                               category.name,
-                              style: Theme.of(context).textTheme.bodySmall,
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(fontWeight: FontWeight.w600),
                               textAlign: TextAlign.center,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
@@ -235,109 +379,70 @@ class _HomeTabState extends State<HomeTab> {
             ),
           ],
 
-          // ──── Product Ads Carousel ────
-          if (_productAds.isNotEmpty)
-            SliverToBoxAdapter(
+          // ──── Best Sellers Rail ────
+          if (_isLoading)
+            const SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppTheme.spacing16,
-                  AppTheme.spacing8,
-                  AppTheme.spacing16,
-                  AppTheme.spacing8,
+                padding: EdgeInsets.all(40.0),
+                child: Center(child: CircularProgressIndicator()),
+              ),
+            )
+          else if (_bestSellers.isNotEmpty)
+            _buildProductRail(
+              context,
+              'Best Sellers',
+              Icons.local_fire_department,
+              AppTheme.accentColor,
+              _bestSellers,
+              true,
+            ),
+
+          // ──── Promo Banner Divider ────
+          if (!_isLoading)
+            SliverToBoxAdapter(
+              child: Container(
+                margin: const EdgeInsets.symmetric(vertical: 32),
+                height: 120,
+                decoration: const BoxDecoration(
+                  gradient: AppTheme.oliveGradient,
                 ),
-                child: Column(
-                  children: [
-                    SizedBox(
-                      height: 180,
-                      child: PageView.builder(
-                        controller: _adsPageController,
-                        itemCount: _productAds.length,
-                        onPageChanged: (index) {
-                          setState(() => _currentAdPage = index);
-                        },
-                        itemBuilder: (context, index) {
-                          final ad = _productAds[index];
-                          return _buildAdCard(ad);
-                        },
-                      ),
-                    ),
-                    if (_productAds.length > 1) ...[
-                      const SizedBox(height: AppTheme.spacing8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(
-                          _productAds.length,
-                          (i) => AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
-                            margin: const EdgeInsets.symmetric(horizontal: 3),
-                            width: _currentAdPage == i ? 20 : 8,
-                            height: 8,
-                            decoration: BoxDecoration(
-                              color: _currentAdPage == i
-                                  ? AppTheme.primaryColor
-                                  : AppTheme.borderColor,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                          ),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        'FESTIVE SPECIAL',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 2,
                         ),
                       ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Get 20% Off All Gift Hampers',
+                        style: Theme.of(
+                          context,
+                        ).textTheme.titleLarge?.copyWith(color: Colors.white),
+                      ),
                     ],
-                  ],
+                  ),
                 ),
               ),
             ),
 
-          // Featured Products Section
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(AppTheme.spacing16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Featured Products',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      widget.onTabChange?.call(1);
-                    },
-                    child: const Text('View All'),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // Products Grid
-          if (_isLoading)
-            const SliverFillRemaining(
-              child: Center(child: CircularProgressIndicator()),
-            )
-          else if (_featuredProducts.isEmpty)
-            const SliverFillRemaining(
-              child: Center(child: Text('No products available')),
-            )
-          else
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppTheme.spacing16,
-              ),
-              sliver: SliverGrid(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.75,
-                  crossAxisSpacing: AppTheme.spacing12,
-                  mainAxisSpacing: AppTheme.spacing12,
-                ),
-                delegate: SliverChildBuilderDelegate((context, index) {
-                  final product = _featuredProducts[index];
-                  return _ProductCard(product: product);
-                }, childCount: _featuredProducts.length),
-              ),
+          // ──── New Arrivals Rail ────
+          if (!_isLoading && _newArrivals.isNotEmpty)
+            _buildProductRail(
+              context,
+              'New Arrivals',
+              Icons.auto_awesome,
+              AppTheme.primaryColor,
+              _newArrivals,
+              false,
             ),
 
-          // Copyright
+          // ──── Copyright ────
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(
@@ -354,114 +459,94 @@ class _HomeTabState extends State<HomeTab> {
             ),
           ),
 
-          const SliverPadding(
-            padding: EdgeInsets.only(bottom: AppTheme.spacing24),
+          const SliverPadding(padding: EdgeInsets.only(bottom: 40)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTrustBadge(IconData icon, String title, String subtitle) {
+    return Expanded(
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppTheme.primaryColor.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: AppTheme.primaryColor, size: 28),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            title,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+            textAlign: TextAlign.center,
+          ),
+          Text(
+            subtitle,
+            style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildAdCard(Map<String, dynamic> ad) {
-    final mediaUrl = ad['mediaUrl'] as String?;
-    final title = ad['title'] as String? ?? '';
-    final description = ad['description'] as String? ?? '';
-    final linkUrl = ad['linkUrl'] as String?;
-
-    return GestureDetector(
-      onTap: () {
-        // If ad links to a product, try to navigate
-        if (linkUrl != null && linkUrl.contains('/products/')) {
-          final productId = linkUrl.split('/products/').last.split('?').first;
-          if (productId.isNotEmpty) {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => ProductDetailScreen(productId: productId),
-              ),
-            );
-          }
-        }
-      },
+  Widget _buildProductRail(
+    BuildContext context,
+    String title,
+    IconData icon,
+    Color iconColor,
+    List<Product> products,
+    bool hasWhiteBg,
+  ) {
+    return SliverToBoxAdapter(
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 4),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(AppTheme.radiusXl),
-          boxShadow: AppTheme.cardShadow,
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(AppTheme.radiusXl),
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              // Background image
-              if (mediaUrl != null && mediaUrl.isNotEmpty)
-                CachedNetworkImage(
-                  imageUrl: mediaUrl,
-                  fit: BoxFit.cover,
-                  placeholder: (_, __) => Container(
-                    color: AppTheme.surfaceColor,
-                    child: const Center(child: CircularProgressIndicator()),
-                  ),
-                  errorWidget: (_, __, ___) => Container(
-                    decoration: const BoxDecoration(
-                      gradient: AppTheme.oliveGradient,
+        color: hasWhiteBg ? AppTheme.surfaceColor : Colors.transparent,
+        padding: const EdgeInsets.symmetric(vertical: 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  Icon(icon, color: iconColor, size: 28),
+                  const SizedBox(width: 8),
+                  Text(
+                    title,
+                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                )
-              else
-                Container(
-                  decoration: const BoxDecoration(
-                    gradient: AppTheme.oliveGradient,
+                  const Spacer(),
+                  TextButton(
+                    onPressed: () => widget.onTabChange?.call(1),
+                    child: const Text('View All'),
                   ),
-                ),
-
-              // Gradient overlay for text readability
-              Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      Colors.black.withValues(alpha: 0.6),
-                    ],
-                  ),
-                ),
+                ],
               ),
-
-              // Title + description
-              Positioned(
-                bottom: 16,
-                left: 16,
-                right: 16,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (title.isNotEmpty)
-                      Text(
-                        title,
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    if (description.isNotEmpty)
-                      Text(
-                        description,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.white.withValues(alpha: 0.9),
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                  ],
-                ),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              height: 300,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: products.length,
+                itemBuilder: (context, index) {
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 16),
+                    child: SizedBox(
+                      width: 180,
+                      child: _ProductCard(product: products[index]),
+                    ),
+                  );
+                },
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -487,35 +572,32 @@ class _ProductCard extends StatelessWidget {
         );
       },
       child: Card(
+        elevation: 2,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
+              flex: 5,
               child: Stack(
+                fit: StackFit.expand,
                 children: [
-                  Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: AppTheme.surfaceColor,
-                      borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+                  ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(16),
                     ),
                     child: product.images.isNotEmpty
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(
-                              AppTheme.radiusLg,
+                        ? CachedNetworkImage(
+                            imageUrl: product.images.first,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => const Center(
+                              child: CircularProgressIndicator(),
                             ),
-                            child: CachedNetworkImage(
-                              imageUrl: product.images.first,
-                              fit: BoxFit.cover,
-                              placeholder: (_, __) => const Center(
-                                child: CircularProgressIndicator(),
-                              ),
-                              errorWidget: (_, __, ___) => const Center(
-                                child: Icon(
-                                  Icons.image_outlined,
-                                  size: 48,
-                                  color: AppTheme.textSecondary,
-                                ),
+                            errorWidget: (context, url, error) => const Center(
+                              child: Icon(
+                                Icons.image_outlined,
+                                size: 48,
+                                color: AppTheme.textSecondary,
                               ),
                             ),
                           )
@@ -529,8 +611,8 @@ class _ProductCard extends StatelessWidget {
                   ),
                   if (hasDiscount)
                     Positioned(
-                      top: 8,
-                      left: 8,
+                      top: 10,
+                      left: 10,
                       child: Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 8,
@@ -538,56 +620,65 @@ class _ProductCard extends StatelessWidget {
                         ),
                         decoration: BoxDecoration(
                           color: AppTheme.accentColor,
-                          borderRadius: BorderRadius.circular(
-                            AppTheme.radiusSm,
-                          ),
+                          borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
                           '${product.maxDiscountPercentage}% OFF',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(
-                                color: AppTheme.textOnPrimary,
-                                fontWeight: FontWeight.bold,
-                              ),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
                 ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(AppTheme.spacing8),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (product.category != null)
+            Expanded(
+              flex: 3,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (product.category != null)
+                          Text(
+                            product.category!.name.toUpperCase(),
+                            style: const TextStyle(
+                              color: AppTheme.primaryColor,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        const SizedBox(height: 4),
+                        Text(
+                          product.name,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
                     Text(
-                      product.category!.name,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppTheme.primaryColor,
-                        fontWeight: FontWeight.w500,
+                      '₹${price.toStringAsFixed(0)}',
+                      style: const TextStyle(
+                        color: AppTheme.textPrimary,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                  const SizedBox(height: AppTheme.spacing4),
-                  Text(
-                    product.name,
-                    style: Theme.of(
-                      context,
-                    ).textTheme.titleLarge?.copyWith(fontSize: 14),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: AppTheme.spacing4),
-                  Text(
-                    '₹${price.toStringAsFixed(0)}',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppTheme.primaryColor,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],
