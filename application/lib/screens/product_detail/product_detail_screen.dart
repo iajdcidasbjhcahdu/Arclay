@@ -10,6 +10,7 @@ import '../../services/cart_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/review_service.dart';
 import '../../services/shipping_service.dart';
+import '../../widgets/product_card.dart';
 import '../cart/cart_screen.dart';
 
 class ProductDetailScreen extends StatefulWidget {
@@ -1324,95 +1325,22 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         Text('Related Products', style: Theme.of(context).textTheme.titleLarge),
         const SizedBox(height: AppTheme.spacing12),
         SizedBox(
-          height: 220,
+          height: 280,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: _relatedProducts.length,
             itemBuilder: (context, index) {
               final product = _relatedProducts[index];
-              final firstVariant = product.variants.isNotEmpty
-                  ? product.variants.first
-                  : null;
 
-              return GestureDetector(
-                onTap: () {
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                      builder: (_) =>
-                          ProductDetailScreen(productId: product.id),
-                    ),
-                  );
-                },
-                child: Container(
-                  width: 160,
-                  margin: EdgeInsets.only(
-                    right: index < _relatedProducts.length - 1
-                        ? AppTheme.spacing12
-                        : 0,
-                  ),
-                  child: Card(
-                    clipBehavior: Clip.antiAlias,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                          height: 120,
-                          width: double.infinity,
-                          child: product.images.isNotEmpty
-                              ? CachedNetworkImage(
-                                  imageUrl: product.images.first,
-                                  fit: BoxFit.cover,
-                                  errorWidget: (context, url, error) =>
-                                      Container(
-                                        color: AppTheme.surfaceColor,
-                                        child: const Icon(Icons.image_outlined),
-                                      ),
-                                )
-                              : Container(
-                                  color: AppTheme.surfaceColor,
-                                  child: const Icon(Icons.image_outlined),
-                                ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(8),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              if (product.category != null)
-                                Text(
-                                  product.category!.name.toUpperCase(),
-                                  style: Theme.of(context).textTheme.labelSmall
-                                      ?.copyWith(
-                                        color: AppTheme.primaryColor,
-                                        letterSpacing: 0.8,
-                                      ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              const SizedBox(height: 2),
-                              Text(
-                                product.name,
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(fontWeight: FontWeight.w600),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 4),
-                              if (firstVariant != null)
-                                Text(
-                                  '₹${firstVariant.effectivePrice.toStringAsFixed(0)}',
-                                  style: Theme.of(context).textTheme.bodyMedium
-                                      ?.copyWith(
-                                        color: AppTheme.primaryColor,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+              return Padding(
+                padding: EdgeInsets.only(
+                  right: index < _relatedProducts.length - 1
+                      ? AppTheme.spacing12
+                      : 0,
+                ),
+                child: SizedBox(
+                  width: 180,
+                  child: ProductCard(product: product),
                 ),
               );
             },

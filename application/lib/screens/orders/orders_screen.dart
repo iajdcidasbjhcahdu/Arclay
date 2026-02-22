@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 import '../../config/theme.dart';
-import '../../config/constants.dart';
 import '../../models/order.dart';
 import '../../services/order_service.dart';
 import 'order_detail_screen.dart';
