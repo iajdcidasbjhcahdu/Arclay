@@ -558,7 +558,7 @@ function SplashScreenTab({ splashScreens, onChange, onSave, saving }) {
 
             if (data.success) {
                 const updated = [...splashScreens];
-                updated[index].imageUrl = data.url;
+                updated[index].imageUrl = data.image.url;
                 updated[index].imageType = file.type === "image/svg+xml" ? "svg" : "png";
                 onChange(updated);
                 toast.success("Image uploaded!");

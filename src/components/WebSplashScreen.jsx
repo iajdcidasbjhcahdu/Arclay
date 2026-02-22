@@ -39,27 +39,18 @@ export default function WebSplashScreen() {
         fetchConfig();
     }, []);
 
-    useEffect(() => {
-        if (!isVisible || splashScreens.length === 0) return;
-
-        // Auto-advance logic
-        const timer = setTimeout(() => {
-            if (currentIndex < splashScreens.length - 1) {
-                // Move to next screen
-                setCurrentIndex(prev => prev + 1);
-            } else {
-                // Sequence finished, start fade out
-                setIsFadingOut(true);
-                setTimeout(() => {
-                    setIsVisible(false);
-                    localStorage.setItem("hasSeenSplash", "true");
-                    document.body.style.overflow = "auto";
-                }, 500); // 500ms fade duration
-            }
-        }, 2000); // Show each screen for 2000ms
-
-        return () => clearTimeout(timer);
-    }, [isVisible, currentIndex, splashScreens.length]);
+    const handleNext = () => {
+        if (currentIndex < splashScreens.length - 1) {
+            setCurrentIndex(prev => prev + 1);
+        } else {
+            setIsFadingOut(true);
+            setTimeout(() => {
+                setIsVisible(false);
+                localStorage.setItem("hasSeenSplash", "true");
+                document.body.style.overflow = "auto";
+            }, 500);
+        }
+    };
 
     if (!isVisible) return null;
 
@@ -67,16 +58,18 @@ export default function WebSplashScreen() {
 
     // Parse background color safely, default to white
     const bgColor = currentScreen?.backgroundColor || "#FFFFFF";
+    const textColor = getContrastColor(bgColor);
+    const isLastScreen = currentIndex === splashScreens.length - 1;
 
     return (
         <div
-            className={`fixed inset-0 z-[9999] flex items-center justify-center transition-opacity duration-500 ease-in-out ${isFadingOut ? "opacity-0" : "opacity-100"
+            className={`fixed inset-0 z-[9999] flex flex-col items-center justify-between transition-opacity duration-500 ease-in-out ${isFadingOut ? "opacity-0" : "opacity-100"
                 }`}
             style={{ backgroundColor: bgColor }}
         >
-            <div className="flex flex-col items-center justify-center max-w-md text-center px-6 animate-fade-in-up">
+            <div className="flex-1 w-full flex flex-col items-center justify-center max-w-md text-center px-6 animate-fade-in-up">
                 {currentScreen.imageUrl && (
-                    <div className="mb-8 relative w-32 h-32 md:w-48 md:h-48 drop-shadow-xl animate-float">
+                    <div className="mb-8 relative w-40 h-40 md:w-56 md:h-56 drop-shadow-xl animate-float">
                         <Image
                             src={currentScreen.imageUrl}
                             alt={currentScreen.title || "Logo"}
@@ -89,8 +82,8 @@ export default function WebSplashScreen() {
 
                 {currentScreen.title && (
                     <h1
-                        className="text-4xl md:text-5xl font-serif font-bold mb-4 tracking-tight drop-shadow-sm"
-                        style={{ color: getContrastColor(bgColor) }}
+                        className="text-4xl md:text-5xl font-serif font-bold mb-4 tracking-tight drop-shadow-sm transition-colors duration-300"
+                        style={{ color: textColor }}
                     >
                         {currentScreen.title}
                     </h1>
@@ -98,7 +91,7 @@ export default function WebSplashScreen() {
 
                 {currentScreen.description && (
                     <p
-                        className="text-lg md:text-xl font-medium opacity-90 drop-shadow-sm max-w-sm leading-relaxed"
+                        className="text-lg md:text-xl font-medium opacity-90 drop-shadow-sm max-w-sm leading-relaxed transition-colors duration-300"
                         style={{ color: getContrastColor(bgColor, 0.8) }}
                     >
                         {currentScreen.description}
@@ -106,21 +99,37 @@ export default function WebSplashScreen() {
                 )}
             </div>
 
-            {/* Progress Indicators */}
-            {splashScreens.length > 1 && (
-                <div className="absolute bottom-12 left-0 right-0 flex justify-center gap-3">
-                    {splashScreens.map((_, idx) => (
-                        <div
-                            key={idx}
-                            className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentIndex
+            <div className="w-full max-w-md px-6 pb-12 flex flex-col items-center gap-8">
+                {/* Progress Indicators */}
+                {splashScreens.length > 1 && (
+                    <div className="flex justify-center gap-3">
+                        {splashScreens.map((_, idx) => (
+                            <div
+                                key={idx}
+                                className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentIndex
                                     ? "w-8 opacity-100"
                                     : "w-2 opacity-30"
-                                }`}
-                            style={{ backgroundColor: getContrastColor(bgColor) }}
-                        />
-                    ))}
-                </div>
-            )}
+                                    }`}
+                                style={{ backgroundColor: textColor }}
+                            />
+                        ))}
+                    </div>
+                )}
+
+                <button
+                    onClick={handleNext}
+                    className="w-full py-4 px-6 rounded-2xl font-semibold text-lg transition-transform active:scale-95 shadow-lg flex items-center justify-center gap-2"
+                    style={{
+                        backgroundColor: textColor,
+                        color: bgColor
+                    }}
+                >
+                    {isLastScreen ? "Get Started" : "Continue"}
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+            </div>
         </div>
     );
 }

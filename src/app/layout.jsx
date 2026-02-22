@@ -56,8 +56,6 @@ export const metadata = {
   keywords: "pickles, Indian food, gourmet snacks, mango pickle, masala cashews, traditional recipes",
 };
 
-import WebSplashScreen from "@/components/WebSplashScreen";
-
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
@@ -72,7 +70,6 @@ export default function RootLayout({ children }) {
           disableTransitionOnChange
         >
           <UserProvider>
-            <WebSplashScreen />
             <Navbar />
             {children}
             <Footer />
