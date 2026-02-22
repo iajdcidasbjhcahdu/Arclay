@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  // ESSVORA Brand Colors
-  static const Color primaryColor = Color(0xFF556B2F); // Dark Olive Green
-  static const Color primaryLight = Color(0xFF6B8B3D);
-  static const Color primaryDark = Color(0xFF3D4F22);
+  // ESSVORA Brand Colors (Gourmet Ecom Theme)
+  static const Color primaryColor = Color(0xFFD4AF37); // Luxury Gold
+  static const Color primaryLight = Color(0xFFE5C06A);
+  static const Color primaryDark = Color(0xFFB8860B);
 
-  static const Color secondaryColor = Color(0xFFD4A643); // Royal Mustard Yellow
-  static const Color secondaryLight = Color(0xFFE5C06A);
+  static const Color secondaryColor = Color(0xFF1A1A1A); // Deep Charcoal
+  static const Color secondaryLight = Color(0xFF333333);
 
   static const Color accentColor = Color(0xFF8B1A1A); // Deep Chili Red
   static const Color accentLight = Color(0xFFA52A2A);
@@ -17,13 +17,15 @@ class AppTheme {
   static const Color copperLight = Color(0xFFD4A643);
 
   // Background Colors
-  static const Color backgroundColor = Color(0xFFFAF8F5); // Warm Ivory
-  static const Color surfaceColor = Color(0xFFF5F0E8); // Cream
+  static const Color backgroundColor = Color(
+    0xFFFBFBFB,
+  ); // Clean White/Off-White
+  static const Color surfaceColor = Color(0xFFFFFFFF); // Pure White
   static const Color cardColor = Color(0xFFFFFFFF);
 
   // Text Colors
-  static const Color textPrimary = Color(0xFF2D2D2D); // Charcoal Black
-  static const Color textSecondary = Color(0xFF6B6B6B);
+  static const Color textPrimary = Color(0xFF1A1A1A); // Deep Charcoal
+  static const Color textSecondary = Color(0xFF666666);
   static const Color textOnPrimary = Color(0xFFFFFFFF);
 
   // Border Colors
@@ -66,7 +68,7 @@ class AppTheme {
   ];
 
   // Gradients
-  static const LinearGradient oliveGradient = LinearGradient(
+  static const LinearGradient premiumGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [primaryColor, primaryLight],
@@ -252,12 +254,14 @@ class AppTheme {
       ),
 
       // Bottom Navigation Bar Theme
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: cardColor,
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: cardColor, // White in light mode
         selectedItemColor: primaryColor,
-        unselectedItemColor: textSecondary,
-        elevation: 8,
+        unselectedItemColor: Colors.grey[400],
+        elevation: 20,
         type: BottomNavigationBarType.fixed,
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
       ),
 
       // Floating Action Button Theme
@@ -395,6 +399,16 @@ class AppTheme {
         margin: const EdgeInsets.all(spacing8),
       ),
 
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: darkCard, // Dark surface in dark mode
+        selectedItemColor: primaryColor,
+        unselectedItemColor: Colors.grey[600],
+        elevation: 20,
+        type: BottomNavigationBarType.fixed,
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
+      ),
+
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryColor,
@@ -457,14 +471,6 @@ class AppTheme {
         ),
         labelStyle: GoogleFonts.inter(color: darkTextSecondary),
         hintStyle: GoogleFonts.inter(color: darkTextSecondary),
-      ),
-
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: darkSurface,
-        selectedItemColor: primaryLight,
-        unselectedItemColor: darkTextSecondary,
-        elevation: 8,
-        type: BottomNavigationBarType.fixed,
       ),
 
       floatingActionButtonTheme: const FloatingActionButtonThemeData(

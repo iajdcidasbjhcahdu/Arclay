@@ -39,7 +39,8 @@ class PaymentService {
 
   // Create Razorpay order
   Future<ApiResponse<RazorpayOrderResponse>> createRazorpayOrder(
-      String orderId) async {
+    String orderId,
+  ) async {
     final response = await _apiService.post<Map<String, dynamic>>(
       AppConstants.razorpayCreateEndpoint,
       body: {'orderId': orderId},

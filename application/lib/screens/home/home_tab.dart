@@ -102,219 +102,136 @@ class _HomeTabState extends State<HomeTab> {
       onRefresh: _loadHomeData,
       child: CustomScrollView(
         slivers: [
-          // ──── Hero Auto-Slider (Full Width) ────
+          // ──── Hero Auto-Slider (Card Based) ────
           SliverToBoxAdapter(
-            child: SizedBox(
-              height: 400,
-              child: Stack(
-                children: [
-                  PageView.builder(
-                    controller: _heroPageController,
-                    onPageChanged: (idx) =>
-                        setState(() => _currentHeroPage = idx),
-                    itemCount: _heroAds.isNotEmpty ? _heroAds.length : 1,
-                    itemBuilder: (context, index) {
-                      if (_heroAds.isEmpty) {
-                        return Container(
-                          decoration: const BoxDecoration(
-                            gradient: AppTheme.warmGradient,
-                          ),
-                          child: const Center(
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                            ),
-                          ),
-                        );
-                      }
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20.0),
+              child: SizedBox(
+                height: 220,
+                child: PageView.builder(
+                  controller: PageController(viewportFraction: 0.9),
+                  onPageChanged: (idx) =>
+                      setState(() => _currentHeroPage = idx),
+                  itemCount: _heroAds.isNotEmpty ? _heroAds.length : 1,
+                  itemBuilder: (context, index) {
+                    if (_heroAds.isEmpty) {
+                      return Container(
+                        margin: const EdgeInsets.symmetric(horizontal: 8),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(24),
+                          gradient: AppTheme.premiumGradient,
+                        ),
+                        child: const Center(
+                          child: CircularProgressIndicator(color: Colors.white),
+                        ),
+                      );
+                    }
 
-                      final banner = _heroAds[index];
-                      final hasMedia =
-                          banner['mediaUrl'] != null &&
-                          banner['mediaUrl'].toString().isNotEmpty;
+                    final banner = _heroAds[index];
+                    final hasMedia =
+                        banner['mediaUrl'] != null &&
+                        banner['mediaUrl'].toString().isNotEmpty;
 
-                      final hasValidLink =
-                          banner['linkUrl'] != null &&
-                          banner['linkUrl'].toString().startsWith('/products/');
+                    final hasValidLink =
+                        banner['linkUrl'] != null &&
+                        banner['linkUrl'].toString().startsWith('/products/');
 
-                      Widget bannerContent = Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          Container(color: AppTheme.oliveGradient.colors.first),
-                          if (hasMedia)
-                            CachedNetworkImage(
-                              imageUrl: banner['mediaUrl'],
-                              fit: BoxFit.cover,
-                              placeholder: (context, url) => Container(
-                                decoration: const BoxDecoration(
-                                  gradient: AppTheme.warmGradient,
+                    Widget bannerContent = Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 8),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(24),
+                        image: hasMedia
+                            ? DecorationImage(
+                                image: CachedNetworkImageProvider(
+                                  banner['mediaUrl'],
                                 ),
-                              ),
-                              errorWidget: (context, url, error) => Container(
-                                decoration: const BoxDecoration(
-                                  gradient: AppTheme.warmGradient,
-                                ),
-                              ),
-                            )
-                          else
-                            Container(
-                              decoration: const BoxDecoration(
-                                gradient: AppTheme.warmGradient,
-                              ),
-                            ),
-                          // Gradient overlay
-                          Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [
-                                  Colors.black.withValues(alpha: 0.7),
-                                  Colors.transparent,
-                                ],
-                                begin: Alignment.bottomCenter,
-                                end: Alignment.topCenter,
-                              ),
-                            ),
-                          ),
-                          Positioned(
-                            bottom: 40,
-                            left: 20,
-                            right: 20,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
-                                    vertical: 6,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: AppTheme.primaryColor,
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: const Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        Icons.star,
-                                        color: Colors.white,
-                                        size: 14,
-                                      ),
-                                      SizedBox(width: 4),
-                                      Text(
-                                        'Premium Artisanal Collection',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(height: 12),
-                                Text(
-                                  banner['title']?.toString() ?? '',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.w900,
-                                    height: 1.1,
-                                  ),
-                                ),
-                                if (banner['description'] != null &&
-                                    banner['description']
-                                        .toString()
-                                        .isNotEmpty) ...[
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    banner['description'].toString(),
-                                    style: TextStyle(
-                                      color: Colors.white.withValues(
-                                        alpha: 0.9,
-                                      ),
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                ],
-                                if (hasValidLink) ...[
-                                  const SizedBox(height: 16),
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      final productId = banner['linkUrl']
-                                          .toString()
-                                          .split('/')
-                                          .last;
-                                      Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                          builder: (_) => ProductDetailScreen(
-                                            productId: productId,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: AppTheme.primaryColor,
-                                      foregroundColor: Colors.white,
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 24,
-                                        vertical: 12,
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                    ),
-                                    child: const Text('Shop Now'),
-                                  ),
-                                ],
-                              ],
-                            ),
+                                fit: BoxFit.cover,
+                              )
+                            : null,
+                        color: hasMedia ? null : AppTheme.primaryColor,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.15),
+                            blurRadius: 15,
+                            offset: const Offset(0, 10),
                           ),
                         ],
-                      );
-
-                      if (hasValidLink) {
-                        return GestureDetector(
-                          onTap: () {
-                            final productId = banner['linkUrl']
-                                .toString()
-                                .split('/')
-                                .last;
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    ProductDetailScreen(productId: productId),
-                              ),
-                            );
-                          },
-                          child: bannerContent,
-                        );
-                      }
-
-                      return bannerContent;
-                    },
-                  ),
-                  Positioned(
-                    bottom: 15,
-                    left: 0,
-                    right: 0,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List.generate(
-                        _heroAds.length,
-                        (idx) => Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 4),
-                          height: 6,
-                          width: _currentHeroPage == idx ? 24 : 6,
-                          decoration: BoxDecoration(
-                            color: _currentHeroPage == idx
-                                ? Colors.white
-                                : Colors.white54,
-                            borderRadius: BorderRadius.circular(3),
+                      ),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(24),
+                          gradient: LinearGradient(
+                            colors: [
+                              Colors.black.withValues(alpha: 0.7),
+                              Colors.transparent,
+                            ],
+                            begin: Alignment.bottomLeft,
+                            end: Alignment.topRight,
                           ),
                         ),
+                        padding: const EdgeInsets.all(24.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFD4AF37),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: const Text(
+                                'NEW ARRIVAL',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              banner['title']?.toString() ??
+                                  'Premium\nCollection',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                height: 1.2,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ),
-                ],
+                    );
+
+                    if (hasValidLink) {
+                      return GestureDetector(
+                        onTap: () {
+                          final productId = banner['linkUrl']
+                              .toString()
+                              .split('/')
+                              .last;
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  ProductDetailScreen(productId: productId),
+                            ),
+                          );
+                        },
+                        child: bannerContent,
+                      );
+                    }
+
+                    return bannerContent;
+                  },
+                ),
               ),
             ),
           ),
@@ -351,70 +268,69 @@ class _HomeTabState extends State<HomeTab> {
           if (_categories.isNotEmpty) ...[
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 32, 16, 16),
+                padding: const EdgeInsets.fromLTRB(20, 32, 20, 16),
                 child: Text(
-                  'Shop by Category',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                  'Explore Categories',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
                 ),
               ),
             ),
             SliverToBoxAdapter(
               child: SizedBox(
-                height: 116,
+                height: 45,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  physics: const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
                   itemCount: _categories.length,
                   itemBuilder: (context, index) {
                     final category = _categories[index];
+                    // Using index 0 as selected for demo purposes if no active category state exists
+                    bool isSelected = index == 0;
                     return GestureDetector(
                       onTap: () => widget.onCategoryTap?.call(category.id),
                       child: Container(
-                        width: 80,
-                        margin: const EdgeInsets.only(right: 16),
-                        child: Column(
-                          children: [
-                            Container(
-                              width: 80,
-                              height: 80,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: AppTheme.surfaceColor,
-                                border: Border.all(color: AppTheme.borderColor),
-                                boxShadow: AppTheme.cardShadow,
-                              ),
-                              child:
-                                  category.image != null &&
-                                      category.image!.isNotEmpty
-                                  ? ClipOval(
-                                      child: CachedNetworkImage(
-                                        imageUrl: category.image!,
-                                        fit: BoxFit.cover,
-                                        errorWidget: (context, url, error) =>
-                                            const Icon(
-                                              Icons.category,
-                                              color: AppTheme.primaryColor,
-                                            ),
-                                      ),
-                                    )
-                                  : const Icon(
-                                      Icons.category,
-                                      color: AppTheme.primaryColor,
-                                      size: 30,
-                                    ),
+                        margin: const EdgeInsets.only(right: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? Theme.of(context).colorScheme.onSurface
+                              : Theme.of(context).colorScheme.surface,
+                          borderRadius: BorderRadius.circular(30),
+                          border: Border.all(
+                            color: isSelected
+                                ? Theme.of(context).colorScheme.onSurface
+                                : Theme.of(context).dividerColor,
+                          ),
+                          boxShadow: isSelected
+                              ? [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.2),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ]
+                              : [],
+                        ),
+                        child: Center(
+                          child: Text(
+                            category.name,
+                            style: TextStyle(
+                              color: isSelected
+                                  ? Theme.of(context).colorScheme.surface
+                                  : Theme.of(context).colorScheme.onSurface,
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.w500,
+                              fontFamily: 'sans-serif',
                             ),
-                            const SizedBox(height: 8),
-                            Text(
-                              category.name,
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(fontWeight: FontWeight.w600),
-                              textAlign: TextAlign.center,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
+                          ),
                         ),
                       ),
                     );
@@ -449,7 +365,7 @@ class _HomeTabState extends State<HomeTab> {
                 margin: const EdgeInsets.symmetric(vertical: 32),
                 height: 120,
                 decoration: const BoxDecoration(
-                  gradient: AppTheme.oliveGradient,
+                  gradient: AppTheme.premiumGradient,
                 ),
                 child: Center(
                   child: Column(
@@ -548,7 +464,12 @@ class _HomeTabState extends State<HomeTab> {
   ) {
     return SliverToBoxAdapter(
       child: Container(
-        color: hasWhiteBg ? AppTheme.surfaceColor : Colors.transparent,
+        color: hasWhiteBg
+            ? (Theme.of(context).brightness == Brightness.dark
+                  ? Colors
+                        .black.withValues(alpha: 0.04)
+                  : Theme.of(context).colorScheme.surface)
+            : Colors.transparent,
         padding: const EdgeInsets.symmetric(vertical: 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -557,35 +478,35 @@ class _HomeTabState extends State<HomeTab> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 children: [
-                  Icon(icon, color: iconColor, size: 28),
-                  const SizedBox(width: 8),
                   Text(
                     title,
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   const Spacer(),
                   TextButton(
                     onPressed: () => widget.onTabChange?.call(1),
-                    child: const Text('View All'),
+                    child: const Text(
+                      'See All',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: AppTheme.primaryColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 16),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: GridView.builder(
-                padding: EdgeInsets.zero,
-                physics: const NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.7,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                ),
+            SizedBox(
+              height: 315,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 12),
                 itemCount: products.length,
                 itemBuilder: (context, index) {
                   return _ProductCard(product: products[index]);
@@ -617,114 +538,167 @@ class _ProductCard extends StatelessWidget {
           ),
         );
       },
-      child: Card(
-        elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Container(
+        width: 180,
+        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 15,
+              spreadRadius: 2,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              flex: 5,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  ClipRRect(
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(16),
-                    ),
-                    child: product.images.isNotEmpty
-                        ? CachedNetworkImage(
-                            imageUrl: product.images.first,
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => const Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                            errorWidget: (context, url, error) => const Center(
+            // Image with Favorite Button & Discount Badge
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                  ),
+                  child: product.images.isNotEmpty
+                      ? CachedNetworkImage(
+                          imageUrl: product.images.first,
+                          height: 160,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => const SizedBox(
+                            height: 160,
+                            child: Center(child: CircularProgressIndicator()),
+                          ),
+                          errorWidget: (context, url, error) => const SizedBox(
+                            height: 160,
+                            child: Center(
                               child: Icon(
                                 Icons.image_outlined,
                                 size: 48,
                                 color: AppTheme.textSecondary,
                               ),
                             ),
-                          )
-                        : const Center(
+                          ),
+                        )
+                      : const SizedBox(
+                          height: 160,
+                          child: Center(
                             child: Icon(
                               Icons.image_outlined,
                               size: 48,
                               color: AppTheme.textSecondary,
                             ),
                           ),
+                        ),
+                ),
+                Positioned(
+                  top: 10,
+                  right: 10,
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surface.withValues(alpha: 0.9),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.favorite_border,
+                      size: 18,
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.5),
+                    ),
                   ),
-                  if (hasDiscount)
-                    Positioned(
-                      top: 10,
-                      left: 10,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppTheme.accentColor,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          '${product.maxDiscountPercentage}% OFF',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                          ),
+                ),
+                if (hasDiscount)
+                  Positioned(
+                    top: 10,
+                    left: 10,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppTheme.accentColor,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        '${product.maxDiscountPercentage}% OFF',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
-                ],
-              ),
+                  ),
+              ],
             ),
-            Expanded(
-              flex: 3,
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (product.category != null)
-                          Text(
-                            product.category!.name.toUpperCase(),
-                            style: const TextStyle(
-                              color: AppTheme.primaryColor,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        const SizedBox(height: 4),
-                        Text(
-                          product.name,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
+
+            // Details
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (product.category != null) ...[
                     Text(
-                      '₹${price.toStringAsFixed(0)}',
+                      product.category!.name.toUpperCase(),
                       style: const TextStyle(
-                        color: AppTheme.textPrimary,
-                        fontSize: 16,
+                        color: AppTheme.textSecondary,
+                        fontSize: 10,
                         fontWeight: FontWeight.bold,
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
+                    const SizedBox(height: 4),
                   ],
-                ),
+                  Text(
+                    product.name,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        '₹${price.toStringAsFixed(0)}',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w900,
+                          fontSize: 16,
+                          color: AppTheme.primaryColor, // Gold Price
+                          fontFamily: 'sans-serif',
+                        ),
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).colorScheme.onSurface,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        padding: const EdgeInsets.all(6),
+                        child: Icon(
+                          Icons.add,
+                          color: Theme.of(context).colorScheme.surface,
+                          size: 18,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ],

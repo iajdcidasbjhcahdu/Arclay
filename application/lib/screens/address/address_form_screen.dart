@@ -38,10 +38,12 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
     final a = widget.address;
     _fullNameController = TextEditingController(text: a?.fullName ?? '');
     _phoneController = TextEditingController(text: a?.phone ?? '');
-    _addressLine1Controller =
-        TextEditingController(text: a?.addressLine1 ?? '');
-    _addressLine2Controller =
-        TextEditingController(text: a?.addressLine2 ?? '');
+    _addressLine1Controller = TextEditingController(
+      text: a?.addressLine1 ?? '',
+    );
+    _addressLine2Controller = TextEditingController(
+      text: a?.addressLine2 ?? '',
+    );
     _cityController = TextEditingController(text: a?.city ?? '');
     _stateController = TextEditingController(text: a?.state ?? '');
     _pincodeController = TextEditingController(text: a?.pincode ?? '');
@@ -92,8 +94,7 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
     if (response.success) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-              _isEditing ? 'Address updated' : 'Address added'),
+          content: Text(_isEditing ? 'Address updated' : 'Address added'),
         ),
       );
       Navigator.of(context).pop(true); // true = changed
@@ -110,9 +111,7 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_isEditing ? 'Edit Address' : 'New Address'),
-      ),
+      appBar: AppBar(title: Text(_isEditing ? 'Edit Address' : 'New Address')),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppTheme.spacing16),
         child: Form(
@@ -121,8 +120,10 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Label selector
-              Text('Address Label',
-                  style: Theme.of(context).textTheme.titleMedium),
+              Text(
+                'Address Label',
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
               const SizedBox(height: AppTheme.spacing8),
               Wrap(
                 spacing: AppTheme.spacing8,
@@ -136,11 +137,11 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
                       color: selected
                           ? AppTheme.primaryColor
                           : AppTheme.textPrimary,
-                      fontWeight:
-                          selected ? FontWeight.w600 : FontWeight.normal,
+                      fontWeight: selected
+                          ? FontWeight.w600
+                          : FontWeight.normal,
                     ),
-                    onSelected: (_) =>
-                        setState(() => _selectedLabel = label),
+                    onSelected: (_) => setState(() => _selectedLabel = label),
                   );
                 }).toList(),
               ),
@@ -207,24 +208,18 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
                   Expanded(
                     child: TextFormField(
                       controller: _cityController,
-                      decoration: const InputDecoration(
-                        labelText: 'City *',
-                      ),
-                      validator: (v) => (v == null || v.trim().isEmpty)
-                          ? 'Required'
-                          : null,
+                      decoration: const InputDecoration(labelText: 'City *'),
+                      validator: (v) =>
+                          (v == null || v.trim().isEmpty) ? 'Required' : null,
                     ),
                   ),
                   const SizedBox(width: AppTheme.spacing12),
                   Expanded(
                     child: TextFormField(
                       controller: _stateController,
-                      decoration: const InputDecoration(
-                        labelText: 'State *',
-                      ),
-                      validator: (v) => (v == null || v.trim().isEmpty)
-                          ? 'Required'
-                          : null,
+                      decoration: const InputDecoration(labelText: 'State *'),
+                      validator: (v) =>
+                          (v == null || v.trim().isEmpty) ? 'Required' : null,
                     ),
                   ),
                 ],
@@ -252,8 +247,7 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
               // Default toggle
               SwitchListTile(
                 title: const Text('Set as default address'),
-                subtitle: const Text(
-                    'This will be pre-selected at checkout'),
+                subtitle: const Text('This will be pre-selected at checkout'),
                 value: _isDefault,
                 activeColor: AppTheme.primaryColor,
                 onChanged: (v) => setState(() => _isDefault = v),
@@ -274,12 +268,11 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
                             valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.white),
+                              Colors.white,
+                            ),
                           ),
                         )
-                      : Text(_isEditing
-                          ? 'Update Address'
-                          : 'Save Address'),
+                      : Text(_isEditing ? 'Update Address' : 'Save Address'),
                 ),
               ),
 

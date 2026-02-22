@@ -18,7 +18,8 @@ class AddressService {
     );
 
     if (response.success && response.data != null) {
-      final addresses = (response.data!['addresses'] as List?)
+      final addresses =
+          (response.data!['addresses'] as List?)
               ?.map((e) => Address.fromJson(e))
               .toList() ??
           [];
@@ -65,8 +66,7 @@ class AddressService {
   }
 
   // Update address
-  Future<ApiResponse<Address>> updateAddress(
-      String id, Address address) async {
+  Future<ApiResponse<Address>> updateAddress(String id, Address address) async {
     final response = await _apiService.put<Map<String, dynamic>>(
       '${AppConstants.addressesEndpoint}/$id',
       body: address.toJson(),

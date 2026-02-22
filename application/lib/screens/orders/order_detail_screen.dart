@@ -54,30 +54,35 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_order != null
-            ? 'Order #${_order!.id.substring(_order!.id.length - 8)}'
-            : 'Order Details'),
+        title: Text(
+          _order != null
+              ? 'Order #${_order!.id.substring(_order!.id.length - 8)}'
+              : 'Order Details',
+        ),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.error_outline,
-                          size: 64, color: AppTheme.accentColor),
-                      const SizedBox(height: AppTheme.spacing16),
-                      Text(_error!),
-                      const SizedBox(height: AppTheme.spacing24),
-                      ElevatedButton(
-                        onPressed: _loadOrder,
-                        child: const Text('Retry'),
-                      ),
-                    ],
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.error_outline,
+                    size: 64,
+                    color: AppTheme.accentColor,
                   ),
-                )
-              : _buildContent(),
+                  const SizedBox(height: AppTheme.spacing16),
+                  Text(_error!),
+                  const SizedBox(height: AppTheme.spacing24),
+                  ElevatedButton(
+                    onPressed: _loadOrder,
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            )
+          : _buildContent(),
     );
   }
 
@@ -118,8 +123,20 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   }
 
   Widget _buildStatusTracker() {
-    final statuses = ['pending', 'confirmed', 'processing', 'shipped', 'delivered'];
-    final statusLabels = ['Pending', 'Confirmed', 'Processing', 'Shipped', 'Delivered'];
+    final statuses = [
+      'pending',
+      'confirmed',
+      'processing',
+      'shipped',
+      'delivered',
+    ];
+    final statusLabels = [
+      'Pending',
+      'Confirmed',
+      'Processing',
+      'Shipped',
+      'Delivered',
+    ];
 
     int currentStep = _order!.isCancelled
         ? -1
@@ -136,10 +153,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                   const SizedBox(width: AppTheme.spacing12),
                   Text(
                     'Order Cancelled',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleLarge
-                        ?.copyWith(color: Colors.red),
+                    style: Theme.of(
+                      context,
+                    ).textTheme.titleLarge?.copyWith(color: Colors.red),
                   ),
                 ],
               )
@@ -158,9 +174,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                 : AppTheme.borderColor,
                           ),
                           child: Icon(
-                            i <= currentStep
-                                ? Icons.check
-                                : Icons.circle,
+                            i <= currentStep ? Icons.check : Icons.circle,
                             size: i <= currentStep ? 16 : 8,
                             color: i <= currentStep
                                 ? Colors.white
@@ -171,9 +185,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                         Expanded(
                           child: Text(
                             statusLabels[i],
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
+                            style: Theme.of(context).textTheme.bodyMedium
                                 ?.copyWith(
                                   fontWeight: i <= currentStep
                                       ? FontWeight.w600
@@ -231,8 +243,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     ClipRRect(
-                      borderRadius:
-                          BorderRadius.circular(AppTheme.radiusMd),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                       child: item.product.images.isNotEmpty
                           ? CachedNetworkImage(
                               imageUrl: item.product.images.first,
@@ -258,20 +269,17 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(item.product.name,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.copyWith(
-                                      fontWeight: FontWeight.w500)),
+                          Text(
+                            item.product.name,
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(fontWeight: FontWeight.w500),
+                          ),
                           if (variantText.isNotEmpty)
-                            Text(variantText,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .bodySmall
-                                    ?.copyWith(
-                                        color:
-                                            AppTheme.textSecondary)),
+                            Text(
+                              variantText,
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(color: AppTheme.textSecondary),
+                            ),
                           const SizedBox(height: AppTheme.spacing4),
                           Text(
                             'Qty: ${item.quantity} × ₹${item.priceAtOrder.toStringAsFixed(0)}',
@@ -282,15 +290,13 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                     ),
                     Text(
                       '₹${item.itemTotal.toStringAsFixed(0)}',
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyMedium
-                          ?.copyWith(fontWeight: FontWeight.w600),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ],
                 ),
-                if (!isLast)
-                  const Divider(height: AppTheme.spacing24),
+                if (!isLast) const Divider(height: AppTheme.spacing24),
               ],
             );
           }).toList(),
@@ -307,23 +313,26 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(addr.fullName,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.copyWith(fontWeight: FontWeight.w600)),
+            Text(
+              addr.fullName,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+            ),
             const SizedBox(height: AppTheme.spacing4),
-            Text(addr.fullAddress,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.copyWith(color: AppTheme.textSecondary)),
+            Text(
+              addr.fullAddress,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppTheme.textSecondary),
+            ),
             const SizedBox(height: AppTheme.spacing4),
-            Text('Phone: ${addr.phone}',
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.copyWith(color: AppTheme.textSecondary)),
+            Text(
+              'Phone: ${addr.phone}',
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppTheme.textSecondary),
+            ),
           ],
         ),
       ),
@@ -356,26 +365,27 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('Status',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodyMedium
-                        ?.copyWith(color: AppTheme.textSecondary)),
+                Text(
+                  'Status',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppTheme.textSecondary,
+                  ),
+                ),
                 Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 4),
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: paymentStatusColor.withOpacity(0.1),
-                    borderRadius:
-                        BorderRadius.circular(AppTheme.radiusSm),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusSm),
                   ),
                   child: Text(
                     _order!.paymentStatus.toUpperCase(),
-                    style:
-                        Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: paymentStatusColor,
-                              fontWeight: FontWeight.w600,
-                            ),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: paymentStatusColor,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ],
@@ -391,8 +401,9 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   }
 
   Widget _buildSummary() {
-    final dateStr =
-        DateFormat('dd MMM yyyy, hh:mm a').format(_order!.createdAt);
+    final dateStr = DateFormat(
+      'dd MMM yyyy, hh:mm a',
+    ).format(_order!.createdAt);
 
     return Card(
       child: Padding(
@@ -417,14 +428,17 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Notes',
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyMedium
-                            ?.copyWith(color: AppTheme.textSecondary)),
+                    Text(
+                      'Notes',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppTheme.textSecondary,
+                      ),
+                    ),
                     const SizedBox(height: AppTheme.spacing4),
-                    Text(_order!.notes,
-                        style: Theme.of(context).textTheme.bodyMedium),
+                    Text(
+                      _order!.notes,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
                   ],
                 ),
               ),
@@ -439,18 +453,21 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label,
-            style: Theme.of(context)
-                .textTheme
-                .bodyMedium
-                ?.copyWith(color: AppTheme.textSecondary)),
+        Text(
+          label,
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: AppTheme.textSecondary),
+        ),
         Flexible(
-          child: Text(value,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontWeight: bold ? FontWeight.bold : FontWeight.w500,
-                    color: bold ? AppTheme.primaryColor : null,
-                  ),
-              textAlign: TextAlign.end),
+          child: Text(
+            value,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontWeight: bold ? FontWeight.bold : FontWeight.w500,
+              color: bold ? AppTheme.primaryColor : null,
+            ),
+            textAlign: TextAlign.end,
+          ),
         ),
       ],
     );

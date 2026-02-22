@@ -113,9 +113,7 @@ class _OrdersScreenState extends State<OrdersScreen>
           unselectedLabelColor: AppTheme.textSecondary,
           indicatorColor: AppTheme.primaryColor,
           tabAlignment: TabAlignment.start,
-          tabs: _statusTabs
-              .map((t) => Tab(text: t['label']))
-              .toList(),
+          tabs: _statusTabs.map((t) => Tab(text: t['label'])).toList(),
         ),
 
         // Orders list
@@ -123,50 +121,51 @@ class _OrdersScreenState extends State<OrdersScreen>
           child: _isLoading
               ? const Center(child: CircularProgressIndicator())
               : _error != null
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.error_outline,
-                              size: 64, color: AppTheme.accentColor),
-                          const SizedBox(height: AppTheme.spacing16),
-                          Text(_error!),
-                          const SizedBox(height: AppTheme.spacing24),
-                          ElevatedButton(
-                            onPressed: () => _loadOrders(page: 1),
-                            child: const Text('Retry'),
-                          ),
-                        ],
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.error_outline,
+                        size: 64,
+                        color: AppTheme.accentColor,
                       ),
-                    )
-                  : _orders.isEmpty
-                      ? _buildEmptyState()
-                      : RefreshIndicator(
-                          onRefresh: () => _loadOrders(page: 1),
-                          child: ListView.builder(
-                            padding:
-                                const EdgeInsets.all(AppTheme.spacing16),
-                            itemCount: _orders.length + (_totalPages > 1 ? 1 : 0),
-                            itemBuilder: (context, index) {
-                              if (index == _orders.length) {
-                                return _buildPagination();
-                              }
-                              return _OrderCard(
-                                order: _orders[index],
-                                statusColor: _statusColor(
-                                    _orders[index].orderStatus),
-                                onTap: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (_) => OrderDetailScreen(
-                                          orderId: _orders[index].id),
-                                    ),
-                                  );
-                                },
-                              );
-                            },
-                          ),
-                        ),
+                      const SizedBox(height: AppTheme.spacing16),
+                      Text(_error!),
+                      const SizedBox(height: AppTheme.spacing24),
+                      ElevatedButton(
+                        onPressed: () => _loadOrders(page: 1),
+                        child: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                )
+              : _orders.isEmpty
+              ? _buildEmptyState()
+              : RefreshIndicator(
+                  onRefresh: () => _loadOrders(page: 1),
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(AppTheme.spacing16),
+                    itemCount: _orders.length + (_totalPages > 1 ? 1 : 0),
+                    itemBuilder: (context, index) {
+                      if (index == _orders.length) {
+                        return _buildPagination();
+                      }
+                      return _OrderCard(
+                        order: _orders[index],
+                        statusColor: _statusColor(_orders[index].orderStatus),
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  OrderDetailScreen(orderId: _orders[index].id),
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
         ),
       ],
     );
@@ -177,18 +176,22 @@ class _OrdersScreenState extends State<OrdersScreen>
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.receipt_long_outlined,
-              size: 80, color: AppTheme.textSecondary),
+          const Icon(
+            Icons.receipt_long_outlined,
+            size: 80,
+            color: AppTheme.textSecondary,
+          ),
           const SizedBox(height: AppTheme.spacing24),
-          Text('No orders yet',
-              style: Theme.of(context).textTheme.headlineSmall),
+          Text(
+            'No orders yet',
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
           const SizedBox(height: AppTheme.spacing8),
           Text(
             'Your orders will appear here',
-            style: Theme.of(context)
-                .textTheme
-                .bodyLarge
-                ?.copyWith(color: AppTheme.textSecondary),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.copyWith(color: AppTheme.textSecondary),
           ),
         ],
       ),
@@ -212,10 +215,11 @@ class _OrdersScreenState extends State<OrdersScreen>
             child: const Text('Previous'),
           ),
           Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: AppTheme.spacing16),
-            child: Text('$_currentPage / $_totalPages',
-                style: Theme.of(context).textTheme.bodyMedium),
+            padding: const EdgeInsets.symmetric(horizontal: AppTheme.spacing16),
+            child: Text(
+              '$_currentPage / $_totalPages',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
           ),
           ElevatedButton(
             onPressed: _currentPage < _totalPages
@@ -246,8 +250,7 @@ class _OrderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dateStr =
-        DateFormat('dd MMM yyyy, hh:mm a').format(order.createdAt);
+    final dateStr = DateFormat('dd MMM yyyy, hh:mm a').format(order.createdAt);
     final firstItem = order.items.isNotEmpty ? order.items.first : null;
 
     return Card(
@@ -267,27 +270,26 @@ class _OrderCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       'Order #${order.id.substring(order.id.length - 8)}',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleMedium
-                          ?.copyWith(fontWeight: FontWeight.w600),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 4),
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: statusColor.withOpacity(0.1),
-                      borderRadius:
-                          BorderRadius.circular(AppTheme.radiusSm),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusSm),
                     ),
                     child: Text(
                       order.orderStatusDisplay,
-                      style:
-                          Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: statusColor,
-                                fontWeight: FontWeight.w600,
-                              ),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: statusColor,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],
@@ -300,8 +302,7 @@ class _OrderCard extends StatelessWidget {
                 Row(
                   children: [
                     ClipRRect(
-                      borderRadius:
-                          BorderRadius.circular(AppTheme.radiusMd),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                       child: firstItem.product.images.isNotEmpty
                           ? CachedNetworkImage(
                               imageUrl: firstItem.product.images.first,
@@ -312,16 +313,17 @@ class _OrderCard extends StatelessWidget {
                                 width: 50,
                                 height: 50,
                                 color: AppTheme.surfaceColor,
-                                child: const Icon(Icons.image_outlined,
-                                    size: 24),
+                                child: const Icon(
+                                  Icons.image_outlined,
+                                  size: 24,
+                                ),
                               ),
                             )
                           : Container(
                               width: 50,
                               height: 50,
                               color: AppTheme.surfaceColor,
-                              child: const Icon(Icons.image_outlined,
-                                  size: 24),
+                              child: const Icon(Icons.image_outlined, size: 24),
                             ),
                     ),
                     const SizedBox(width: AppTheme.spacing12),
@@ -338,11 +340,8 @@ class _OrderCard extends StatelessWidget {
                           if (order.items.length > 1)
                             Text(
                               '+${order.items.length - 1} more item(s)',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
-                                  ?.copyWith(
-                                      color: AppTheme.textSecondary),
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(color: AppTheme.textSecondary),
                             ),
                         ],
                       ),
@@ -358,20 +357,16 @@ class _OrderCard extends StatelessWidget {
                 children: [
                   Text(
                     dateStr,
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall
-                        ?.copyWith(color: AppTheme.textSecondary),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppTheme.textSecondary,
+                    ),
                   ),
                   Text(
                     '₹${order.totalAmount.toStringAsFixed(0)}',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleMedium
-                        ?.copyWith(
-                          color: AppTheme.primaryColor,
-                          fontWeight: FontWeight.bold,
-                        ),
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: AppTheme.primaryColor,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),

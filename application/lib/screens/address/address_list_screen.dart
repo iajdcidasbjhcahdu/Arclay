@@ -76,9 +76,9 @@ class _AddressListScreenState extends State<AddressListScreen> {
     if (!mounted) return;
 
     if (response.success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Address deleted')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Address deleted')));
       _loadAddresses();
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -92,9 +92,7 @@ class _AddressListScreenState extends State<AddressListScreen> {
 
   Future<void> _navigateToForm({Address? address}) async {
     final result = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(
-        builder: (_) => AddressFormScreen(address: address),
-      ),
+      MaterialPageRoute(builder: (_) => AddressFormScreen(address: address)),
     );
 
     if (result == true) {
@@ -110,8 +108,7 @@ class _AddressListScreenState extends State<AddressListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-            widget.selectionMode ? 'Select Address' : 'My Addresses'),
+        title: Text(widget.selectionMode ? 'Select Address' : 'My Addresses'),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _navigateToForm(),
@@ -120,43 +117,44 @@ class _AddressListScreenState extends State<AddressListScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.error_outline,
-                          size: 64, color: AppTheme.accentColor),
-                      const SizedBox(height: AppTheme.spacing16),
-                      Text(_error!),
-                      const SizedBox(height: AppTheme.spacing24),
-                      ElevatedButton(
-                        onPressed: _loadAddresses,
-                        child: const Text('Retry'),
-                      ),
-                    ],
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.error_outline,
+                    size: 64,
+                    color: AppTheme.accentColor,
                   ),
-                )
-              : _addresses.isEmpty
-                  ? _buildEmptyState()
-                  : RefreshIndicator(
-                      onRefresh: _loadAddresses,
-                      child: ListView.builder(
-                        padding: const EdgeInsets.all(AppTheme.spacing16),
-                        itemCount: _addresses.length,
-                        itemBuilder: (context, index) {
-                          return _AddressCard(
-                            address: _addresses[index],
-                            selectionMode: widget.selectionMode,
-                            onTap: widget.selectionMode
-                                ? () => _selectAddress(_addresses[index])
-                                : () =>
-                                    _navigateToForm(address: _addresses[index]),
-                            onDelete: () =>
-                                _deleteAddress(_addresses[index].id),
-                          );
-                        },
-                      ),
-                    ),
+                  const SizedBox(height: AppTheme.spacing16),
+                  Text(_error!),
+                  const SizedBox(height: AppTheme.spacing24),
+                  ElevatedButton(
+                    onPressed: _loadAddresses,
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            )
+          : _addresses.isEmpty
+          ? _buildEmptyState()
+          : RefreshIndicator(
+              onRefresh: _loadAddresses,
+              child: ListView.builder(
+                padding: const EdgeInsets.all(AppTheme.spacing16),
+                itemCount: _addresses.length,
+                itemBuilder: (context, index) {
+                  return _AddressCard(
+                    address: _addresses[index],
+                    selectionMode: widget.selectionMode,
+                    onTap: widget.selectionMode
+                        ? () => _selectAddress(_addresses[index])
+                        : () => _navigateToForm(address: _addresses[index]),
+                    onDelete: () => _deleteAddress(_addresses[index].id),
+                  );
+                },
+              ),
+            ),
     );
   }
 
@@ -165,8 +163,11 @@ class _AddressListScreenState extends State<AddressListScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.location_off_outlined,
-              size: 80, color: AppTheme.textSecondary),
+          const Icon(
+            Icons.location_off_outlined,
+            size: 80,
+            color: AppTheme.textSecondary,
+          ),
           const SizedBox(height: AppTheme.spacing24),
           Text(
             'No addresses saved',
@@ -175,10 +176,9 @@ class _AddressListScreenState extends State<AddressListScreen> {
           const SizedBox(height: AppTheme.spacing8),
           Text(
             'Add a delivery address to get started',
-            style: Theme.of(context)
-                .textTheme
-                .bodyLarge
-                ?.copyWith(color: AppTheme.textSecondary),
+            style: Theme.of(
+              context,
+            ).textTheme.bodyLarge?.copyWith(color: AppTheme.textSecondary),
           ),
           const SizedBox(height: AppTheme.spacing32),
           ElevatedButton.icon(
@@ -222,81 +222,83 @@ class _AddressCard extends StatelessWidget {
                   // Label badge
                   Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 4),
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: AppTheme.primaryColor.withOpacity(0.1),
-                      borderRadius:
-                          BorderRadius.circular(AppTheme.radiusSm),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusSm),
                     ),
                     child: Text(
                       address.label,
-                      style:
-                          Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: AppTheme.primaryColor,
-                                fontWeight: FontWeight.w600,
-                              ),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppTheme.primaryColor,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                   if (address.isDefault) ...[
                     const SizedBox(width: AppTheme.spacing8),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: AppTheme.secondaryColor.withOpacity(0.15),
-                        borderRadius:
-                            BorderRadius.circular(AppTheme.radiusSm),
+                        borderRadius: BorderRadius.circular(AppTheme.radiusSm),
                       ),
                       child: Text(
                         'Default',
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodySmall
-                            ?.copyWith(
-                              color: AppTheme.copperColor,
-                              fontWeight: FontWeight.w600,
-                            ),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppTheme.copperColor,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                   ],
                   const Spacer(),
                   if (!selectionMode)
                     IconButton(
-                      icon: const Icon(Icons.delete_outline,
-                          size: 20, color: AppTheme.accentColor),
+                      icon: const Icon(
+                        Icons.delete_outline,
+                        size: 20,
+                        color: AppTheme.accentColor,
+                      ),
                       onPressed: onDelete,
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(
-                          minWidth: 32, minHeight: 32),
+                        minWidth: 32,
+                        minHeight: 32,
+                      ),
                     ),
                   if (selectionMode)
-                    const Icon(Icons.chevron_right,
-                        color: AppTheme.textSecondary),
+                    const Icon(
+                      Icons.chevron_right,
+                      color: AppTheme.textSecondary,
+                    ),
                 ],
               ),
               const SizedBox(height: AppTheme.spacing12),
               Text(
                 address.fullName,
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(fontWeight: FontWeight.w600),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: AppTheme.spacing4),
               Text(
                 address.fullAddress,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.copyWith(color: AppTheme.textSecondary),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: AppTheme.textSecondary),
               ),
               const SizedBox(height: AppTheme.spacing4),
               Text(
                 address.phone,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.copyWith(color: AppTheme.textSecondary),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: AppTheme.textSecondary),
               ),
             ],
           ),

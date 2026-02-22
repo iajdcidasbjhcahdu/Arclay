@@ -78,17 +78,13 @@ class Cart {
   final double total;
   final int itemCount;
 
-  Cart({
-    required this.items,
-    required this.total,
-    required this.itemCount,
-  });
+  Cart({required this.items, required this.total, required this.itemCount});
 
   factory Cart.fromJson(Map<String, dynamic> json) {
     return Cart(
-      items: (json['items'] as List?)
-          ?.map((e) => CartItem.fromJson(e))
-          .toList() ?? [],
+      items:
+          (json['items'] as List?)?.map((e) => CartItem.fromJson(e)).toList() ??
+          [],
       total: (json['total'] ?? 0).toDouble(),
       itemCount: json['itemCount'] ?? 0,
     );

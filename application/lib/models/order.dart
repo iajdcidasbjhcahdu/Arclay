@@ -140,9 +140,11 @@ class Order {
   factory Order.fromJson(Map<String, dynamic> json) {
     return Order(
       id: json['_id'] ?? '',
-      items: (json['items'] as List?)
-          ?.map((e) => OrderItem.fromJson(e))
-          .toList() ?? [],
+      items:
+          (json['items'] as List?)
+              ?.map((e) => OrderItem.fromJson(e))
+              .toList() ??
+          [],
       shippingAddress: ShippingAddress.fromJson(json['shippingAddress'] ?? {}),
       paymentMethod: json['paymentMethod'] ?? '',
       paymentStatus: json['paymentStatus'] ?? 'pending',

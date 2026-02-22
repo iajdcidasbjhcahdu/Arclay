@@ -17,9 +17,8 @@ class OrdersResponse {
 
   factory OrdersResponse.fromJson(Map<String, dynamic> json) {
     return OrdersResponse(
-      orders: (json['orders'] as List?)
-              ?.map((e) => Order.fromJson(e))
-              .toList() ??
+      orders:
+          (json['orders'] as List?)?.map((e) => Order.fromJson(e)).toList() ??
           [],
       total: json['pagination']?['total'] ?? 0,
       page: json['pagination']?['page'] ?? 1,
