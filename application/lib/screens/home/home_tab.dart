@@ -49,41 +49,32 @@ class _HomeTabState extends State<HomeTab> {
   Future<void> _loadHomeData() async {
     setState(() => _isLoading = true);
 
-    // Load Best Sellers (Featured) and New Arrivals in parallel
+    // Load Best Sellers, New Arrivals and Hero Ads in parallel
     final results = await Future.wait([
-      _productsService.getProducts(
-        page: 1,
-        limit: 8,
-        sort: 'newest',
-      ), // Usually bestsellers route logic, we'll mimic
+      _productsService.getProducts(page: 1, limit: 4, isFeatured: true),
+      _productsService.getProducts(page: 1, limit: 4, sort: 'newest'),
       _productsService.getHeroAds(),
     ]);
 
     if (!mounted) return;
 
-    final productsResponse = results[0] as ApiResponse<ProductsResponse>;
-    final adsResponse = results[1] as ApiResponse<List<Map<String, dynamic>>>;
+    final featuredResponse = results[0] as ApiResponse<ProductsResponse>;
+    final newResponse = results[1] as ApiResponse<ProductsResponse>;
+    final adsResponse = results[2] as ApiResponse<List<Map<String, dynamic>>>;
 
     setState(() {
       if (adsResponse.success && adsResponse.data != null) {
         _heroAds = adsResponse.data!;
       }
 
-      if (productsResponse.success && productsResponse.data != null) {
-        // Split them out for demo. Assuming backend returns all for now.
-        final allProducts = productsResponse.data!.products;
-        _categories = productsResponse.data!.categories;
+      if (featuredResponse.success && featuredResponse.data != null) {
+        _bestSellers = featuredResponse.data!.products;
+      }
 
-        if (allProducts.length >= 4) {
-          _bestSellers = allProducts.sublist(
-            0,
-            (allProducts.length / 2).ceil(),
-          );
-          _newArrivals = allProducts.sublist((allProducts.length / 2).ceil());
-        } else {
-          _bestSellers = List.from(allProducts);
-          _newArrivals = List.from(allProducts);
-        }
+      if (newResponse.success && newResponse.data != null) {
+        _newArrivals = newResponse.data!.products;
+        // Categories can be extracted from any product response
+        _categories = newResponse.data!.categories;
       }
 
       _isLoading = false;
@@ -141,7 +132,11 @@ class _HomeTabState extends State<HomeTab> {
                           banner['mediaUrl'] != null &&
                           banner['mediaUrl'].toString().isNotEmpty;
 
-                      return Stack(
+                      final hasValidLink =
+                          banner['linkUrl'] != null &&
+                          banner['linkUrl'].toString().startsWith('/products/');
+
+                      Widget bannerContent = Stack(
                         fit: StackFit.expand,
                         children: [
                           Container(color: AppTheme.oliveGradient.colors.first),
@@ -240,11 +235,61 @@ class _HomeTabState extends State<HomeTab> {
                                     ),
                                   ),
                                 ],
+                                if (hasValidLink) ...[
+                                  const SizedBox(height: 16),
+                                  ElevatedButton(
+                                    onPressed: () {
+                                      final productId = banner['linkUrl']
+                                          .toString()
+                                          .split('/')
+                                          .last;
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (_) => ProductDetailScreen(
+                                            productId: productId,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: AppTheme.primaryColor,
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 24,
+                                        vertical: 12,
+                                      ),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                    ),
+                                    child: const Text('Shop Now'),
+                                  ),
+                                ],
                               ],
                             ),
                           ),
                         ],
                       );
+
+                      if (hasValidLink) {
+                        return GestureDetector(
+                          onTap: () {
+                            final productId = banner['linkUrl']
+                                .toString()
+                                .split('/')
+                                .last;
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    ProductDetailScreen(productId: productId),
+                              ),
+                            );
+                          },
+                          child: bannerContent,
+                        );
+                      }
+
+                      return bannerContent;
                     },
                   ),
                   Positioned(
@@ -379,7 +424,7 @@ class _HomeTabState extends State<HomeTab> {
             ),
           ],
 
-          // ──── Best Sellers Rail ────
+          // ──── Best Sellers Grid ────
           if (_isLoading)
             const SliverToBoxAdapter(
               child: Padding(
@@ -388,7 +433,7 @@ class _HomeTabState extends State<HomeTab> {
               ),
             )
           else if (_bestSellers.isNotEmpty)
-            _buildProductRail(
+            _buildProductGrid(
               context,
               'Best Sellers',
               Icons.local_fire_department,
@@ -431,9 +476,9 @@ class _HomeTabState extends State<HomeTab> {
               ),
             ),
 
-          // ──── New Arrivals Rail ────
+          // ──── New Arrivals Grid ────
           if (!_isLoading && _newArrivals.isNotEmpty)
-            _buildProductRail(
+            _buildProductGrid(
               context,
               'New Arrivals',
               Icons.auto_awesome,
@@ -493,7 +538,7 @@ class _HomeTabState extends State<HomeTab> {
     );
   }
 
-  Widget _buildProductRail(
+  Widget _buildProductGrid(
     BuildContext context,
     String title,
     IconData icon,
@@ -529,20 +574,21 @@ class _HomeTabState extends State<HomeTab> {
               ),
             ),
             const SizedBox(height: 16),
-            SizedBox(
-              height: 300,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: GridView.builder(
+                padding: EdgeInsets.zero,
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  childAspectRatio: 0.7,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                ),
                 itemCount: products.length,
                 itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 16),
-                    child: SizedBox(
-                      width: 180,
-                      child: _ProductCard(product: products[index]),
-                    ),
-                  );
+                  return _ProductCard(product: products[index]);
                 },
               ),
             ),
@@ -664,7 +710,7 @@ class _ProductCard extends StatelessWidget {
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                           ),
-                          maxLines: 2,
+                          maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ],

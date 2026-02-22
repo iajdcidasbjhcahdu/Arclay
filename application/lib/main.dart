@@ -84,6 +84,15 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> _fetchSplashAndCheckAuth() async {
+    final prefs = await SharedPreferences.getInstance();
+    final hasSeenSplash = prefs.getBool('has_seen_splash') ?? false;
+
+    if (hasSeenSplash) {
+      if (mounted) setState(() => _isLoading = false);
+      _navigate();
+      return;
+    }
+
     try {
       // 1. Fetch splash config from API
       final response = await ApiService().get<Map<String, dynamic>>(
@@ -122,9 +131,12 @@ class _SplashScreenState extends State<SplashScreen> {
     }
   }
 
-  void _navigate() {
+  void _navigate() async {
     if (!mounted || _isNavigating) return;
     _isNavigating = true;
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('has_seen_splash', true);
 
     final authService = AuthService();
     // Navigate based on auth status
@@ -239,39 +251,52 @@ class _SplashScreenState extends State<SplashScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     if (imageUrl != null && imageUrl.toString().isNotEmpty) ...[
-                      if (imageType == 'svg')
-                        SvgPicture.network(
-                          imageUrl,
-                          height: 200, // Slightly larger for standalone page
-                          width: 200,
-                          placeholderBuilder: (BuildContext context) =>
-                              const SizedBox(
+                      (() {
+                        final urlStr = imageUrl.toString().toLowerCase();
+                        final isSvg =
+                            (imageType == 'svg' || urlStr.endsWith('.svg')) &&
+                            !urlStr.endsWith('.webp') &&
+                            !urlStr.endsWith('.png') &&
+                            !urlStr.endsWith('.jpg') &&
+                            !urlStr.endsWith('.jpeg');
+
+                        if (isSvg) {
+                          return SvgPicture.network(
+                            imageUrl,
+                            height: 200,
+                            width: 200,
+                            placeholderBuilder: (BuildContext context) =>
+                                const SizedBox(
+                                  height: 200,
+                                  width: 200,
+                                  child: Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                ),
+                          );
+                        } else {
+                          return Image.network(
+                            imageUrl,
+                            height: 200,
+                            width: 200,
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return const SizedBox(
                                 height: 200,
                                 width: 200,
                                 child: Center(
                                   child: CircularProgressIndicator(),
                                 ),
-                              ),
-                        )
-                      else
-                        Image.network(
-                          imageUrl,
-                          height: 200,
-                          width: 200,
-                          loadingBuilder: (context, child, loadingProgress) {
-                            if (loadingProgress == null) return child;
-                            return const SizedBox(
-                              height: 200,
-                              width: 200,
-                              child: Center(child: CircularProgressIndicator()),
-                            );
-                          },
-                          errorBuilder: (context, error, stackTrace) => Icon(
-                            Icons.broken_image,
-                            size: 120,
-                            color: textColor.withOpacity(0.5),
-                          ),
-                        ),
+                              );
+                            },
+                            errorBuilder: (context, error, stackTrace) => Icon(
+                              Icons.broken_image,
+                              size: 120,
+                              color: textColor.withOpacity(0.5),
+                            ),
+                          );
+                        }
+                      })(),
                       const SizedBox(height: AppTheme.spacing48),
                     ],
                     Text(
@@ -369,6 +394,23 @@ class _SplashScreenState extends State<SplashScreen> {
                   ),
                 ),
               ],
+            ),
+          ),
+
+          // Skip Button
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 16,
+            right: 16,
+            child: TextButton(
+              onPressed: _navigate,
+              style: TextButton.styleFrom(
+                foregroundColor:
+                    ThemeData.estimateBrightnessForColor(safeBgColor) ==
+                        Brightness.dark
+                    ? Colors.white70
+                    : AppTheme.textSecondary,
+              ),
+              child: const Text('Skip'),
             ),
           ),
         ],

@@ -65,12 +65,17 @@ class ProductsService {
     double? minPrice,
     double? maxPrice,
     String sort = 'newest',
+    bool? isFeatured,
   }) async {
     final queryParams = {
       'page': page.toString(),
       'limit': limit.toString(),
       'sort': sort,
     };
+
+    if (isFeatured != null) {
+      queryParams['isFeatured'] = isFeatured.toString();
+    }
 
     if (search != null && search.isNotEmpty) {
       queryParams['search'] = search;
