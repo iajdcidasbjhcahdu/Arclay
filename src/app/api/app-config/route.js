@@ -12,6 +12,7 @@ export async function GET() {
             return Response.json({
                 success: true,
                 config: {
+                    splashScreen: {},
                     helpContacts: [],
                     legalPolicies: [],
                     faqs: []
@@ -21,6 +22,9 @@ export async function GET() {
 
         // Filter to only enabled items
         const filtered = {
+            splashScreens: (config.splashScreens || [])
+                .filter(s => s.isEnabled)
+                .sort((a, b) => (a.order || 0) - (b.order || 0)),
             helpContacts: (config.helpContacts || []).filter(c => c.isEnabled),
             legalPolicies: (config.legalPolicies || []).filter(p => p.isEnabled),
             faqs: (config.faqs || [])

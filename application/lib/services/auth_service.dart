@@ -26,7 +26,7 @@ class AuthService {
     try {
       final prefs = await SharedPreferences.getInstance();
       final userJson = prefs.getString(AppConstants.userKey);
-      
+
       if (userJson != null && _apiService.isAuthenticated) {
         _currentUser = User.fromJson(jsonDecode(userJson));
       }
@@ -68,19 +68,28 @@ class AuthService {
       fromJson: (json) => json as Map<String, dynamic>,
     );
 
-    if (response.success && response.data != null) {
-      final user = User.fromJson(response.data!['user']);
-      await _saveUser(user);
-      // Note: Token will be in cookie, we don't get it in response
-      // Set a placeholder token to indicate authenticated state
-      await _apiService.saveToken('authenticated');
-      
-      return ApiResponse(
-        success: true,
-        data: user,
-        message: response.message,
-        statusCode: response.statusCode,
-      );
+    if (response.success) {
+      if (response.requiresVerification) {
+        // User needs to verify OTP before we can save them as authenticated
+        return ApiResponse(
+          success: true,
+          message: response.message,
+          statusCode: response.statusCode,
+          requiresVerification: true,
+        );
+      } else if (response.data != null && response.data!['user'] != null) {
+        // Direct successful registration (email verification was disabled)
+        final user = User.fromJson(response.data!['user']);
+        await _saveUser(user);
+        await _apiService.saveToken('authenticated');
+
+        return ApiResponse(
+          success: true,
+          data: user,
+          message: response.message,
+          statusCode: response.statusCode,
+        );
+      }
     }
 
     return ApiResponse(
@@ -97,10 +106,7 @@ class AuthService {
   }) async {
     final response = await _apiService.post<Map<String, dynamic>>(
       AppConstants.loginEndpoint,
-      body: {
-        'email': email,
-        'password': password,
-      },
+      body: {'email': email, 'password': password},
       fromJson: (json) => json as Map<String, dynamic>,
     );
 
@@ -110,7 +116,7 @@ class AuthService {
       // Note: Token will be in cookie, we don't get it in response
       // Set a placeholder token to indicate authenticated state
       await _apiService.saveToken('authenticated');
-      
+
       return ApiResponse(
         success: true,
         data: user,
@@ -151,7 +157,7 @@ class AuthService {
     if (response.success && response.data != null) {
       final user = User.fromJson(response.data!['user']);
       await _saveUser(user);
-      
+
       return ApiResponse(
         success: true,
         data: user,
@@ -171,5 +177,48 @@ class AuthService {
       message: response.message ?? 'Failed to get user',
       statusCode: response.statusCode,
     );
+  }
+
+  // Verify OTP
+  Future<ApiResponse<User>> verifyOtp({
+    required String email,
+    required String otp,
+  }) async {
+    final response = await _apiService.post<Map<String, dynamic>>(
+      AppConstants.verifyOtpEndpoint,
+      body: {'email': email, 'otp': otp},
+      fromJson: (json) => json as Map<String, dynamic>,
+    );
+
+    if (response.success &&
+        response.data != null &&
+        response.data!['user'] != null) {
+      final user = User.fromJson(response.data!['user']);
+      await _saveUser(user);
+      await _apiService.saveToken('authenticated');
+
+      return ApiResponse(
+        success: true,
+        data: user,
+        message: response.message,
+        statusCode: response.statusCode,
+      );
+    }
+
+    return ApiResponse(
+      success: false,
+      message: response.message ?? 'Invalid OTP',
+      statusCode: response.statusCode,
+    );
+  }
+
+  // Resend OTP
+  Future<ApiResponse<void>> resendOtp({required String email}) async {
+    final response = await _apiService.post<void>(
+      AppConstants.resendOtpEndpoint,
+      body: {'email': email},
+    );
+
+    return response;
   }
 }

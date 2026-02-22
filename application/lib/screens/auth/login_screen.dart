@@ -54,134 +54,136 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        color: AppTheme.backgroundColor,
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(AppTheme.spacing24),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Logo/Title
-                    Text(
-                      AppConstants.appName,
-                      style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                        color: AppTheme.primaryColor,
+    return Theme(
+      data: AppTheme.buildTheme(), // Force light theme
+      child: Scaffold(
+        body: Container(
+          color: AppTheme.backgroundColor,
+          child: SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(AppTheme.spacing24),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Logo/Title
+                      Text(
+                        AppConstants.appName,
+                        style: Theme.of(context).textTheme.displayLarge
+                            ?.copyWith(color: AppTheme.primaryColor),
+                        textAlign: TextAlign.center,
                       ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: AppTheme.spacing8),
-                    Text(
-                      'Welcome Back!',
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: AppTheme.textSecondary,
+                      const SizedBox(height: AppTheme.spacing8),
+                      Text(
+                        'Welcome Back!',
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: AppTheme.textSecondary,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
-                      textAlign: TextAlign.center,
-                    ),
 
-                    const SizedBox(height: AppTheme.spacing48),
+                      const SizedBox(height: AppTheme.spacing48),
 
-                    // Email Field
-                    TextFormField(
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(
-                        labelText: 'Email',
-                        hintText: 'Enter your email',
-                        prefixIcon: Icon(Icons.email_outlined),
+                      // Email Field
+                      TextFormField(
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: const InputDecoration(
+                          labelText: 'Email',
+                          hintText: 'Enter your email',
+                          prefixIcon: Icon(Icons.email_outlined),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your email';
+                          }
+                          if (!value.contains('@')) {
+                            return 'Please enter a valid email';
+                          }
+                          return null;
+                        },
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your email';
-                        }
-                        if (!value.contains('@')) {
-                          return 'Please enter a valid email';
-                        }
-                        return null;
-                      },
-                    ),
 
-                    const SizedBox(height: AppTheme.spacing16),
+                      const SizedBox(height: AppTheme.spacing16),
 
-                    // Password Field
-                    TextFormField(
-                      controller: _passwordController,
-                      obscureText: _obscurePassword,
-                      decoration: InputDecoration(
-                        labelText: 'Password',
-                        hintText: 'Enter your password',
-                        prefixIcon: const Icon(Icons.lock_outline),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility
-                                : Icons.visibility_off,
+                      // Password Field
+                      TextFormField(
+                        controller: _passwordController,
+                        obscureText: _obscurePassword,
+                        decoration: InputDecoration(
+                          labelText: 'Password',
+                          hintText: 'Enter your password',
+                          prefixIcon: const Icon(Icons.lock_outline),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                            ),
+                            onPressed: () {
+                              setState(
+                                () => _obscurePassword = !_obscurePassword,
+                              );
+                            },
                           ),
-                          onPressed: () {
-                            setState(
-                              () => _obscurePassword = !_obscurePassword,
-                            );
-                          },
                         ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your password';
+                          }
+                          return null;
+                        },
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your password';
-                        }
-                        return null;
-                      },
-                    ),
 
-                    const SizedBox(height: AppTheme.spacing32),
+                      const SizedBox(height: AppTheme.spacing32),
 
-                    // Login Button
-                    SizedBox(
-                      height: 48,
-                      child: ElevatedButton(
-                        onPressed: _isLoading ? null : _login,
-                        child: _isLoading
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    Colors.white,
+                      // Login Button
+                      SizedBox(
+                        height: 48,
+                        child: ElevatedButton(
+                          onPressed: _isLoading ? null : _login,
+                          child: _isLoading
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white,
+                                    ),
                                   ),
-                                ),
-                              )
-                            : const Text('Login'),
+                                )
+                              : const Text('Login'),
+                        ),
                       ),
-                    ),
 
-                    const SizedBox(height: AppTheme.spacing24),
+                      const SizedBox(height: AppTheme.spacing24),
 
-                    // Register Link
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Don't have an account? ",
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => const RegisterScreen(),
-                              ),
-                            );
-                          },
-                          child: const Text('Register'),
-                        ),
-                      ],
-                    ),
-                  ],
+                      // Register Link
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            "Don't have an account? ",
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => const RegisterScreen(),
+                                ),
+                              );
+                            },
+                            child: const Text('Register'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

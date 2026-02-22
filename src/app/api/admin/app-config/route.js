@@ -23,7 +23,16 @@ async function getHandler() {
                     { slug: "refund", title: "Refund Policy", content: "", isEnabled: true },
                     { slug: "shipping", title: "Shipping Policy", content: "", isEnabled: true }
                 ],
-                faqs: []
+                faqs: [],
+                splashScreens: [{
+                    isEnabled: true,
+                    title: "Arclay",
+                    description: "Your Premium Shopping Experience",
+                    backgroundColor: "#FFFFFF",
+                    imageUrl: "",
+                    imageType: "",
+                    order: 0
+                }]
             });
             config = config.toObject();
         }
@@ -42,7 +51,7 @@ async function getHandler() {
 async function putHandler(req) {
     try {
         const body = await req.json();
-        const { helpContacts, legalPolicies, faqs } = body;
+        const { helpContacts, legalPolicies, faqs, splashScreens } = body;
 
         await connectDB();
 
@@ -50,6 +59,7 @@ async function putHandler(req) {
         if (helpContacts !== undefined) updateData.helpContacts = helpContacts;
         if (legalPolicies !== undefined) updateData.legalPolicies = legalPolicies;
         if (faqs !== undefined) updateData.faqs = faqs;
+        if (splashScreens !== undefined) updateData.splashScreens = splashScreens;
 
         const config = await AppConfig.findOneAndUpdate(
             {},

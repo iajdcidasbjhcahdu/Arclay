@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../config/theme.dart';
 import '../../services/auth_service.dart';
 import '../home/home_screen.dart';
+import 'verify_otp_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -51,10 +52,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (!mounted) return;
 
     if (response.success) {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-        (route) => false,
-      );
+      if (response.requiresVerification) {
+        // Email verification is enabled on backend
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) =>
+                VerifyOtpScreen(email: _emailController.text.trim()),
+          ),
+        );
+      } else {
+        // Direct successful login route
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
+          (route) => false,
+        );
+      }
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(response.message ?? 'Registration failed')),
@@ -64,165 +76,168 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Register')),
-      body: Container(
-        color: AppTheme.backgroundColor,
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(AppTheme.spacing24),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const SizedBox(height: AppTheme.spacing24),
+    return Theme(
+      data: AppTheme.buildTheme(), // Force light theme
+      child: Scaffold(
+        appBar: AppBar(title: const Text('Register')),
+        body: Container(
+          color: AppTheme.backgroundColor,
+          child: SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(AppTheme.spacing24),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const SizedBox(height: AppTheme.spacing24),
 
-                    // Name Field
-                    TextFormField(
-                      controller: _nameController,
-                      textCapitalization: TextCapitalization.words,
-                      decoration: const InputDecoration(
-                        labelText: 'Full Name',
-                        hintText: 'Enter your full name',
-                        prefixIcon: Icon(Icons.person_outline),
+                      // Name Field
+                      TextFormField(
+                        controller: _nameController,
+                        textCapitalization: TextCapitalization.words,
+                        decoration: const InputDecoration(
+                          labelText: 'Full Name',
+                          hintText: 'Enter your full name',
+                          prefixIcon: Icon(Icons.person_outline),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your name';
+                          }
+                          return null;
+                        },
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your name';
-                        }
-                        return null;
-                      },
-                    ),
 
-                    const SizedBox(height: AppTheme.spacing16),
+                      const SizedBox(height: AppTheme.spacing16),
 
-                    // Email Field
-                    TextFormField(
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(
-                        labelText: 'Email',
-                        hintText: 'Enter your email',
-                        prefixIcon: Icon(Icons.email_outlined),
+                      // Email Field
+                      TextFormField(
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: const InputDecoration(
+                          labelText: 'Email',
+                          hintText: 'Enter your email',
+                          prefixIcon: Icon(Icons.email_outlined),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your email';
+                          }
+                          if (!value.contains('@')) {
+                            return 'Please enter a valid email';
+                          }
+                          return null;
+                        },
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your email';
-                        }
-                        if (!value.contains('@')) {
-                          return 'Please enter a valid email';
-                        }
-                        return null;
-                      },
-                    ),
 
-                    const SizedBox(height: AppTheme.spacing16),
+                      const SizedBox(height: AppTheme.spacing16),
 
-                    // Phone Field (Optional)
-                    TextFormField(
-                      controller: _phoneController,
-                      keyboardType: TextInputType.phone,
-                      decoration: const InputDecoration(
-                        labelText: 'Phone (Optional)',
-                        hintText: 'Enter your phone number',
-                        prefixIcon: Icon(Icons.phone_outlined),
-                      ),
-                    ),
-
-                    const SizedBox(height: AppTheme.spacing16),
-
-                    // Password Field
-                    TextFormField(
-                      controller: _passwordController,
-                      obscureText: _obscurePassword,
-                      decoration: InputDecoration(
-                        labelText: 'Password',
-                        hintText: 'Enter your password',
-                        prefixIcon: const Icon(Icons.lock_outline),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility
-                                : Icons.visibility_off,
-                          ),
-                          onPressed: () {
-                            setState(
-                              () => _obscurePassword = !_obscurePassword,
-                            );
-                          },
+                      // Phone Field (Optional)
+                      TextFormField(
+                        controller: _phoneController,
+                        keyboardType: TextInputType.phone,
+                        decoration: const InputDecoration(
+                          labelText: 'Phone (Optional)',
+                          hintText: 'Enter your phone number',
+                          prefixIcon: Icon(Icons.phone_outlined),
                         ),
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter a password';
-                        }
-                        if (value.length < 6) {
-                          return 'Password must be at least 6 characters';
-                        }
-                        return null;
-                      },
-                    ),
 
-                    const SizedBox(height: AppTheme.spacing16),
+                      const SizedBox(height: AppTheme.spacing16),
 
-                    // Confirm Password Field
-                    TextFormField(
-                      controller: _confirmPasswordController,
-                      obscureText: _obscureConfirmPassword,
-                      decoration: InputDecoration(
-                        labelText: 'Confirm Password',
-                        hintText: 'Re-enter your password',
-                        prefixIcon: const Icon(Icons.lock_outline),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscureConfirmPassword
-                                ? Icons.visibility
-                                : Icons.visibility_off,
+                      // Password Field
+                      TextFormField(
+                        controller: _passwordController,
+                        obscureText: _obscurePassword,
+                        decoration: InputDecoration(
+                          labelText: 'Password',
+                          hintText: 'Enter your password',
+                          prefixIcon: const Icon(Icons.lock_outline),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                            ),
+                            onPressed: () {
+                              setState(
+                                () => _obscurePassword = !_obscurePassword,
+                              );
+                            },
                           ),
-                          onPressed: () {
-                            setState(
-                              () => _obscureConfirmPassword =
-                                  !_obscureConfirmPassword,
-                            );
-                          },
                         ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter a password';
+                          }
+                          if (value.length < 6) {
+                            return 'Password must be at least 6 characters';
+                          }
+                          return null;
+                        },
                       ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please confirm your password';
-                        }
-                        if (value != _passwordController.text) {
-                          return 'Passwords do not match';
-                        }
-                        return null;
-                      },
-                    ),
 
-                    const SizedBox(height: AppTheme.spacing32),
+                      const SizedBox(height: AppTheme.spacing16),
 
-                    // Register Button
-                    SizedBox(
-                      height: 48,
-                      child: ElevatedButton(
-                        onPressed: _isLoading ? null : _register,
-                        child: _isLoading
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                    Colors.white,
+                      // Confirm Password Field
+                      TextFormField(
+                        controller: _confirmPasswordController,
+                        obscureText: _obscureConfirmPassword,
+                        decoration: InputDecoration(
+                          labelText: 'Confirm Password',
+                          hintText: 'Re-enter your password',
+                          prefixIcon: const Icon(Icons.lock_outline),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscureConfirmPassword
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                            ),
+                            onPressed: () {
+                              setState(
+                                () => _obscureConfirmPassword =
+                                    !_obscureConfirmPassword,
+                              );
+                            },
+                          ),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please confirm your password';
+                          }
+                          if (value != _passwordController.text) {
+                            return 'Passwords do not match';
+                          }
+                          return null;
+                        },
+                      ),
+
+                      const SizedBox(height: AppTheme.spacing32),
+
+                      // Register Button
+                      SizedBox(
+                        height: 48,
+                        child: ElevatedButton(
+                          onPressed: _isLoading ? null : _register,
+                          child: _isLoading
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white,
+                                    ),
                                   ),
-                                ),
-                              )
-                            : const Text('Register'),
+                                )
+                              : const Text('Register'),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

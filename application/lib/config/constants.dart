@@ -8,6 +8,8 @@ class AppConstants {
   static const String registerEndpoint = '/api/auth/register';
   static const String logoutEndpoint = '/api/auth/logout';
   static const String meEndpoint = '/api/auth/me';
+  static const String verifyOtpEndpoint = '/api/auth/verify-otp';
+  static const String resendOtpEndpoint = '/api/auth/resend-otp';
 
   static const String productsEndpoint = '/api/products';
   static const String cartEndpoint = '/api/cart';

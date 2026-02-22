@@ -12,12 +12,14 @@ class ApiResponse<T> {
   final T? data;
   final String? message;
   final int statusCode;
+  final bool requiresVerification;
 
   ApiResponse({
     required this.success,
     this.data,
     this.message,
     required this.statusCode,
+    this.requiresVerification = false,
   });
 }
 
@@ -221,12 +223,14 @@ class ApiService {
           data: parsedData,
           message: data['message'] as String?,
           statusCode: response.statusCode!,
+          requiresVerification: data['requiresVerification'] ?? false,
         );
       } else {
         return ApiResponse<T>(
           success: false,
           message: data['message'] ?? 'Request failed',
           statusCode: response.statusCode!,
+          requiresVerification: data['requiresVerification'] ?? false,
         );
       }
     } catch (e) {

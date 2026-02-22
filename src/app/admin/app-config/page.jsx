@@ -6,7 +6,7 @@ import { toast } from "react-toastify";
 
 const RichEditor = dynamic(() => import("@/components/RichEditor"), { ssr: false });
 
-const TABS = ["Get Help", "Legal & Policies", "FAQs"];
+const TABS = ["Get Help", "Legal & Policies", "FAQs", "Splash Screen"];
 
 export default function AppConfigPage() {
     const [activeTab, setActiveTab] = useState(0);
@@ -16,6 +16,7 @@ export default function AppConfigPage() {
     const [helpContacts, setHelpContacts] = useState([]);
     const [legalPolicies, setLegalPolicies] = useState([]);
     const [faqs, setFaqs] = useState([]);
+    const [splashScreens, setSplashScreens] = useState([]);
 
     useEffect(() => {
         fetchConfig();
@@ -29,6 +30,7 @@ export default function AppConfigPage() {
                 setHelpContacts(data.config.helpContacts || []);
                 setLegalPolicies(data.config.legalPolicies || []);
                 setFaqs(data.config.faqs || []);
+                setSplashScreens(data.config.splashScreens || []);
             }
         } catch (err) {
             console.error(err);
@@ -54,6 +56,7 @@ export default function AppConfigPage() {
                 setHelpContacts(data.config.helpContacts || []);
                 setLegalPolicies(data.config.legalPolicies || []);
                 setFaqs(data.config.faqs || []);
+                setSplashScreens(data.config.splashScreens || []);
             } else {
                 toast.error(data.message || "Failed to save");
             }
@@ -119,6 +122,14 @@ export default function AppConfigPage() {
                     faqs={faqs}
                     onChange={setFaqs}
                     onSave={() => saveConfig({ faqs })}
+                    saving={saving}
+                />
+            )}
+            {activeTab === 3 && (
+                <SplashScreenTab
+                    splashScreens={splashScreens}
+                    onChange={setSplashScreens}
+                    onSave={() => saveConfig({ splashScreens })}
                     saving={saving}
                 />
             )}
@@ -479,6 +490,255 @@ function FAQsTab({ faqs, onChange, onSave, saving }) {
                     className="px-8 py-2.5 bg-primary text-primary-foreground rounded-xl font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors"
                 >
                     {saving ? "Saving..." : "Save FAQs"}
+                </button>
+            </div>
+        </div>
+    );
+}
+
+// ═══════════════════════════
+// Tab 4: Splash Screen
+// ═══════════════════════════
+
+function SplashScreenTab({ splashScreens, onChange, onSave, saving }) {
+    const [uploadingIndex, setUploadingIndex] = useState(null);
+
+    const updateScreen = (index, field, value) => {
+        const updated = [...splashScreens];
+        updated[index] = { ...updated[index], [field]: value };
+        onChange(updated);
+    };
+
+    const addScreen = () => {
+        onChange([...splashScreens, {
+            isEnabled: true,
+            title: "Arclay",
+            description: "The Best E-Commerce Experience",
+            backgroundColor: "#FFFFFF",
+            imageUrl: "",
+            imageType: "",
+            order: splashScreens.length
+        }]);
+    };
+
+    const removeScreen = (index) => {
+        onChange(splashScreens.filter((_, i) => i !== index));
+    };
+
+    const moveScreen = (index, direction) => {
+        const updated = [...splashScreens];
+        const target = index + direction;
+        if (target < 0 || target >= updated.length) return;
+        [updated[index], updated[target]] = [updated[target], updated[index]];
+        // Update order
+        updated.forEach((s, i) => s.order = i);
+        onChange(updated);
+    };
+
+    const handleImageUpload = async (e, index) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Verify it's an SVG or PNG
+        if (file.type !== "image/png" && file.type !== "image/svg+xml") {
+            toast.error("Please upload only PNG or SVG files for the splash screen.");
+            return;
+        }
+
+        setUploadingIndex(index);
+        try {
+            const formData = new FormData();
+            formData.append("file", file);
+
+            const res = await fetch("/api/admin/upload", {
+                method: "POST",
+                body: formData,
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                const updated = [...splashScreens];
+                updated[index].imageUrl = data.url;
+                updated[index].imageType = file.type === "image/svg+xml" ? "svg" : "png";
+                onChange(updated);
+                toast.success("Image uploaded!");
+            } else {
+                toast.error(data.message || "Upload failed");
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error("Upload failed");
+        } finally {
+            setUploadingIndex(null);
+            e.target.value = null;
+        }
+    };
+
+    return (
+        <div className="space-y-4">
+            <div className="flex items-center justify-between mb-4 mt-2 px-2">
+                <div>
+                    <h3 className="text-xl font-medium text-foreground">Mobile & Web Splash Screens</h3>
+                    <p className="text-sm text-muted-foreground mt-1">Configure the sequence of screens shown when users open the app/web.</p>
+                </div>
+            </div>
+
+            {splashScreens.map((screen, i) => (
+                <div key={i} className="bg-card border border-border rounded-xl p-6">
+                    <div className="flex items-center justify-between mb-6 pb-4 border-b border-border">
+                        <div className="flex items-center gap-2">
+                            <span className="text-muted-foreground font-mono text-sm">Screen #{i + 1}</span>
+                            <div className="flex flex-col">
+                                <button
+                                    onClick={() => moveScreen(i, -1)}
+                                    disabled={i === 0}
+                                    className="text-xs text-muted-foreground hover:text-foreground disabled:opacity-30"
+                                >
+                                    ▲
+                                </button>
+                                <button
+                                    onClick={() => moveScreen(i, 1)}
+                                    disabled={i === splashScreens.length - 1}
+                                    className="text-xs text-muted-foreground hover:text-foreground disabled:opacity-30"
+                                >
+                                    ▼
+                                </button>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-3">
+                            <label className="flex items-center gap-2 cursor-pointer bg-muted/50 px-3 py-1.5 rounded-lg">
+                                <span className="text-sm font-medium">Enable</span>
+                                <button
+                                    type="button"
+                                    onClick={() => updateScreen(i, "isEnabled", !screen.isEnabled)}
+                                    className={`w-11 h-6 rounded-full transition-colors relative ${screen.isEnabled ? "bg-primary" : "bg-muted-foreground/30"
+                                        }`}
+                                >
+                                    <span className={`block w-5 h-5 bg-white rounded-full shadow transition-transform absolute top-0.5 ${screen.isEnabled ? "translate-x-5" : "translate-x-0.5"
+                                        }`} />
+                                </button>
+                            </label>
+                            <button
+                                onClick={() => removeScreen(i)}
+                                className="text-destructive hover:bg-destructive/10 p-1.5 rounded-lg transition-colors ml-2"
+                                title="Delete Screen"
+                            >
+                                🗑️
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="space-y-6">
+                        {/* Image Upload */}
+                        <div>
+                            <label className="block text-sm font-medium mb-2">Splash Logo (SVG or PNG)</label>
+                            <div className="flex items-start gap-6">
+                                <div className="w-32 h-32 shrink-0 rounded-xl border-2 border-dashed border-border flex items-center justify-center overflow-hidden bg-muted/50 relative">
+                                    {screen.imageUrl ? (
+                                        screen.imageType === "svg" ? (
+                                            <div
+                                                className="w-full h-full p-4 [&>svg]:w-full [&>svg]:h-full [&>svg]:object-contain"
+                                                dangerouslySetInnerHTML={{ __html: `<img src="${screen.imageUrl}" alt="SVG Logo" class="w-full h-full object-contain" />` }}
+                                            />
+                                        ) : (
+                                            <img src={screen.imageUrl} alt="Splash Logo" className="w-full h-full object-contain p-4" />
+                                        )
+                                    ) : (
+                                        <span className="text-3xl opacity-30">✨</span>
+                                    )}
+
+                                    {/* Overlay remove button if image exists */}
+                                    {screen.imageUrl && (
+                                        <button
+                                            onClick={() => {
+                                                updateScreen(i, "imageUrl", "");
+                                                updateScreen(i, "imageType", "");
+                                            }}
+                                            className="absolute top-1 right-1 bg-black/50 hover:bg-black text-white rounded-full w-6 h-6 flex items-center justify-center text-xs backdrop-blur-sm transition-colors"
+                                        >
+                                            ✕
+                                        </button>
+                                    )}
+                                </div>
+                                <div className="flex-1 space-y-3">
+                                    <label className="inline-flex items-center justify-center px-4 py-2 border border-border rounded-lg bg-card hover:bg-muted font-medium cursor-pointer transition-colors relative overflow-hidden">
+                                        {uploadingIndex === i ? "Uploading..." : "Upload New Image"}
+                                        <input
+                                            type="file"
+                                            className="absolute inset-0 opacity-0 cursor-pointer"
+                                            accept="image/png, image/svg+xml"
+                                            onChange={(e) => handleImageUpload(e, i)}
+                                            disabled={uploadingIndex !== null}
+                                        />
+                                    </label>
+                                    <p className="text-xs text-muted-foreground w-3/4 leading-relaxed">
+                                        Optimal size: 500x500px. SVGs are highly recommended for vector scaling across different phone screens.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr className="border-border" />
+
+                        {/* Text Content */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium mb-1.5">App Title</label>
+                                <input
+                                    type="text"
+                                    value={screen.title}
+                                    onChange={(e) => updateScreen(i, "title", e.target.value)}
+                                    placeholder="e.g. Arclay"
+                                    className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium mb-1.5">Background Color</label>
+                                <div className="flex items-center gap-3">
+                                    <input
+                                        type="color"
+                                        value={screen.backgroundColor || "#ffffff"}
+                                        onChange={(e) => updateScreen(i, "backgroundColor", e.target.value)}
+                                        className="h-10 w-16 p-1 bg-muted border border-border rounded-lg cursor-pointer"
+                                    />
+                                    <input
+                                        type="text"
+                                        value={screen.backgroundColor || "#ffffff"}
+                                        onChange={(e) => updateScreen(i, "backgroundColor", e.target.value)}
+                                        className="w-32 px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary font-mono text-sm uppercase"
+                                        maxLength={7}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium mb-1.5">Description Text</label>
+                            <input
+                                type="text"
+                                value={screen.description}
+                                onChange={(e) => updateScreen(i, "description", e.target.value)}
+                                placeholder="e.g. The Best E-Commerce Experience"
+                                className="w-full px-3 py-2 bg-muted border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                            />
+                        </div>
+                    </div>
+                </div>
+            ))}
+
+            <button
+                onClick={addScreen}
+                className="w-full p-4 bg-card border-2 border-dashed border-border rounded-xl text-primary font-medium hover:border-primary transition-colors"
+            >
+                + Add Splash Screen
+            </button>
+
+            <div className="flex justify-end pt-4">
+                <button
+                    onClick={onSave}
+                    disabled={saving}
+                    className="px-8 py-2.5 bg-primary text-primary-foreground rounded-xl font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors"
+                >
+                    {saving ? "Saving..." : "Save Splash Screens"}
                 </button>
             </div>
         </div>

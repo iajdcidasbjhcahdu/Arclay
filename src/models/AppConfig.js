@@ -25,7 +25,18 @@ const faqSchema = new mongoose.Schema({
     isEnabled: { type: Boolean, default: true }
 }, { _id: true });
 
+const splashScreenSchema = new mongoose.Schema({
+    isEnabled: { type: Boolean, default: true },
+    title: { type: String, default: "Arclay" },
+    description: { type: String, default: "The Best E-Commerce Experience" },
+    backgroundColor: { type: String, default: "#FFFFFF" },
+    imageUrl: { type: String, default: "" },
+    imageType: { type: String, enum: ["png", "svg", ""], default: "" },
+    order: { type: Number, default: 0 }
+}, { _id: true });
+
 const appConfigSchema = new mongoose.Schema({
+    splashScreens: { type: [splashScreenSchema], default: [] },
     helpContacts: [helpContactSchema],
     legalPolicies: [legalPolicySchema],
     faqs: [faqSchema]
