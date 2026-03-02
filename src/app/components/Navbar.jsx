@@ -38,12 +38,20 @@ export default function Navbar() {
                 <div className="flex items-center justify-between h-16 lg:h-20">
 
                     {/* Minimalist Brand Logo */}
-                    <Link href="/" className="flex items-center gap-2 group">
-                        <span className="text-xl lg:text-2xl font-bold text-foreground tracking-tight group-hover:text-primary transition-colors">
-                            {siteName}
-                        </span>
-                        <div className="h-1.5 w-1.5 rounded-full bg-primary mt-1"></div>
-                    </Link>
+                    {
+                        siteName.toLocaleLowerCase() == 'sanatva'
+                            ?
+                            <Link href="/" className="flex items-center gap-2 group">
+                                <img src="sanatvaLogo.png" className="h-20" alt="" />
+                            </Link>
+                            :
+                            <Link href="/" className="flex items-center gap-2 group">
+                                <span className="text-xl lg:text-2xl font-bold text-foreground tracking-tight group-hover:text-primary transition-colors">
+                                    {siteName}
+                                </span>
+                                <div className="h-1.5 w-1.5 rounded-full bg-primary mt-1"></div>
+                            </Link>
+                    }
 
                     {/* Centered Navigation */}
                     <div className="hidden lg:flex items-center gap-10">
@@ -162,7 +170,7 @@ export default function Navbar() {
                 {isMenuOpen && (
                     <div className="lg:hidden bg-card border-t border-border absolute left-0 right-0 top-[64px] p-6 shadow-2xl animate-fade-in-up">
                         <div className="flex flex-col gap-6">
-                            {["Home", "Products", "Contact"].map((item) => (
+                            {["Home", "Products"].map((item) => (
                                 <Link
                                     key={item}
                                     href={item === "Home" ? "/" : `/${item.toLowerCase()}`}

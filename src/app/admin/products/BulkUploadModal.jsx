@@ -99,9 +99,26 @@ export default function BulkUploadModal({ isOpen, onClose, onSuccess }) {
 
     const handleImport = async () => {
         const mappedData = getMappedData();
+
+        // give regularPrice a default value of 0 if not provided
+        mappedData.forEach(p => {
+            if (p.regularPrice === undefined || p.regularPrice === "") {
+                p.regularPrice = 0;
+            }
+        });
+
+        // if mappedData images is an array of strings, give image1, image2, image3 as images[0], images[1], images[2]
+        mappedData.forEach(p => {
+            if (p.images && Array.isArray(p.images)) {
+                p.image1 = p.images[0] || "";
+                p.image2 = p.images[1] || "";
+                p.image3 = p.images[2] || "";
+                delete p.images;
+            }
+        });
         
         // Validate required fields (category is optional, defaults to SITE_NAME)
-        const invalidRows = mappedData.filter((p, i) => !p.name || !p.regularPrice);
+        const invalidRows = mappedData.filter((p, i) => !p.name);
         if (invalidRows.length > 0) {
             toast.error(`${invalidRows.length} rows are missing required fields (name or regularPrice)`);
             return;

@@ -397,6 +397,7 @@ export default function ProductDetailPage({ params }) {
                                     <h2 className="font-medium text-foreground mb-2">Description</h2>
                                     <p className="text-muted-foreground leading-relaxed">
                                         {product.description}
+                                        
                                     </p>
                                 </div>
                             )}

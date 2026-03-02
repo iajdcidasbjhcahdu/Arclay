@@ -36,8 +36,8 @@ dotenv.config({ path: path.join(__dirname, '..', '.env') });
 const CONFIG = {
     // Admin user credentials
     admin: {
-        name: 'Admin User',
-        email: 'admin@arclay.com',
+        name: 'Amit Verma',
+        email: 'sales@sanatva.com',
         password: 'Admin@123',
         phone: '+91 9999999999'
     },
@@ -583,20 +583,27 @@ async function seedDatabase() {
         if (CONFIG.clearExisting) {
             console.log('🗑️  Clearing existing data...');
             await Promise.all([
-                Category.deleteMany({}), Product.deleteMany({}), User.deleteMany({}), Review.deleteMany({}),
-                Settings.deleteMany({}), Coupon.deleteMany({}), Address.deleteMany({}), Order.deleteMany({}),
-                ProductAd.deleteMany({}), Bundle.deleteMany({})
+                Category.deleteMany({}),
+                Product.deleteMany({}), 
+                User.deleteMany({}), 
+                Review.deleteMany({}),
+                // Settings.deleteMany({}), 
+                Coupon.deleteMany({}), 
+                Address.deleteMany({}), 
+                Order.deleteMany({}),
+                ProductAd.deleteMany({}), 
+                Bundle.deleteMany({})
             ]);
             console.log('✅ Data cleared\n');
         }
 
         // 1. Settings
         console.log('⚙️  Creating settings...');
-        await Settings.create({
-            isDemo: false,
-            payment: { cod: { isEnabled: true }, razorpay: { isEnabled: true }, stripe: { isEnabled: false } },
-            shipping: { freeShippingThreshold: 500, flatRate: 40, rateCalculation: 'free_threshold' }
-        });
+        // await Settings.create({
+        //     isDemo: false,
+        //     payment: { cod: { isEnabled: true }, razorpay: { isEnabled: true }, stripe: { isEnabled: false } },
+        //     shipping: { freeShippingThreshold: 500, flatRate: 40, rateCalculation: 'free_threshold' }
+        // });
         console.log('✅ Settings created\n');
 
         // 2. Users (Admin + Sample)
@@ -607,6 +614,9 @@ async function seedDatabase() {
             name: CONFIG.admin.name, email: CONFIG.admin.email, phone: CONFIG.admin.phone,
             password: hashedAdminPwd, role: 'admin', isActive: true, isEmailVerified: true
         });
+
+        return;
+
         users.push(admin);
 
         for (const u of SAMPLE_USERS) {

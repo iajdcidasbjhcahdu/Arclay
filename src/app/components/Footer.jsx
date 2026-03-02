@@ -12,10 +12,26 @@ const content = getBrandContent(siteName);
 export default function Footer() {
     const pathname = usePathname();
     const [showFooter, setShowFooter] = useState(true);
+    const [policies, setPolicies] = useState([]);
 
     useEffect(() => {
         pathname.includes("login") || pathname.includes("signup") || pathname.includes("admin") ? setShowFooter(false) : setShowFooter(true);
     }, [pathname]);
+
+    useEffect(() => {
+        async function fetchPolicies() {
+            try {
+                const res = await fetch('/api/app-config');
+                const data = await res.json();
+                if (data.success && data.config?.legalPolicies) {
+                    setPolicies(data.config.legalPolicies);
+                }
+            } catch {
+                // Silently fail
+            }
+        }
+        fetchPolicies();
+    }, []);
 
     if (!showFooter) return null;
 
@@ -28,14 +44,22 @@ export default function Footer() {
                     {/* Brand & Newsletter Column */}
                     <div className="lg:col-span-12 xl:col-span-5 space-y-8">
                         <div>
-                            <Link href="/" className="inline-block group">
-                                <span className="text-3xl font-black text-foreground tracking-tighter">
-                                    {siteName}<span className="text-primary">.</span>
-                                </span>
-                            </Link>
+                            {
+                                siteName.toLocaleLowerCase() == 'sanatva'
+                                    ?
+                                    <Link href="/" className="flex items-center gap-2 group">
+                                        <img src="sanatvaLogo.png" className="h-20" alt="" />
+                                    </Link>
+                                    :
+                                    <Link href="/" className="inline-block group">
+                                        <span className="text-3xl font-black text-foreground tracking-tighter">
+                                            {siteName}<span className="text-primary">.</span>
+                                        </span>
+                                    </Link>
+                            }
+
                             <p className="mt-4 text-muted-foreground max-w-sm leading-relaxed font-medium">
-                                Experience the finest culinary journey.
-                                Fresh ingredients, expert chefs, and an atmosphere like no other.
+                                Authentic herbal formulas that cleanse, rejuvenate, and support liver health for improved digestion, vitality, and overall body balance naturally.
                             </p>
                         </div>
 
@@ -78,39 +102,49 @@ export default function Footer() {
                             <h4 className="text-lg font-bold text-foreground">Contact</h4>
                             <ul className="space-y-4">
                                 <li className="text-muted-foreground text-sm font-medium">
-                                    Chitkara University, <br /> Rajpura, Punjab 140401
+                                    SCO 12, Sector 5 <br/> Panchkula – 134109, Haryana
                                 </li>
                                 <li className="text-muted-foreground text-sm font-medium hover:text-primary cursor-pointer">
-                                    +91 82848-34841
+                                    +91 91155-91455
                                 </li>
                                 <li className="text-muted-foreground text-sm font-medium hover:text-primary cursor-pointer">
-                                    mails.kunalbhatia@gmail.com
+                                    Sales@Sanatva.com
                                 </li>
                             </ul>
                         </div>
 
-                        {/* Column 3 - Socials */}
-                        <div className="space-y-6">
-                            <h4 className="text-lg font-bold text-foreground">Follow Us</h4>
-                            <div className="flex gap-4">
-                                {[1, 2, 3, 4].map(i => (
-                                    <div key={i} className="w-10 h-10 rounded-full bg-card border border-border hover:bg-primary hover:text-background text-muted-foreground flex items-center justify-center transition-all cursor-pointer shadow-sm hover:shadow-primary/30">
-                                        <div className="w-4 h-4 bg-current rounded-sm"></div>
-                                    </div>
-                                ))}
+                        {/* Column 3 - Policies */}
+                        {policies.length > 0 && (
+                            <div className="space-y-6">
+                                <h4 className="text-lg font-bold text-foreground">Policies</h4>
+                                <ul className="space-y-4">
+                                    {policies.map(policy => (
+                                        <li key={policy.slug}>
+                                            <Link href={`/policy/${policy.slug}`} className="text-muted-foreground hover:text-primary transition-colors text-sm font-medium">
+                                                {policy.title}
+                                            </Link>
+                                        </li>
+                                    ))}
+                                </ul>
                             </div>
-                        </div>
+                        )}
 
                     </div>
                 </div>
 
                 {/* Footer Bottom */}
                 <div className="pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-muted-foreground font-medium">
-                    <p>© {new Date().getFullYear()} {siteName}. All Rights Reserved.</p>
-                    <div className="flex gap-8">
+                    <p>
+                        © {new Date().getFullYear()}
+                        <a href="https://kunalbhatia.in" target="_blank" rel="noopener noreferrer" className="text-primary">
+                            {" "} {siteName}. {" "}
+                        </a>
+                        All Rights Reserved.
+                    </p>
+                    {/* <div className="flex gap-8">
                         <Link href="#" className="hover:text-foreground transition-colors">Privacy Policy</Link>
                         <Link href="#" className="hover:text-foreground transition-colors">Terms of Service</Link>
-                    </div>
+                    </div> */}
                 </div>
 
             </div>

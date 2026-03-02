@@ -22,7 +22,7 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           port: ${{ secrets.VPS_PORT }}
-          timeout: 60s
+          timeout: 120s
           command_timeout: 20m
           debug: true
           script: |
@@ -39,5 +39,11 @@ jobs:
             
             echo "🔄 Restarting PM2 process... via pm2 and updating env"
             pm2 restart arclay --update-env
+
+            cd /root/apps/sanatva
+            git pull origin main
+            pnpm install
+            pnpm run build
+            pm2 restart sanatva --update-env
             
             echo "✅ Deployment complete!"
