@@ -5,6 +5,7 @@ import { UserProvider } from "@/context/UserContext";
 import { ThemeProvider } from "@/components/theme-provider";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import ChatWidget from "./components/ChatWidget";
 
 // ESSVORA fonts
 const playfair = Playfair_Display({
@@ -73,6 +74,7 @@ export default function RootLayout({ children }) {
             <Navbar />
             {children}
             <Footer />
+            <ChatWidget />
           </UserProvider>
         </ThemeProvider>
       </body>

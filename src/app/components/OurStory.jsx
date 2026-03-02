@@ -6,6 +6,7 @@ const siteName = getSiteName();
 const content = getBrandContent(siteName);
 const storyContent = content.ourStory;
 const isVedicBro = siteName.toLowerCase().includes('vedicbro');
+const isSanatva = siteName.toLowerCase().includes('sanatva');
 
 export default function OurStory() {
     return (
@@ -26,9 +27,9 @@ export default function OurStory() {
                                             E
                                         </div>
                                         <h3 className="text-2xl font-black text-foreground uppercase tracking-tight mb-2">
-                                            {isVedicBro ? 'Pure Ayurveda' : 'Premium Craft'}
+                                            {isSanatva ? 'Sanatva Ayurveda' : (isVedicBro ? 'Pure Ayurveda' : 'Premium Craft')}
                                         </h3>
-                                        <p className="text-muted-foreground text-sm">Since 1998</p>
+                                        <p className="text-muted-foreground text-sm">{isSanatva ? 'Authentic Care' : 'Since 1998'}</p>
                                     </div>
                                 </div>
                                 <div className="absolute inset-0 border-2 border-primary/20 scale-95 opacity-0 group-hover:opacity-100 group-hover:scale-100 transition-all duration-500 rounded-2xl"></div>

@@ -412,6 +412,60 @@ export default function AdminSettings() {
                 </div>
             </div>
 
+            {/* AI Chatbot Settings */}
+            <div className="bg-card rounded-2xl p-6 shadow-sm border border-border">
+                <h2 className="font-serif text-xl font-semibold text-foreground mb-6">
+                    💬 AI Chatbot
+                </h2>
+                <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 bg-muted rounded-xl">
+                        <div>
+                            <h3 className="font-medium">Enable Chatbot</h3>
+                            <p className="text-sm text-muted-foreground">
+                                Show a floating AI chat widget on your website (requires Gemini API key above)
+                            </p>
+                        </div>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={settings?.chatbot?.isEnabled || false}
+                                onChange={(e) => updateSetting('chatbot.isEnabled', e.target.checked)}
+                                className="sr-only peer"
+                            />
+                            <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                        </label>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium mb-2">Welcome Message</label>
+                        <input
+                            type="text"
+                            value={settings?.chatbot?.welcomeMessage || ''}
+                            onChange={(e) => updateSetting('chatbot.welcomeMessage', e.target.value)}
+                            className="w-full px-4 py-3 rounded-xl border border-input bg-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                            placeholder="Hi! How can I help you today?"
+                        />
+                        <p className="text-xs text-muted-foreground mt-1">
+                            The first message users see when they open the chat
+                        </p>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium mb-2">System Prompt</label>
+                        <textarea
+                            value={settings?.chatbot?.systemPrompt || ''}
+                            onChange={(e) => updateSetting('chatbot.systemPrompt', e.target.value)}
+                            rows={5}
+                            className="w-full px-4 py-3 rounded-xl border border-input bg-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary resize-y"
+                            placeholder="You are a helpful shopping assistant for our store. Help customers find products, answer questions about our offerings, and provide a great shopping experience..."
+                        />
+                        <p className="text-xs text-muted-foreground mt-1">
+                            Instructions that guide the AI&apos;s behavior and personality. Tell it about your brand, tone, and what it should/shouldn&apos;t do.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
             {/* Shipping Settings */}
             <div className="bg-card rounded-2xl p-6 shadow-sm border border-border">
                 <h2 className="font-serif text-xl font-semibold text-foreground mb-6">

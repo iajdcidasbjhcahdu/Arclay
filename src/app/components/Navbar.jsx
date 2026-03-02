@@ -47,7 +47,7 @@ export default function Navbar() {
 
                     {/* Centered Navigation */}
                     <div className="hidden lg:flex items-center gap-10">
-                        {["Home", "Products", "Contact"].map((item) => (
+                        {["Home", "Products"].map((item) => (
                             <Link
                                 key={item}
                                 href={item === "Home" ? "/" : `/${item.toLowerCase()}`}
@@ -99,6 +99,11 @@ export default function Navbar() {
                                                 <p className="font-bold text-foreground truncate">{user?.name}</p>
                                                 <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
                                             </div>
+                                            {
+                                                user?.role === "admin" && (
+                                                    <Link href="/admin" className="block px-4 py-2 text-sm text-muted-foreground hover:text-primary hover:bg-muted transition-colors" onClick={() => setIsUserMenuOpen(false)}>Admin</Link>
+                                                )
+                                            }
                                             <Link href="/account" className="block px-4 py-2 text-sm text-muted-foreground hover:text-primary hover:bg-muted transition-colors" onClick={() => setIsUserMenuOpen(false)}>Account</Link>
                                             <Link href="/orders" className="block px-4 py-2 text-sm text-muted-foreground hover:text-primary hover:bg-muted transition-colors" onClick={() => setIsUserMenuOpen(false)}>Orders</Link>
                                             <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-sm text-destructive hover:bg-muted transition-colors">Sign Out</button>

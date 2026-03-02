@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowRight, Gift, Pause, Play, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getSiteName } from "@/config/brandContent";
 
 const localBanners = [
     {
@@ -12,14 +13,14 @@ const localBanners = [
         image: '/images/banners/hero-1.jpg',
         title: 'Authentic Indian Flavors',
         subtitle: 'Handcrafted pickles and preserves made with love and tradition',
-        link: '/shop'
+        link: '/products'
     },
     {
         _id: '2',
         image: '/images/banners/hero-2.jpg',
         title: 'Taste of Tradition',
         subtitle: 'Experience the rich heritage of culinary excellence',
-        link: '/shop?category=pickles'
+        link: '/products?category=pickles'
     },
     {
         _id: '3',
@@ -30,9 +31,36 @@ const localBanners = [
     }
 ];
 
+const sanatvaBanners = [
+    {
+        _id: '4',
+        image: 'https://ayurvedicliverdetox.com/wp-content/uploads/2025/10/livrax-banner-1.jpg',
+        title: 'Sanatva Ayurvedic',
+        subtitle: 'Authentic herbal formulas that cleanse, rejuvenate, and support liver health.',
+        link: '/products?brand=sanatva'
+    },
+    {
+        _id: '5',
+        image: 'https://ayurvedicliverdetox.com/wp-content/uploads/2025/10/livercare-banner.jpg',
+        title: 'Natural Liver Detox',
+        subtitle: 'Improve digestion, vitality, and overall body balance naturally.',
+        link: '/products?category=liver-care'
+    },
+    {
+        _id: '6',
+        image: 'https://ayurvedicliverdetox.com/wp-content/uploads/2025/10/gaskia-banner.jpg',
+        title: 'Gaskia & Livkia',
+        subtitle: 'Discover Sanatva Ayurvedic’s complete range for digestion and vitality.',
+        link: '/products?brand=sanatva'
+    }
+];
+
 export default function HomeHero() {
     const router = useRouter();
-    const [banners, setBanners] = useState(localBanners);
+    const siteName = getSiteName();
+    const isSanatva = siteName.toLowerCase().includes('sanatva');
+
+    const [banners, setBanners] = useState(isSanatva ? sanatvaBanners : localBanners);
     const [currentBanner, setCurrentBanner] = useState(0);
     const [isAutoPlaying, setIsAutoPlaying] = useState(true);
 
@@ -93,7 +121,7 @@ export default function HomeHero() {
                             Shop Now
                             <ArrowRight className="ml-2 w-5 h-5" />
                         </Button>
-                        <Button
+                        {/* <Button
                             size="lg"
                             variant="outline"
                             className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20 rounded-full px-8 h-12 text-base"
@@ -101,7 +129,7 @@ export default function HomeHero() {
                         >
                             <Gift className="mr-2 w-5 h-5" />
                             Gift Hampers
-                        </Button>
+                        </Button> */}
                     </div>
                 </motion.div>
             </div>

@@ -81,6 +81,20 @@ const SettingsSchema = new mongoose.Schema({
             default: false
         }
     },
+    chatbot: {
+        isEnabled: {
+            type: Boolean,
+            default: false
+        },
+        systemPrompt: {
+            type: String,
+            default: ''
+        },
+        welcomeMessage: {
+            type: String,
+            default: 'Hi! How can I help you today?'
+        }
+    },
     shipping: {
         shiprocket: {
             isEnabled: {

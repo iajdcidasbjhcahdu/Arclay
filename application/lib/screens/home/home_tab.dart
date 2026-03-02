@@ -29,8 +29,7 @@ class _HomeTabState extends State<HomeTab> {
   List<Map<String, dynamic>> _heroAds = [];
   bool _isLoading = true;
 
-  // Hero Carousel
-  final PageController _heroPageController = PageController();
+  final PageController _heroPageController = PageController(viewportFraction: 0.92);
   Timer? _heroAutoScroll;
   int _currentHeroPage = 0;
 
@@ -51,7 +50,6 @@ class _HomeTabState extends State<HomeTab> {
   Future<void> _loadHomeData() async {
     setState(() => _isLoading = true);
 
-    // Load Best Sellers, New Arrivals and Hero Ads in parallel
     final results = await Future.wait([
       _productsService.getProducts(page: 1, limit: 4, isFeatured: true),
       _productsService.getProducts(page: 1, limit: 4, sort: 'newest'),
@@ -68,17 +66,13 @@ class _HomeTabState extends State<HomeTab> {
       if (adsResponse.success && adsResponse.data != null) {
         _heroAds = adsResponse.data!;
       }
-
       if (featuredResponse.success && featuredResponse.data != null) {
         _bestSellers = featuredResponse.data!.products;
       }
-
       if (newResponse.success && newResponse.data != null) {
         _newArrivals = newResponse.data!.products;
-        // Categories can be extracted from any product response
         _categories = newResponse.data!.categories;
       }
-
       _isLoading = false;
     });
   }
@@ -86,251 +80,193 @@ class _HomeTabState extends State<HomeTab> {
   void _startHeroAutoScroll() {
     _heroAutoScroll?.cancel();
     _heroAutoScroll = Timer.periodic(const Duration(seconds: 5), (_) {
-      if (!mounted || !_heroPageController.hasClients || _heroAds.isEmpty) {
-        return;
-      }
+      if (!mounted || !_heroPageController.hasClients || _heroAds.isEmpty) return;
       final next = (_currentHeroPage + 1) % _heroAds.length;
       _heroPageController.animateToPage(
         next,
-        duration: const Duration(milliseconds: 600),
-        curve: Curves.easeInOut,
+        duration: const Duration(milliseconds: 700),
+        curve: Curves.easeInOutCubic,
       );
     });
   }
 
   String _getGreeting() {
     final hour = DateTime.now().hour;
-    String timeOfDay;
+    String greeting;
     if (hour < 12) {
-      timeOfDay = 'Good Morning';
+      greeting = 'Good Morning';
     } else if (hour < 17) {
-      timeOfDay = 'Good Afternoon';
+      greeting = 'Good Afternoon';
     } else {
-      timeOfDay = 'Good Evening';
+      greeting = 'Good Evening';
     }
 
     final user = AuthService().currentUser;
     if (user != null && user.name.isNotEmpty) {
       final firstName = user.name.trim().split(' ').first;
-      return '$timeOfDay, $firstName';
+      return '$greeting, $firstName!';
     }
-    return timeOfDay;
+    return '$greeting!';
+  }
+
+  String _getUserInitials() {
+    final user = AuthService().currentUser;
+    if (user != null && user.name.isNotEmpty) {
+      return user.name.trim().split(' ').map((w) => w[0]).take(2).join().toUpperCase();
+    }
+    return '✦';
   }
 
   @override
   Widget build(BuildContext context) {
     return RefreshIndicator(
+      color: AppTheme.primaryColor,
       onRefresh: _loadHomeData,
       child: CustomScrollView(
+        physics: const BouncingScrollPhysics(),
         slivers: [
-          // ──── Greeting Section ────
+          // ── Greeting ──────────────────────────────────────────
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
-              child: Text(
-                _getGreeting(),
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.onSurface,
-                ),
-              ),
-            ),
-          ),
-
-          // ──── Hero Auto-Slider (Card Based) ────
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.only(top: 16.0, bottom: 20.0),
-              child: SizedBox(
-                height: 220,
-                child: PageView.builder(
-                  controller: PageController(viewportFraction: 0.9),
-                  onPageChanged: (idx) =>
-                      setState(() => _currentHeroPage = idx),
-                  itemCount: _heroAds.isNotEmpty ? _heroAds.length : 1,
-                  itemBuilder: (context, index) {
-                    if (_heroAds.isEmpty) {
-                      return Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 8),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(24),
-                          gradient: AppTheme.premiumGradient,
-                        ),
-                        child: const Center(
-                          child: CircularProgressIndicator(color: Colors.white),
-                        ),
-                      );
-                    }
-
-                    final banner = _heroAds[index];
-                    final hasMedia =
-                        banner['mediaUrl'] != null &&
-                        banner['mediaUrl'].toString().isNotEmpty;
-
-                    final hasValidLink =
-                        banner['linkUrl'] != null &&
-                        banner['linkUrl'].toString().startsWith('/products/');
-
-                    Widget bannerContent = Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 8),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(24),
-                        image: hasMedia
-                            ? DecorationImage(
-                                image: CachedNetworkImageProvider(
-                                  banner['mediaUrl'],
-                                ),
-                                fit: BoxFit.cover,
-                              )
-                            : null,
-                        color: hasMedia ? null : AppTheme.primaryColor,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.15),
-                            blurRadius: 15,
-                            offset: const Offset(0, 10),
-                          ),
-                        ],
-                      ),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(24),
-                          gradient: LinearGradient(
-                            colors: [
-                              Colors.black.withValues(alpha: 0.7),
-                              Colors.transparent,
-                            ],
-                            begin: Alignment.bottomLeft,
-                            end: Alignment.topRight,
-                          ),
-                        ),
-                        padding: const EdgeInsets.all(24.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFD4AF37),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: const Text(
-                                'NEW ARRIVAL',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
-                                  letterSpacing: 1,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 10),
-                            Text(
-                              banner['title']?.toString() ??
-                                  'Premium\nCollection',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                height: 1.2,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            if (banner['description'] != null &&
-                                banner['description']
-                                    .toString()
-                                    .isNotEmpty) ...[
-                              const SizedBox(height: 8),
-                              Text(
-                                banner['description'].toString(),
-                                style: TextStyle(
-                                  color: Colors.white.withValues(alpha: 0.9),
-                                  fontSize: 14,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                    );
-
-                    if (hasValidLink) {
-                      return GestureDetector(
-                        onTap: () {
-                          final productId = banner['linkUrl']
-                              .toString()
-                              .split('/')
-                              .last;
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  ProductDetailScreen(productId: productId),
-                            ),
-                          );
-                        },
-                        child: bannerContent,
-                      );
-                    }
-
-                    return bannerContent;
-                  },
-                ),
-              ),
-            ),
-          ),
-
-          // ──── Trust Badges Row ────
-          SliverToBoxAdapter(
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-              color: AppTheme.surfaceColor.withValues(alpha: 0.04),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 4),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _buildTrustBadge(
-                    Icons.local_shipping_outlined,
-                    'Free Shipping',
-                    'On orders over ₹999',
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _getGreeting(),
+                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'What\'s on your plate today?',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: AppTheme.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  _buildTrustBadge(
-                    Icons.eco_outlined,
-                    '100% Natural',
-                    'No preservatives',
-                  ),
-                  _buildTrustBadge(
-                    Icons.verified_outlined,
-                    'Premium',
-                    'Quality assured',
+                  // User avatar
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      gradient: AppTheme.premiumGradient,
+                      shape: BoxShape.circle,
+                      boxShadow: AppTheme.goldGlowShadow,
+                    ),
+                    child: Center(
+                      child: Text(
+                        _getUserInitials(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
             ),
           ),
 
-          // ──── Categories Grid ────
+          // ── Hero Carousel ─────────────────────────────────────
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 20, bottom: 8),
+              child: SizedBox(
+                height: 230,
+                child: Stack(
+                  alignment: Alignment.bottomCenter,
+                  children: [
+                    PageView.builder(
+                      controller: _heroPageController,
+                      onPageChanged: (idx) => setState(() => _currentHeroPage = idx),
+                      itemCount: _heroAds.isNotEmpty ? _heroAds.length : 1,
+                      itemBuilder: (context, index) {
+                        if (_heroAds.isEmpty) {
+                          return _buildPlaceholderBanner(context);
+                        }
+                        return _buildHeroBanner(context, _heroAds[index]);
+                      },
+                    ),
+
+                    // Dots indicator inside carousel
+                    if (_heroAds.length > 1)
+                      Positioned(
+                        bottom: 14,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: List.generate(_heroAds.length, (idx) {
+                            final isActive = idx == _currentHeroPage;
+                            return AnimatedContainer(
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                              margin: const EdgeInsets.symmetric(horizontal: 3),
+                              height: 6,
+                              width: isActive ? 22 : 6,
+                              decoration: BoxDecoration(
+                                color: isActive
+                                    ? AppTheme.primaryColor
+                                    : Colors.white.withValues(alpha: 0.6),
+                                borderRadius: BorderRadius.circular(3),
+                              ),
+                            );
+                          }),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // ── Trust Badges ──────────────────────────────────────
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: Row(
+                children: [
+                  _TrustBadge(
+                    icon: Icons.local_shipping_outlined,
+                    label: 'Free Ship',
+                    sublabel: '₹999+',
+                  ),
+                  _TrustBadge(
+                    icon: Icons.eco_outlined,
+                    label: '100% Natural',
+                    sublabel: 'No additives',
+                  ),
+                  _TrustBadge(
+                    icon: Icons.verified_outlined,
+                    label: 'Premium',
+                    sublabel: 'Quality assured',
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // ── Categories ────────────────────────────────────────
           if (_categories.isNotEmpty) ...[
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 32, 20, 16),
-                child: Text(
-                  'Explore Categories',
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onSurface,
-                  ),
+                padding: const EdgeInsets.fromLTRB(20, 24, 20, 12),
+                child: _SectionHeader(
+                  title: 'Explore Categories',
+                  onSeeAll: () => widget.onTabChange?.call(1),
                 ),
               ),
             ),
             SliverToBoxAdapter(
               child: SizedBox(
-                height: 45,
+                height: 44,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   physics: const BouncingScrollPhysics(),
@@ -338,51 +274,9 @@ class _HomeTabState extends State<HomeTab> {
                   itemCount: _categories.length,
                   itemBuilder: (context, index) {
                     final category = _categories[index];
-                    // Using index 0 as selected for demo purposes if no active category state exists
-                    bool isSelected = index == 0;
-                    return GestureDetector(
+                    return _CategoryChip(
+                      label: category.name,
                       onTap: () => widget.onCategoryTap?.call(category.id),
-                      child: Container(
-                        margin: const EdgeInsets.only(right: 12),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 10,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? Theme.of(context).colorScheme.onSurface
-                              : Theme.of(context).colorScheme.surface,
-                          borderRadius: BorderRadius.circular(30),
-                          border: Border.all(
-                            color: isSelected
-                                ? Theme.of(context).colorScheme.onSurface
-                                : Theme.of(context).dividerColor,
-                          ),
-                          boxShadow: isSelected
-                              ? [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.2),
-                                    blurRadius: 8,
-                                    offset: const Offset(0, 4),
-                                  ),
-                                ]
-                              : [],
-                        ),
-                        child: Center(
-                          child: Text(
-                            category.name,
-                            style: TextStyle(
-                              color: isSelected
-                                  ? Theme.of(context).colorScheme.surface
-                                  : Theme.of(context).colorScheme.onSurface,
-                              fontWeight: isSelected
-                                  ? FontWeight.bold
-                                  : FontWeight.w500,
-                              fontFamily: 'sans-serif',
-                            ),
-                          ),
-                        ),
-                      ),
                     );
                   },
                 ),
@@ -390,157 +284,288 @@ class _HomeTabState extends State<HomeTab> {
             ),
           ],
 
-          // ──── Best Sellers Grid ────
+          // ── Best Sellers ──────────────────────────────────────
           if (_isLoading)
             const SliverToBoxAdapter(
               child: Padding(
-                padding: EdgeInsets.all(40.0),
-                child: Center(child: CircularProgressIndicator()),
+                padding: EdgeInsets.all(48.0),
+                child: Center(
+                  child: CircularProgressIndicator(color: AppTheme.primaryColor),
+                ),
               ),
             )
           else if (_bestSellers.isNotEmpty)
-            _buildProductGrid(
+            _buildProductSection(
               context,
-              'Best Sellers',
-              Icons.local_fire_department,
-              AppTheme.accentColor,
-              _bestSellers,
-              true,
+              title: 'Best Sellers',
+              icon: Icons.local_fire_department_rounded,
+              iconColor: AppTheme.accentColor,
+              products: _bestSellers,
+              hasBackground: true,
             ),
 
-          // ──── Promo Banner Divider ────
+          // ── Promo Banner ──────────────────────────────────────
           if (!_isLoading)
             SliverToBoxAdapter(
               child: Container(
-                margin: const EdgeInsets.symmetric(vertical: 32),
-                height: 120,
-                decoration: const BoxDecoration(
-                  gradient: AppTheme.premiumGradient,
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                height: 110,
+                decoration: BoxDecoration(
+                  gradient: AppTheme.authHeaderGradient,
+                  borderRadius: BorderRadius.circular(AppTheme.radius2xl),
+                  boxShadow: AppTheme.elevatedShadow,
                 ),
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
-                        'FESTIVE SPECIAL',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 2,
+                child: Stack(
+                  children: [
+                    // Decorative circles
+                    Positioned(
+                      right: -20,
+                      top: -20,
+                      child: Container(
+                        width: 120,
+                        height: 120,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppTheme.primaryColor.withValues(alpha: 0.10),
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Get 20% Off All Gift Hampers',
-                        style: Theme.of(
-                          context,
-                        ).textTheme.titleLarge?.copyWith(color: Colors.white),
+                    ),
+                    Positioned(
+                      right: 30,
+                      bottom: -30,
+                      child: Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppTheme.primaryColor.withValues(alpha: 0.06),
+                        ),
                       ),
-                    ],
-                  ),
+                    ),
+                    // Content
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: AppTheme.primaryColor,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Text(
+                              'FESTIVE SPECIAL',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 1.2,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            'Get 20% Off All Gift Hampers',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 17,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
 
-          // ──── New Arrivals Grid ────
+          // ── New Arrivals ───────────────────────────────────────
           if (!_isLoading && _newArrivals.isNotEmpty)
-            _buildProductGrid(
+            _buildProductSection(
               context,
-              'New Arrivals',
-              Icons.auto_awesome,
-              AppTheme.primaryColor,
-              _newArrivals,
-              false,
+              title: 'New Arrivals',
+              icon: Icons.auto_awesome_rounded,
+              iconColor: AppTheme.primaryColor,
+              products: _newArrivals,
+              hasBackground: false,
             ),
 
-          // ──── Copyright ────
+          // ── Footer ────────────────────────────────────────────
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                vertical: AppTheme.spacing24,
-                horizontal: AppTheme.spacing16,
-              ),
+              padding: const EdgeInsets.symmetric(vertical: AppTheme.spacing24, horizontal: AppTheme.spacing16),
               child: Text(
                 '© ${DateTime.now().year} ${AppConstants.appName}. All rights reserved.',
                 textAlign: TextAlign.center,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: AppTheme.textSecondary),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppTheme.textTertiary,
+                ),
               ),
             ),
           ),
 
-          const SliverPadding(padding: EdgeInsets.only(bottom: 40)),
+          const SliverPadding(padding: EdgeInsets.only(bottom: 20)),
         ],
       ),
     );
   }
 
-  Widget _buildTrustBadge(IconData icon, String title, String subtitle) {
-    return Expanded(
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppTheme.primaryColor.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
+  Widget _buildPlaceholderBanner(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(AppTheme.radius2xl),
+        gradient: AppTheme.authHeaderGradient,
+      ),
+      child: const Center(
+        child: CircularProgressIndicator(color: AppTheme.primaryColor),
+      ),
+    );
+  }
+
+  Widget _buildHeroBanner(BuildContext context, Map<String, dynamic> banner) {
+    final hasMedia =
+        banner['mediaUrl'] != null && banner['mediaUrl'].toString().isNotEmpty;
+
+    final hasValidLink =
+        banner['linkUrl'] != null &&
+        banner['linkUrl'].toString().startsWith('/products/');
+
+    Widget content = Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(AppTheme.radius2xl),
+        image: hasMedia
+            ? DecorationImage(
+                image: CachedNetworkImageProvider(banner['mediaUrl']),
+                fit: BoxFit.cover,
+              )
+            : null,
+        gradient: hasMedia ? null : AppTheme.authHeaderGradient,
+        boxShadow: AppTheme.elevatedShadow,
+      ),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(AppTheme.radius2xl),
+          gradient: AppTheme.heroOverlay,
+        ),
+        padding: const EdgeInsets.fromLTRB(22, 16, 22, 44),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryColor,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Text(
+                'NEW ARRIVAL',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1.2,
+                ),
+              ),
             ),
-            child: Icon(icon, color: AppTheme.primaryColor, size: 28),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            title,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-            textAlign: TextAlign.center,
-          ),
-          Text(
-            subtitle,
-            style: const TextStyle(fontSize: 11, color: AppTheme.textSecondary),
-            textAlign: TextAlign.center,
-          ),
-        ],
+            const SizedBox(height: 10),
+            Text(
+              banner['title']?.toString() ?? 'Premium Collection',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                height: 1.2,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            if (banner['description'] != null &&
+                banner['description'].toString().isNotEmpty) ...[
+              const SizedBox(height: 6),
+              Text(
+                banner['description'].toString(),
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.85),
+                  fontSize: 13,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ],
+        ),
       ),
     );
+
+    if (hasValidLink) {
+      return GestureDetector(
+        onTap: () {
+          final productId = banner['linkUrl'].toString().split('/').last;
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => ProductDetailScreen(productId: productId),
+            ),
+          );
+        },
+        child: content,
+      );
+    }
+
+    return content;
   }
 
-  Widget _buildProductGrid(
-    BuildContext context,
-    String title,
-    IconData icon,
-    Color iconColor,
-    List<Product> products,
-    bool hasWhiteBg,
-  ) {
+  Widget _buildProductSection(
+    BuildContext context, {
+    required String title,
+    required IconData icon,
+    required Color iconColor,
+    required List<Product> products,
+    required bool hasBackground,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return SliverToBoxAdapter(
       child: Container(
-        color: hasWhiteBg
-            ? (Theme.of(context).brightness == Brightness.dark
-                  ? Colors.black.withValues(alpha: 0.04)
-                  : Theme.of(context).colorScheme.surface)
+        color: hasBackground
+            ? (isDark
+                ? Colors.black.withValues(alpha: 0.15)
+                : AppTheme.cream.withValues(alpha: 0.5))
             : Colors.transparent,
         padding: const EdgeInsets.symmetric(vertical: 24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
                 children: [
+                  Container(
+                    width: 4,
+                    height: 20,
+                    decoration: BoxDecoration(
+                      gradient: AppTheme.premiumGradient,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
                   Text(
                     title,
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.onSurface,
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
                   const Spacer(),
-                  TextButton(
-                    onPressed: () => widget.onTabChange?.call(1),
-                    child: const Text(
+                  GestureDetector(
+                    onTap: () => widget.onTabChange?.call(1),
+                    child: Text(
                       'See All',
-                      style: TextStyle(
-                        fontSize: 14,
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
                         color: AppTheme.primaryColor,
                         fontWeight: FontWeight.w600,
                       ),
@@ -557,15 +582,144 @@ class _HomeTabState extends State<HomeTab> {
                 physics: const NeverScrollableScrollPhysics(),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
-                  childAspectRatio: 0.65,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
+                  childAspectRatio: 0.67,
+                  crossAxisSpacing: 14,
+                  mainAxisSpacing: 14,
                 ),
                 itemCount: products.length,
-                itemBuilder: (context, index) {
-                  return ProductCard(product: products[index]);
-                },
+                itemBuilder: (context, index) => ProductCard(product: products[index]),
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ── Section Header ────────────────────────────────────────────────
+
+class _SectionHeader extends StatelessWidget {
+  final String title;
+  final VoidCallback? onSeeAll;
+
+  const _SectionHeader({required this.title, this.onSeeAll});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 4,
+          height: 20,
+          decoration: BoxDecoration(
+            gradient: AppTheme.premiumGradient,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Text(
+          title,
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        if (onSeeAll != null) ...[
+          const Spacer(),
+          GestureDetector(
+            onTap: onSeeAll,
+            child: Text(
+              'See All',
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: AppTheme.primaryColor,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+// ── Category Chip ─────────────────────────────────────────────────
+
+class _CategoryChip extends StatelessWidget {
+  final String label;
+  final VoidCallback onTap;
+
+  const _CategoryChip({required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(right: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(30),
+          border: Border.all(color: AppTheme.borderColor, width: 1.5),
+          boxShadow: AppTheme.softShadow,
+        ),
+        child: Text(
+          label,
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+            color: Theme.of(context).colorScheme.onSurface,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Trust Badge ───────────────────────────────────────────────────
+
+class _TrustBadge extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String sublabel;
+
+  const _TrustBadge({
+    required this.icon,
+    required this.label,
+    required this.sublabel,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+          border: Border.all(color: AppTheme.borderColor, width: 1),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: AppTheme.primaryColor, size: 22),
+            const SizedBox(height: 6),
+            Text(
+              label,
+              style: const TextStyle(
+                fontWeight: FontWeight.w700,
+                fontSize: 11,
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+            ),
+            Text(
+              sublabel,
+              style: const TextStyle(
+                fontSize: 10,
+                color: AppTheme.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 1,
             ),
           ],
         ),

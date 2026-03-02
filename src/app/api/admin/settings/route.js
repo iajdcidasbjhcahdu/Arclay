@@ -52,6 +52,11 @@ async function getHandler(req) {
                 isEnabled: settings.gemini_ai?.isEnabled || false,
                 _hasApiKey: !!settings.gemini_ai?.apiKey
             },
+            chatbot: {
+                isEnabled: settings.chatbot?.isEnabled || false,
+                systemPrompt: settings.chatbot?.systemPrompt || '',
+                welcomeMessage: settings.chatbot?.welcomeMessage || 'Hi! How can I help you today?',
+            },
             shipping: {
                 shiprocket: {
                     isEnabled: settings.shipping?.shiprocket?.isEnabled || false,
@@ -184,6 +189,22 @@ async function putHandler(req) {
             }
             if (typeof updates.gemini_ai.isEnabled === 'boolean') {
                 settings.gemini_ai.isEnabled = updates.gemini_ai.isEnabled;
+            }
+        }
+
+        // Update Chatbot settings
+        if (updates.chatbot) {
+            if (!settings.chatbot) {
+                settings.chatbot = {};
+            }
+            if (typeof updates.chatbot.isEnabled === 'boolean') {
+                settings.chatbot.isEnabled = updates.chatbot.isEnabled;
+            }
+            if (updates.chatbot.systemPrompt !== undefined) {
+                settings.chatbot.systemPrompt = updates.chatbot.systemPrompt;
+            }
+            if (updates.chatbot.welcomeMessage !== undefined) {
+                settings.chatbot.welcomeMessage = updates.chatbot.welcomeMessage;
             }
         }
 

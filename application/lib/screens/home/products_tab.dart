@@ -32,12 +32,12 @@ class _ProductsTabState extends State<ProductsTab> {
   double? _maxPrice;
 
   final _sortOptions = {
-    'newest': 'Newest',
-    'oldest': 'Oldest',
-    'price-low': 'Price: Low to High',
-    'price-high': 'Price: High to Low',
-    'name-asc': 'Name: A to Z',
-    'name-desc': 'Name: Z to A',
+    'newest': 'Newest First',
+    'oldest': 'Oldest First',
+    'price-low': 'Price: Low → High',
+    'price-high': 'Price: High → Low',
+    'name-asc': 'Name: A → Z',
+    'name-desc': 'Name: Z → A',
   };
 
   bool get _hasActiveFilters =>
@@ -97,6 +97,88 @@ class _ProductsTabState extends State<ProductsTab> {
     _loadProducts(page: 1);
   }
 
+  void _showSortSheet() {
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppTheme.spacing24,
+          AppTheme.spacing24,
+          AppTheme.spacing24,
+          AppTheme.spacing32,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: AppTheme.spacing20),
+                decoration: BoxDecoration(
+                  color: AppTheme.borderColor,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            Text('Sort By', style: Theme.of(ctx).textTheme.headlineSmall),
+            const SizedBox(height: AppTheme.spacing16),
+            ..._sortOptions.entries.map((entry) {
+              final isSelected = _sort == entry.key;
+              return GestureDetector(
+                onTap: () {
+                  Navigator.pop(ctx);
+                  if (_sort != entry.key) {
+                    setState(() => _sort = entry.key);
+                    _loadProducts(page: 1);
+                  }
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: AppTheme.spacing8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppTheme.spacing16,
+                    vertical: AppTheme.spacing12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? AppTheme.primaryColor.withValues(alpha: 0.10)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                    border: isSelected
+                        ? Border.all(color: AppTheme.primaryColor, width: 1.5)
+                        : null,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          entry.value,
+                          style: Theme.of(ctx).textTheme.bodyLarge?.copyWith(
+                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
+                            color: isSelected
+                                ? AppTheme.primaryColor
+                                : Theme.of(ctx).colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
+                      if (isSelected)
+                        const Icon(
+                          Icons.check_circle_rounded,
+                          color: AppTheme.primaryColor,
+                          size: 20,
+                        ),
+                    ],
+                  ),
+                ),
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _showPriceFilter() {
     final minCtrl = TextEditingController(
       text: _minPrice?.toStringAsFixed(0) ?? '',
@@ -107,26 +189,29 @@ class _ProductsTabState extends State<ProductsTab> {
 
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
       builder: (ctx) => Padding(
         padding: EdgeInsets.only(
           left: AppTheme.spacing24,
           right: AppTheme.spacing24,
           top: AppTheme.spacing24,
-          bottom: MediaQuery.of(ctx).viewInsets.bottom + AppTheme.spacing24,
+          bottom: MediaQuery.of(ctx).viewInsets.bottom + AppTheme.spacing32,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Price Range',
-              style: Theme.of(
-                ctx,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: AppTheme.spacing20),
+                decoration: BoxDecoration(
+                  color: AppTheme.borderColor,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
             ),
+            Text('Price Range', style: Theme.of(ctx).textTheme.headlineSmall),
             const SizedBox(height: AppTheme.spacing16),
             Row(
               children: [
@@ -134,30 +219,23 @@ class _ProductsTabState extends State<ProductsTab> {
                   child: TextField(
                     controller: minCtrl,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Min ₹',
-                      border: OutlineInputBorder(),
-                      isDense: true,
-                    ),
+                    decoration: const InputDecoration(labelText: 'Min Price (₹)'),
                   ),
                 ),
-                const SizedBox(width: AppTheme.spacing12),
-                const Text('—'),
-                const SizedBox(width: AppTheme.spacing12),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: AppTheme.spacing12),
+                  child: Text('—'),
+                ),
                 Expanded(
                   child: TextField(
                     controller: maxCtrl,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Max ₹',
-                      border: OutlineInputBorder(),
-                      isDense: true,
-                    ),
+                    decoration: const InputDecoration(labelText: 'Max Price (₹)'),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: AppTheme.spacing16),
+            const SizedBox(height: AppTheme.spacing20),
             Row(
               children: [
                 Expanded(
@@ -199,28 +277,25 @@ class _ProductsTabState extends State<ProductsTab> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: RefreshIndicator(
+        color: AppTheme.primaryColor,
         onRefresh: () => _loadProducts(page: 1),
         child: CustomScrollView(
+          physics: const BouncingScrollPhysics(),
           slivers: [
-            // Header
+            // ── Header ──────────────────────────────────────
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  AppTheme.spacing16,
-                  AppTheme.spacing16,
-                  AppTheme.spacing16,
-                  AppTheme.spacing8,
-                ),
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Our Products',
+                      'Our Collection',
                       style: Theme.of(context).textTheme.displaySmall,
                     ),
                     const SizedBox(height: AppTheme.spacing4),
                     Text(
-                      'Discover our exclusive collection.',
+                      'Discover premium Indian flavours',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: AppTheme.textSecondary,
                       ),
@@ -230,17 +305,18 @@ class _ProductsTabState extends State<ProductsTab> {
               ),
             ),
 
-            // ──── Category Chips ────
+            // ── Category Chips ───────────────────────────────
             SliverToBoxAdapter(
               child: SizedBox(
-                height: 48,
+                height: 46,
                 child: ListView(
                   scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
                   padding: const EdgeInsets.symmetric(
-                    horizontal: AppTheme.spacing16,
+                    horizontal: AppTheme.spacing20,
                   ),
                   children: [
-                    _FilterChip(
+                    _FilterPill(
                       label: 'All',
                       isSelected: _selectedCategory == null,
                       onTap: () {
@@ -251,10 +327,8 @@ class _ProductsTabState extends State<ProductsTab> {
                     const SizedBox(width: AppTheme.spacing8),
                     ..._categories.map(
                       (cat) => Padding(
-                        padding: const EdgeInsets.only(
-                          right: AppTheme.spacing8,
-                        ),
-                        child: _FilterChip(
+                        padding: const EdgeInsets.only(right: AppTheme.spacing8),
+                        child: _FilterPill(
                           label: cat.name,
                           isSelected: _selectedCategory == cat.id,
                           onTap: () {
@@ -269,90 +343,53 @@ class _ProductsTabState extends State<ProductsTab> {
               ),
             ),
 
-            // ──── Sort + Price + Clear Bar ────
+            // ── Sort + Filter Bar ────────────────────────────
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppTheme.spacing16,
-                  vertical: AppTheme.spacing8,
+                padding: const EdgeInsets.fromLTRB(
+                  AppTheme.spacing16,
+                  AppTheme.spacing12,
+                  AppTheme.spacing16,
+                  AppTheme.spacing4,
                 ),
                 child: Row(
                   children: [
-                    // Sort dropdown
-                    Expanded(
-                      child: Container(
-                        height: 36,
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: AppTheme.borderColor),
-                          borderRadius: BorderRadius.circular(
-                            AppTheme.radiusMd,
-                          ),
-                        ),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<String>(
-                            value: _sort,
-                            isDense: true,
-                            isExpanded: true,
-                            style: Theme.of(context).textTheme.bodySmall,
-                            icon: const Icon(Icons.unfold_more, size: 18),
-                            items: _sortOptions.entries
-                                .map(
-                                  (e) => DropdownMenuItem(
-                                    value: e.key,
-                                    child: Text(e.value),
-                                  ),
-                                )
-                                .toList(),
-                            onChanged: (val) {
-                              if (val != null) {
-                                setState(() => _sort = val);
-                                _loadProducts(page: 1);
-                              }
-                            },
-                          ),
-                        ),
-                      ),
+                    _FilterActionButton(
+                      icon: Icons.sort_rounded,
+                      label: _sortOptions[_sort] ?? 'Sort',
+                      isActive: _sort != 'newest',
+                      onTap: _showSortSheet,
                     ),
                     const SizedBox(width: AppTheme.spacing8),
-
-                    // Price filter button
-                    SizedBox(
-                      height: 36,
-                      child: OutlinedButton.icon(
-                        onPressed: _showPriceFilter,
-                        icon: const Icon(Icons.currency_rupee, size: 16),
-                        label: Text(
-                          _minPrice != null || _maxPrice != null
-                              ? '${_minPrice?.toStringAsFixed(0) ?? '0'} – ${_maxPrice?.toStringAsFixed(0) ?? '∞'}'
-                              : 'Price',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 10),
-                          side: BorderSide(
-                            color: _minPrice != null || _maxPrice != null
-                                ? AppTheme.primaryColor
-                                : AppTheme.borderColor,
-                          ),
-                        ),
+                    _FilterActionButton(
+                      icon: Icons.currency_rupee_rounded,
+                      label: _minPrice != null || _maxPrice != null
+                          ? '₹${_minPrice?.toStringAsFixed(0) ?? '0'} – ${_maxPrice?.toStringAsFixed(0) ?? '∞'}'
+                          : 'Price',
+                      isActive: _minPrice != null || _maxPrice != null,
+                      onTap: _showPriceFilter,
+                    ),
+                    const Spacer(),
+                    Text(
+                      '$_totalProducts item${_totalProducts != 1 ? 's' : ''}',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppTheme.textSecondary,
                       ),
                     ),
-
-                    // Clear filters
                     if (_hasActiveFilters) ...[
                       const SizedBox(width: AppTheme.spacing8),
-                      SizedBox(
-                        height: 36,
-                        child: IconButton(
-                          onPressed: _clearFilters,
-                          icon: const Icon(Icons.close, size: 18),
-                          tooltip: 'Clear filters',
-                          style: IconButton.styleFrom(
-                            backgroundColor: AppTheme.accentColor.withValues(
-                              alpha: 0.1,
-                            ),
-                            foregroundColor: AppTheme.accentColor,
+                      GestureDetector(
+                        onTap: _clearFilters,
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: AppTheme.accentColor.withValues(alpha: 0.10),
+                            borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                          ),
+                          child: const Icon(
+                            Icons.close_rounded,
+                            size: 16,
+                            color: AppTheme.accentColor,
                           ),
                         ),
                       ),
@@ -362,53 +399,41 @@ class _ProductsTabState extends State<ProductsTab> {
               ),
             ),
 
-            // Results count
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppTheme.spacing16,
-                ),
-                child: Text(
-                  '$_totalProducts product${_totalProducts != 1 ? 's' : ''} found',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppTheme.textSecondary,
-                  ),
-                ),
-              ),
-            ),
+            const SliverToBoxAdapter(child: SizedBox(height: AppTheme.spacing8)),
 
-            const SliverToBoxAdapter(
-              child: SizedBox(height: AppTheme.spacing8),
-            ),
-
-            // Loading, Error, or Products
+            // ── Products / States ────────────────────────────
             if (_isLoading)
               const SliverFillRemaining(
-                child: Center(child: CircularProgressIndicator()),
+                child: Center(
+                  child: CircularProgressIndicator(color: AppTheme.primaryColor),
+                ),
               )
             else if (_error != null)
               SliverFillRemaining(
                 child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.error_outline,
-                        size: 64,
-                        color: AppTheme.accentColor,
-                      ),
-                      const SizedBox(height: AppTheme.spacing16),
-                      Text(
-                        _error!,
-                        style: Theme.of(context).textTheme.bodyLarge,
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: AppTheme.spacing24),
-                      ElevatedButton(
-                        onPressed: () => _loadProducts(page: 1),
-                        child: const Text('Retry'),
-                      ),
-                    ],
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppTheme.spacing32),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.wifi_off_rounded,
+                          size: 64,
+                          color: AppTheme.textTertiary,
+                        ),
+                        const SizedBox(height: AppTheme.spacing16),
+                        Text(
+                          _error!,
+                          style: Theme.of(context).textTheme.bodyLarge,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: AppTheme.spacing24),
+                        ElevatedButton(
+                          onPressed: () => _loadProducts(page: 1),
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               )
@@ -418,19 +443,34 @@ class _ProductsTabState extends State<ProductsTab> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(
-                        Icons.search_off,
-                        size: 64,
-                        color: AppTheme.textSecondary,
+                      Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          color: AppTheme.primaryColor.withValues(alpha: 0.08),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.search_off_rounded,
+                          size: 38,
+                          color: AppTheme.primaryColor,
+                        ),
                       ),
                       const SizedBox(height: AppTheme.spacing16),
                       Text(
                         'No products found',
-                        style: Theme.of(context).textTheme.titleMedium,
+                        style: Theme.of(context).textTheme.titleLarge,
                       ),
                       if (_hasActiveFilters) ...[
-                        const SizedBox(height: AppTheme.spacing12),
-                        ElevatedButton(
+                        const SizedBox(height: AppTheme.spacing8),
+                        Text(
+                          'Try clearing the filters',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: AppTheme.textSecondary,
+                          ),
+                        ),
+                        const SizedBox(height: AppTheme.spacing20),
+                        OutlinedButton(
                           onPressed: _clearFilters,
                           child: const Text('Clear Filters'),
                         ),
@@ -441,72 +481,60 @@ class _ProductsTabState extends State<ProductsTab> {
               )
             else
               SliverPadding(
-                padding: const EdgeInsets.all(AppTheme.spacing16),
+                padding: const EdgeInsets.symmetric(horizontal: AppTheme.spacing16),
                 sliver: SliverGrid(
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    childAspectRatio: 0.65,
+                    childAspectRatio: 0.67,
                     crossAxisSpacing: AppTheme.spacing12,
                     mainAxisSpacing: AppTheme.spacing12,
                   ),
-                  delegate: SliverChildBuilderDelegate((context, index) {
-                    final product = _products[index];
-                    return ProductCard(product: product);
-                  }, childCount: _products.length),
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) => ProductCard(product: _products[index]),
+                    childCount: _products.length,
+                  ),
                 ),
               ),
 
-            // Pagination Controls
+            // ── Pagination ───────────────────────────────────
             if (!_isLoading && _products.isNotEmpty)
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.all(AppTheme.spacing16),
-                  child: Column(
+                  padding: const EdgeInsets.all(AppTheme.spacing24),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        'Page $_currentPage of $_totalPages',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: AppTheme.textSecondary,
+                      _PaginationButton(
+                        label: 'Previous',
+                        icon: Icons.chevron_left_rounded,
+                        iconAtEnd: false,
+                        enabled: _currentPage > 1,
+                        onTap: () => _loadProducts(page: _currentPage - 1),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppTheme.spacing16,
+                        ),
+                        child: Text(
+                          '$_currentPage / $_totalPages',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
-                      const SizedBox(height: AppTheme.spacing12),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          ElevatedButton.icon(
-                            onPressed: _currentPage > 1
-                                ? () => _loadProducts(page: _currentPage - 1)
-                                : null,
-                            icon: const Icon(Icons.chevron_left),
-                            label: const Text('Previous'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppTheme.cardColor,
-                              foregroundColor: AppTheme.textPrimary,
-                              disabledBackgroundColor: AppTheme.surfaceColor,
-                              disabledForegroundColor: AppTheme.textSecondary,
-                            ),
-                          ),
-                          const SizedBox(width: AppTheme.spacing16),
-                          ElevatedButton.icon(
-                            onPressed: _currentPage < _totalPages
-                                ? () => _loadProducts(page: _currentPage + 1)
-                                : null,
-                            icon: const Icon(Icons.chevron_right),
-                            label: const Text('Next'),
-                            iconAlignment: IconAlignment.end,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppTheme.cardColor,
-                              foregroundColor: AppTheme.textPrimary,
-                              disabledBackgroundColor: AppTheme.surfaceColor,
-                              disabledForegroundColor: AppTheme.textSecondary,
-                            ),
-                          ),
-                        ],
+                      _PaginationButton(
+                        label: 'Next',
+                        icon: Icons.chevron_right_rounded,
+                        iconAtEnd: true,
+                        enabled: _currentPage < _totalPages,
+                        onTap: () => _loadProducts(page: _currentPage + 1),
                       ),
                     ],
                   ),
                 ),
               ),
+
+            const SliverPadding(padding: EdgeInsets.only(bottom: 20)),
           ],
         ),
       ),
@@ -514,16 +542,14 @@ class _ProductsTabState extends State<ProductsTab> {
   }
 }
 
-// ═══════════════════════════════════════
-// FILTER CHIP
-// ═══════════════════════════════════════
+// ── Filter Pill ───────────────────────────────────────────────────
 
-class _FilterChip extends StatelessWidget {
+class _FilterPill extends StatelessWidget {
   final String label;
   final bool isSelected;
   final VoidCallback onTap;
 
-  const _FilterChip({
+  const _FilterPill({
     required this.label,
     required this.isSelected,
     required this.onTap,
@@ -533,33 +559,145 @@ class _FilterChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         decoration: BoxDecoration(
           color: isSelected
-              ? Theme.of(context).colorScheme.onSurface
+              ? AppTheme.primaryColor
               : Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(30),
-          boxShadow: [
-            if (!isSelected)
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
+          border: Border.all(
+            color: isSelected ? AppTheme.primaryColor : AppTheme.borderColor,
+            width: 1.5,
+          ),
+          boxShadow: isSelected ? AppTheme.goldGlowShadow : AppTheme.softShadow,
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.white : Theme.of(context).colorScheme.onSurface,
+            fontWeight: FontWeight.w600,
+            fontSize: 13,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Filter Action Button ──────────────────────────────────────────
+
+class _FilterActionButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool isActive;
+  final VoidCallback onTap;
+
+  const _FilterActionButton({
+    required this.icon,
+    required this.label,
+    required this.isActive,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isActive
+              ? AppTheme.primaryColor.withValues(alpha: 0.10)
+              : Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+          border: Border.all(
+            color: isActive ? AppTheme.primaryColor : AppTheme.borderColor,
+            width: 1.5,
+          ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 16,
+              color: isActive ? AppTheme.primaryColor : AppTheme.textSecondary,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: isActive ? AppTheme.primaryColor : AppTheme.textSecondary,
               ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ],
         ),
-        child: Center(
-          child: Text(
-            label,
-            style: TextStyle(
-              color: isSelected
-                  ? Theme.of(context).colorScheme.surface
-                  : Theme.of(context).colorScheme.onSurface,
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-              fontSize: 14,
-            ),
+      ),
+    );
+  }
+}
+
+// ── Pagination Button ─────────────────────────────────────────────
+
+class _PaginationButton extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final bool iconAtEnd;
+  final bool enabled;
+  final VoidCallback onTap;
+
+  const _PaginationButton({
+    required this.label,
+    required this.icon,
+    required this.iconAtEnd,
+    required this.enabled,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final color = enabled ? AppTheme.primaryColor : AppTheme.textTertiary;
+
+    return GestureDetector(
+      onTap: enabled ? onTap : null,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: enabled
+              ? AppTheme.primaryColor.withValues(alpha: 0.08)
+              : Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+          border: Border.all(
+            color: enabled ? AppTheme.primaryColor : AppTheme.borderColor,
+            width: 1.5,
           ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (!iconAtEnd) ...[
+              Icon(icon, size: 18, color: color),
+              const SizedBox(width: 4),
+            ],
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: color,
+              ),
+            ),
+            if (iconAtEnd) ...[
+              const SizedBox(width: 4),
+              Icon(icon, size: 18, color: color),
+            ],
+          ],
         ),
       ),
     );

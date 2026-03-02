@@ -1,15 +1,22 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Award, Leaf, Shield, Truck } from "lucide-react";
+import { Award, Leaf, Shield, Truck, Droplet, CheckCircle, Heart, Package } from "lucide-react";
+import { getSiteName, getBrandContent } from "@/config/brandContent";
+
+const iconMap = {
+    "leaf": Leaf,
+    "jar": Droplet,
+    "no-preservatives": Shield,
+    "package": Package,
+    "award": Award,
+    "truck": Truck
+};
 
 export default function TrustBadges() {
-    const badges = [
-        { icon: Leaf, title: '100% Natural', desc: 'No preservatives' },
-        { icon: Award, title: 'Premium Quality', desc: 'Handcrafted with care' },
-        { icon: Truck, title: 'Free Shipping', desc: 'On orders above ₹500' },
-        { icon: Shield, title: 'Secure Payment', desc: '100% secure checkout' },
-    ];
+    const siteName = getSiteName();
+    const content = getBrandContent(siteName);
+    const badges = content.whyUs.features;
 
     return (
         <section className="py-12 bg-background border-b border-border">
@@ -25,11 +32,14 @@ export default function TrustBadges() {
                             className="flex items-center gap-4"
                         >
                             <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center flex-shrink-0 text-primary">
-                                <badge.icon className="w-7 h-7" />
+                                {(() => {
+                                    const IconComponent = iconMap[badge.icon] || Award;
+                                    return <IconComponent className="w-7 h-7" />;
+                                })()}
                             </div>
                             <div>
                                 <p className="font-bold text-foreground">{badge.title}</p>
-                                <p className="text-sm text-muted-foreground">{badge.desc}</p>
+                                {badge.desc && <p className="text-sm text-muted-foreground">{badge.desc}</p>}
                             </div>
                         </motion.div>
                     ))}

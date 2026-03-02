@@ -374,6 +374,122 @@ export const brandContent = {
             tagline: "Discover Quality. Delivered Fast. Your trusted shopping destination.",
             newsletterPrompt: "Get exclusive deals",
         }
+    },
+
+    sanatva: {
+        hero: {
+            titleLine1: "Sanatva",
+            titleLine2: "Ayurvedic",
+            subtitle: "Authentic herbal formulas that cleanse, rejuvenate, and support liver health.",
+            ctaPrimary: "SHOP PRODUCTS",
+            ctaSecondary: "LEARN MORE",
+            products: []
+        },
+
+        productHighlight: {
+            sectionTitle: "LIVER & DIGESTION",
+            categories: [
+                {
+                    id: 1,
+                    title: "LIVER CARE",
+                    subtitle: "Detoxify & Rejuvenate",
+                    emoji: "🌿",
+                    bgColor: "bg-teal-50",
+                    products: ["Livrax-DS", "Livkia"],
+                },
+                {
+                    id: 2,
+                    title: "DIGESTION",
+                    subtitle: "Improve Gut Health",
+                    emoji: "✨",
+                    bgColor: "bg-green-50",
+                    products: ["Gaskia"],
+                },
+                {
+                    id: 3,
+                    title: "SKIN CARE",
+                    subtitle: "Radiant Skin",
+                    emoji: "🌟",
+                    bgColor: "bg-amber-50",
+                    products: ["Dokta Skin"],
+                },
+            ]
+        },
+
+        whyUs: {
+            sectionTitle: "OUR PRODUCTS ARE",
+            features: [
+                {
+                    id: 1,
+                    title: "Ayush Certified",
+                    icon: "leaf",
+                },
+                {
+                    id: 2,
+                    title: "GMP Certified",
+                    icon: "jar",
+                },
+                {
+                    id: 3,
+                    title: "100% Organic",
+                    icon: "no-preservatives",
+                },
+                {
+                    id: 4,
+                    title: "No Added Chemicals",
+                    icon: "package",
+                },
+            ]
+        },
+
+        ourStory: {
+            sectionLabel: "ABOUT SANATVA",
+            title: "Holistic Health and Deep Nourishment.",
+            description: "Discover Sanatva Ayurvedic’s natural liver detox range — authentic herbal formulas that cleanse, rejuvenate, and support liver health.",
+            additionalText: "We focus on improved digestion, vitality, and overall body balance naturally. True wellness stems from treating the body naturally over time.",
+            stats: [
+                { value: "100%", label: "Organic Ingredients" },
+                { value: "24/7", label: "Customer Support" },
+                { value: "15", label: "Days Return" },
+            ]
+        },
+
+        socialProof: {
+            sectionLabel: "TESTIMONIALS",
+            statsTitle: "Trusted by Many",
+            statsSubtitle: "for liver health",
+            rating: "4.9/5",
+            reviewCount: "820 reviews",
+            communityText: "Experience true wellness",
+            reviews: [
+                {
+                    id: 1,
+                    rating: 5,
+                    text: "Livrax-DS combo has genuinely improved my digestion and energy levels.",
+                    author: "Rakesh S.",
+                    location: "New Delhi",
+                },
+                {
+                    id: 2,
+                    rating: 5,
+                    text: "Finally an authentic ayurvedic solution that works without side effects.",
+                    author: "Sneha K.",
+                    location: "Mumbai",
+                },
+                {
+                    id: 3,
+                    rating: 5,
+                    text: "Gaskia perfectly sorted out my family's dietary concerns. Very reliable.",
+                    author: "Arjun V.",
+                    location: "Bangalore",
+                },
+            ]
+        },
+
+        footer: {
+            tagline: "Ayurvedic Medicine & Treatment for Liver Health.",
+            newsletterPrompt: "Subscribe for updates",
+        }
     }
 };
 
@@ -384,6 +500,7 @@ export const getTheme = (siteName) => {
     const normalized = (siteName || "").toLowerCase().replace(/\s+/g, '');
     if (normalized.includes('vedicbro')) return 'vedicbro';
     if (normalized.includes('arclay')) return 'arclay';
+    if (normalized.includes('sanatva')) return 'sanatva';
     return 'essvora';
 };
 

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { getSiteName, getBrandContent } from "@/config/brandContent";
 
 export default function CategoryGrid() {
     const router = useRouter();
@@ -42,15 +43,26 @@ export default function CategoryGrid() {
 
     if (!categories.length) return null;
 
+    const siteName = getSiteName();
+    const isSanatva = siteName.toLowerCase().includes('sanatva');
+    const content = getBrandContent(siteName);
+
+    // Instead of hardcoding, we can use the productHighlight titles from brandContent.
+    // If not defined, fallback to a smart default.
+    const title = content.productHighlight?.sectionTitle || "Explore Categories";
+    const subtitle = isSanatva
+        ? "Explore Sanatva Ayurvedic’s natural liver detox and health range."
+        : "Discover our wide range of handcrafted pickles, preserves, and gourmet delights";
+
     return (
         <section className="py-20">
             <div className="container mx-auto px-4 lg:px-8">
                 <div className="text-center mb-12">
                     <h2 className="text-3xl lg:text-4xl font-heading font-bold text-foreground mb-4">
-                        Explore Categories
+                        {title}
                     </h2>
                     <p className="text-muted-foreground max-w-2xl mx-auto">
-                        Discover our wide range of handcrafted pickles, preserves, and gourmet delights
+                        {subtitle}
                     </p>
                 </div>
 
