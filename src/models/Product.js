@@ -94,6 +94,11 @@ const ProductSchema = new mongoose.Schema({
     isFeatured: {
         type: Boolean,
         default: false
+    },
+    barcode: {
+        type: String,
+        trim: true,
+        default: ''
     }
 }, {
     timestamps: true

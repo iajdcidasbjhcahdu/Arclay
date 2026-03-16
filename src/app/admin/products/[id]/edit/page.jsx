@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import ImagePicker from "@/app/components/ImagePicker";
 import ImageGeneratorModal from "@/app/components/ImageGeneratorModal";
 import RichTextEditor from "@/app/components/RichTextEditor";
+import BarcodeScanner from "@/app/components/BarcodeScanner";
 
 export default function EditProductPage({ params }) {
     const { id } = use(params);
@@ -26,6 +27,7 @@ export default function EditProductPage({ params }) {
         variants: [],
         category: "",
         isActive: true,
+        barcode: "",
     });
 
     useEffect(() => {
@@ -73,6 +75,7 @@ export default function EditProductPage({ params }) {
                     })),
                     category: p.category?._id || p.category || "",
                     isActive: p.isActive,
+                    barcode: p.barcode || "",
                 });
             } else {
                 setError("Product not found");
@@ -330,6 +333,19 @@ export default function EditProductPage({ params }) {
                                     </option>
                                 ))}
                             </select>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-foreground mb-2">
+                                Barcode
+                            </label>
+                            <BarcodeScanner
+                                value={formData.barcode}
+                                onChange={(value) => setFormData({ ...formData, barcode: value })}
+                            />
+                            <p className="text-xs text-muted-foreground mt-1">
+                                Scan or enter the product barcode/QR code
+                            </p>
                         </div>
 
                         <div>

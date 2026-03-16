@@ -68,7 +68,7 @@ async function getHandler(req) {
 // POST create product
 async function postHandler(req) {
     try {
-        const { name, images, description, variationTypes, variants, category, isActive } = await req.json();
+        const { name, images, description, variationTypes, variants, category, isActive, barcode } = await req.json();
 
         if (!name || !category) {
             return Response.json(
@@ -94,6 +94,7 @@ async function postHandler(req) {
             variants: variants,
             category,
             isActive: isActive !== false,
+            barcode: barcode || "",
         });
 
         const populatedProduct = await Product.findById(product._id)

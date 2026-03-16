@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import ImagePicker from "@/app/components/ImagePicker";
 import ImageGeneratorModal from "@/app/components/ImageGeneratorModal";
 import RichTextEditor from "@/app/components/RichTextEditor";
+import BarcodeScanner from "@/app/components/BarcodeScanner";
 
 export default function NewProductPage() {
     const router = useRouter();
@@ -24,6 +25,7 @@ export default function NewProductPage() {
         variants: [],
         category: "",
         isActive: true,
+        barcode: "",
     });
 
     useEffect(() => {
@@ -281,6 +283,19 @@ export default function NewProductPage() {
                                     </option>
                                 ))}
                             </select>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-foreground mb-2">
+                                Barcode
+                            </label>
+                            <BarcodeScanner
+                                value={formData.barcode}
+                                onChange={(value) => setFormData({ ...formData, barcode: value })}
+                            />
+                            <p className="text-xs text-muted-foreground mt-1">
+                                Scan or enter the product barcode/QR code
+                            </p>
                         </div>
 
                         <div>

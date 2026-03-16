@@ -39,11 +39,5 @@ jobs:
             
             echo "🔄 Restarting PM2 process... via pm2 and updating env"
             pm2 restart arclay --update-env
-
-            cd /var/www/sanatva
-            git pull origin main
-            pnpm install
-            pnpm run build
-            pm2 restart sanatva --update-env
             
             echo "✅ Deployment complete!"
