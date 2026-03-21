@@ -39,14 +39,14 @@ export default function MyAccountPage() {
 
     if (userLoading || loading) {
         return (
-            <div className="min-h-screen bg-background flex items-center justify-center pt-24">
+            <div className="min-h-screen bg-background flex items-center justify-center pt-4">
                 <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-background py-12 pt-24">
+        <div className="min-h-screen bg-background py-12 pt-4">
             <div className="max-w-7xl mx-auto px-4">
                 {/* Header */}
                 <div className="mb-8">

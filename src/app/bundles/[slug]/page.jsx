@@ -59,7 +59,7 @@ export default function BundlePage({ params }) {
     }
 
     return (
-        <main className="min-h-screen bg-background pt-20">
+        <main className="min-h-screen bg-background">
             {/* Hero Section */}
             <section className="bg-linear-to-b from-primary/5 to-background py-12 lg:py-16">
                 <div className="container mx-auto px-4 lg:px-8">

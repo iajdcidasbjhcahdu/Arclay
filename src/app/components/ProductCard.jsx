@@ -2,90 +2,142 @@
 
 import Link from "next/link";
 import { useMemo } from "react";
+import { ShoppingBag, Star } from "lucide-react";
 
-export default function ProductCard({ product }) {
+export default function ProductCard({ product, viewMode = "grid" }) {
     const priceInfo = useMemo(() => {
         const firstVariant = product.variants?.[0];
-        if (!firstVariant) return { price: 0, originalPrice: null, hasSale: false, inStock: false };
+        if (!firstVariant) return { price: 0, originalPrice: null, hasSale: false, inStock: false, discountPercent: 0 };
 
         const hasSale = firstVariant.salePrice && firstVariant.salePrice < firstVariant.regularPrice;
         const totalStock = product.variants?.reduce((acc, v) => acc + (v.stock || 0), 0) || 0;
+        const discountPercent = hasSale
+            ? Math.round((1 - firstVariant.salePrice / firstVariant.regularPrice) * 100)
+            : 0;
 
         return {
             price: hasSale ? firstVariant.salePrice : firstVariant.regularPrice,
             originalPrice: hasSale ? firstVariant.regularPrice : null,
             hasSale,
-            inStock: totalStock > 0
+            inStock: totalStock > 0,
+            discountPercent,
         };
     }, [product]);
 
-    const { price, originalPrice, hasSale, inStock } = priceInfo;
+    const { price, originalPrice, hasSale, inStock, discountPercent } = priceInfo;
+
+    // Status badge: Bestseller (featured) or New or Hot
+    const getStatusBadge = () => {
+        if (product.isFeatured) return { label: "Bestseller", color: "bg-red-500" };
+        if (!hasSale && inStock) return { label: "New", color: "bg-emerald-500" };
+        if (hasSale && inStock) return { label: "Hot", color: "bg-orange-500" };
+        if (!inStock) return { label: "Out of Stock", color: "bg-gray-700" };
+        return null;
+    };
+
+    const statusBadge = getStatusBadge();
+
+    if (viewMode === "list") {
+        return (
+            <Link
+                href={`/products/${product._id}`}
+                className="group flex gap-4 bg-card rounded-2xl border border-border overflow-hidden hover:shadow-md transition-all duration-300"
+            >
+                <div className="w-32 h-32 sm:w-40 sm:h-40 shrink-0 relative overflow-hidden bg-cream-100 dark:bg-secondary">
+                    {product.images?.[0] ? (
+                        <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                    ) : (
+                        <div className="w-full h-full flex items-center justify-center text-3xl opacity-20">📦</div>
+                    )}
+                    {statusBadge && (
+                        <span className={`absolute top-2 left-2 ${statusBadge.color} text-white text-[10px] font-bold px-2 py-0.5 rounded-lg`}>
+                            {statusBadge.label}
+                        </span>
+                    )}
+                    {hasSale && discountPercent > 0 && (
+                        <span className="absolute top-2 right-2 bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-lg">
+                            {discountPercent}% OFF
+                        </span>
+                    )}
+                </div>
+                <div className="flex-1 py-3 pr-4 flex flex-col justify-center">
+                    <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors line-clamp-1">{product.name}</h3>
+                    {product.description && (
+                        <p className="text-sm text-muted-foreground mt-1 line-clamp-1">{product.description}</p>
+                    )}
+                    <div className="flex items-center justify-between mt-2">
+                        <div className="flex items-center gap-2">
+                            <span className="text-lg font-bold text-foreground">₹{price}</span>
+                            {hasSale && originalPrice && (
+                                <span className="text-sm text-muted-foreground line-through">₹{originalPrice}</span>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </Link>
+        );
+    }
 
     return (
         <Link
             href={`/products/${product._id}`}
-            className="product-card group relative flex flex-col h-full"
+            className="group flex flex-col bg-card rounded-2xl overflow-hidden border border-border hover:shadow-lg transition-all duration-300"
         >
-            {/* Product Image Stage */}
-            <div className="product-card-image aspect-square relative">
+            {/* Image */}
+            <div className="relative aspect-square overflow-hidden bg-cream-100 dark:bg-secondary">
                 {product.images?.[0] ? (
-                    <img
-                        src={product.images[0]}
-                        alt={product.name}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
+                    <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                 ) : (
-                    <div className="w-full h-full flex items-center justify-center text-4xl grayscale opacity-20">📦</div>
+                    <div className="w-full h-full flex items-center justify-center text-4xl opacity-20">📦</div>
                 )}
 
-                {/* Badges */}
-                <div className="absolute top-2 left-2 flex flex-col gap-1">
-                    {hasSale && (
-                        <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm flex items-center gap-1">
-                            Sale
-                        </span>
-                    )}
-                    {!inStock && (
-                        <span className="bg-gray-800 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
-                            No Stock
-                        </span>
-                    )}
-                    {product.isNew && (
-                        <span className="bg-olive-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
-                            New
-                        </span>
-                    )}
-                </div>
+                {/* Status Badge — top left */}
+                {statusBadge && (
+                    <span className={`absolute top-2.5 left-2.5 ${statusBadge.color} text-white text-[11px] font-bold px-2.5 py-1 rounded-lg shadow-sm`}>
+                        {statusBadge.label}
+                    </span>
+                )}
 
-                {/* Discount Badge */}
-                {hasSale && originalPrice && (
-                    <span className="absolute top-2 right-2 bg-yellow-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
-                        {Math.round((1 - price / originalPrice) * 100)}% OFF
+                {/* Discount Badge — top right */}
+                {hasSale && discountPercent > 0 && (
+                    <span className="absolute top-2.5 right-2.5 bg-emerald-600 text-white text-[11px] font-bold px-2.5 py-1 rounded-lg shadow-sm">
+                        {discountPercent}% OFF
                     </span>
                 )}
             </div>
 
-            {/* Product Info */}
-            <div className="p-3 flex flex-col flex-1">
-                {product.category && (
-                    <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-1">
-                        {product.category.name}
-                    </p>
-                )}
-                <h3 className="font-medium text-sm text-foreground leading-tight group-hover:text-primary transition-colors line-clamp-2 mb-1">
+            {/* Info */}
+            <div className="p-3 lg:p-4 flex flex-col flex-1">
+                <h3 className="font-semibold text-sm lg:text-[15px] text-foreground leading-snug group-hover:text-primary transition-colors line-clamp-1">
                     {product.name}
                 </h3>
+                {product.description && (
+                    <p className="text-xs lg:text-[13px] text-muted-foreground mt-0.5 lg:mt-1 line-clamp-1">
+                        {product.description}
+                    </p>
+                )}
 
-                <div className="mt-auto flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <span className="font-bold text-olive-700">₹{price}</span>
+                {/* Rating — desktop only for cleaner mobile */}
+                {(product.avgRating > 0 || product.reviewCount > 0) && (
+                    <div className="hidden lg:flex items-center gap-1.5 mt-2">
+                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                        <span className="text-sm font-semibold text-foreground">{product.avgRating}</span>
+                        <span className="text-muted-foreground/40 mx-0.5">|</span>
+                        <span className="text-[13px] text-muted-foreground">{product.reviewCount} reviews</span>
+                    </div>
+                )}
+
+                {/* Price + Cart Button */}
+                <div className="flex items-center justify-between mt-2 lg:mt-2.5">
+                    <div className="flex items-baseline gap-1.5">
+                        <span className="text-base lg:text-lg font-bold text-foreground">₹{price}</span>
                         {hasSale && originalPrice && (
-                            <span className="text-xs text-muted-foreground line-through">₹{originalPrice}</span>
+                            <span className="text-xs lg:text-sm text-muted-foreground line-through">₹{originalPrice}</span>
                         )}
                     </div>
-                    <button className="w-8 h-8 rounded-full bg-olive-100 text-olive-600 flex items-center justify-center hover:bg-olive-500 hover:text-white transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-shopping-bag"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" /><path d="M3 6h18" /><path d="M16 10a4 4 0 0 1-8 0" /></svg>
-                    </button>
+                    <div className="w-8 h-8 rounded-xl bg-olive-100 dark:bg-primary/15 text-olive-600 dark:text-primary flex items-center justify-center hover:bg-olive-500 hover:text-white dark:hover:bg-primary dark:hover:text-primary-foreground transition-colors">
+                        <ShoppingBag className="w-4 h-4" />
+                    </div>
                 </div>
             </div>
         </Link>
