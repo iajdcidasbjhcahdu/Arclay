@@ -152,3 +152,97 @@ async function getHandler(req) {
 }
 
 export const GET = withAdminProtection(getHandler);
+
+// POST - Create order from POS
+async function postHandler(req) {
+    try {
+        const body = await req.json();
+        const { items, customerInfo, paymentMethod, paymentStatus, orderStatus, notes } = body;
+
+        if (!items || items.length === 0) {
+            return Response.json(
+                { success: false, message: "Order must have at least one item" },
+                { status: 400 }
+            );
+        }
+
+        await connectDB();
+
+        // For POS, we don't require a user login
+        // Create a guest user or use a placeholder
+        let guestUser;
+        try {
+            // Try to find user by phone, or create a guest user
+            const User = (await import("@/models/User")).default;
+            guestUser = await User.findOne({ phone: customerInfo?.phone });
+
+            if (!guestUser && customerInfo?.phone) {
+                // Create a guest user
+                guestUser = await User.create({
+                    name: customerInfo?.name || "POS Customer",
+                    email: `pos_${Date.now()}@example.com`,
+                    phone: customerInfo?.phone || "0000000000",
+                    isGuest: true,
+                });
+            }
+        } catch (userErr) {
+            console.error("User lookup error:", userErr);
+            // Continue without user - use null
+            guestUser = null;
+        }
+
+        // Calculate totals
+        let subtotal = 0;
+        const orderItems = items.map(item => {
+            const price = item.price || 0;
+            subtotal += price * item.quantity;
+            return {
+                product: item.product,
+                name: item.name,
+                price,
+                quantity: item.quantity,
+                variant: item.variant || null,
+            };
+        });
+
+        const total = subtotal;
+
+        // Create order
+        const order = await Order.create({
+            user: guestUser?._id || null,
+            items: orderItems,
+            shippingAddress: {
+                fullName: customerInfo?.name || "POS Customer",
+                phone: customerInfo?.phone || "0000000000",
+                addressLine1: "POS Sale",
+                addressLine2: "",
+                city: "N/A",
+                state: "N/A",
+                pincode: "000000",
+                country: "India",
+            },
+            subtotal: subtotal,
+            shippingFee: 0,
+            discountAmount: 0,
+            totalAmount: total,
+            paymentMethod: paymentMethod || "cash",
+            paymentStatus: paymentStatus || "paid",
+            orderStatus: orderStatus || "confirmed",
+            notes: notes || "POS Walk-in Sale",
+        });
+
+        return Response.json({
+            success: true,
+            message: "Order created successfully",
+            order,
+        });
+    } catch (error) {
+        console.error("Create POS order error:", error);
+        return Response.json(
+            { success: false, message: error.message || "Server error" },
+            { status: 500 }
+        );
+    }
+}
+
+export const POST = withAdminProtection(postHandler);
