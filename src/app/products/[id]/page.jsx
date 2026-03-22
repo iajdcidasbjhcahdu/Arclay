@@ -229,7 +229,7 @@ export default function ProductDetailPage({ params }) {
             {/* ============ MOBILE LAYOUT ============ */}
             <div className="lg:hidden">
                 {/* Mobile Image */}
-                <div className="px-4 mb-4 mt-4">
+                <div className="px-4 mb-4 mt-1">
                     <div className="relative aspect-square rounded-2xl overflow-hidden bg-cream-100 dark:bg-secondary">
                         {product.images?.[selectedImage] ? (
                             <img src={product.images[selectedImage]} alt={product.name} className="w-full h-full object-cover" />

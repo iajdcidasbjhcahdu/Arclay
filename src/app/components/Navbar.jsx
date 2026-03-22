@@ -13,7 +13,6 @@ import {
     Truck,
     ChevronDown,
     Store,
-    Gift,
     LayoutGrid,
     Sparkles,
     Sun,
@@ -130,7 +129,6 @@ export default function Navbar() {
     const navItems = [
         { label: "Home", href: "/", icon: Sparkles },
         { label: "Shop", href: "/products", icon: Store, hasDropdown: true },
-        { label: "Gift Boxes", href: "/bundles", icon: Gift },
     ];
 
     // More dropdown items
@@ -198,9 +196,9 @@ export default function Navbar() {
                 </div>
 
                 {/* Main Navbar */}
-                <header className="fixed top-0 lg:top-9 left-0 right-0 z-50 bg-[#fdfbf7] lg:bg-background/95 lg:backdrop-blur-md border-b-0 lg:border-b border-border transition-all">
+                <header className="fixed top-0 lg:top-9 left-0 right-0 z-50 bg-[#fdfbf7] dark:bg-background lg:bg-background/95 lg:backdrop-blur-md border-b-0 lg:border-b border-border transition-all">
                     <nav className="container mx-auto px-4 lg:px-8">
-                        <div className="flex items-center justify-between h-[72px] lg:h-[68px]">
+                        <div className="flex items-center justify-between h-15 lg:h-17">
                             {/* Brand Logo */}
                             <Link href="/" className="flex items-center gap-2.5 group shrink-0">
                                 {isLogoSite ? (
@@ -448,8 +446,8 @@ export default function Navbar() {
                     </nav>
                 </header>
 
-                {/* Spacer for fixed navbar (mobile: 80px for breathing room, desktop: announcement 36px + navbar 68px) */}
-                <div className="h-[80px] lg:h-26" />
+                {/* Spacer for fixed navbar */}
+                <div className="h-15 lg:h-26" />
 
                 {/* Mobile Bottom Navigation Bar */}
                 <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-card border-t border-border/30 shadow-[0_-4px_25px_rgba(0,0,0,0.04)] safe-area-bottom pb-1">
@@ -513,8 +511,6 @@ export default function Navbar() {
                     </div>
                 </div>
 
-                {/* Bottom nav spacer for mobile */}
-                <div className="lg:hidden h-16" />
             </>
         )
     );

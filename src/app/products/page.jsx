@@ -84,7 +84,7 @@ export default function ProductsPage() {
             {/* === MOBILE LAYOUT === */}
             <div className="lg:hidden">
                 {/* Mobile Sticky Toolbar (Categories) - Sticks below fixed navbar (72px) */}
-                <div className="sticky top-[72px] z-30 bg-[#fdfbf7] dark:bg-background pb-3 pt-4">
+                <div className="sticky top-15 z-30 bg-[#fdfbf7] dark:bg-background pb-2 pt-0">
 
                     {/* Mobile Category Pills - Horizontal Scroll */}
                     <div

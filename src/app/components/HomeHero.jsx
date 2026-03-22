@@ -74,7 +74,7 @@ export default function HomeHero() {
     }, [isAutoPlaying, banners.length]);
 
     return (
-        <div className="px-4 pt-3 lg:px-0 lg:pt-0 bg-[#fdfbf7] dark:bg-background lg:bg-transparent">
+        <div className="px-4 pt-0 lg:px-0 lg:pt-0 bg-[#fdfbf7] dark:bg-background lg:bg-transparent">
             <section className="relative h-[220px] lg:h-[700px] rounded-[24px] lg:rounded-none overflow-hidden bg-muted shadow-sm">
                 <AnimatePresence mode="wait">
                     <motion.div

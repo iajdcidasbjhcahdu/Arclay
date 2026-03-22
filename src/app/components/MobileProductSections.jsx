@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowRight, Flame, Sparkles, Star, ChevronRight, Gift } from "lucide-react";
+import { ArrowRight, Flame, Sparkles, Star, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import { getSiteName } from "@/config/brandContent";
 import ProductCard from "./ProductCard";
@@ -29,7 +29,7 @@ function CategoryPills() {
     }, []);
 
     return (
-        <div className="px-4 pt-6 pb-2 bg-[#fdfbf7] dark:bg-background">
+        <div className="px-4 pt-0 pb-2 bg-[#fdfbf7] dark:bg-background">
             <div
                 ref={scrollRef}
                 className="flex gap-3 px-1 pt-2 pb-6 overflow-x-auto no-scrollbar"
@@ -89,7 +89,7 @@ function SimpleProductCard({ product }) {
     const router = useRouter();
     return (
         <div onClick={() => router.push(`/products/${product._id}`)} className="cursor-pointer flex flex-col gap-2.5 group">
-            <div className="aspect-[1.05/1] rounded-[22px] overflow-hidden bg-[#f4f1ea] shadow-sm transform transition-transform group-hover:scale-[1.02]">
+            <div className="aspect-[1.05/1] rounded-[22px] overflow-hidden bg-[#f4f1ea] dark:bg-secondary shadow-sm transform transition-transform group-hover:scale-[1.02]">
                 <img src={product.images?.[0] || "/placeholder-product.jpg"} alt={product.name} className="w-full h-full object-cover" />
             </div>
             <div className="px-1">
@@ -112,7 +112,7 @@ function HorizontalProductCard({ product }) {
     const router = useRouter();
     return (
         <div onClick={() => router.push(`/products/${product._id}`)} className="cursor-pointer flex gap-3.5 bg-white dark:bg-card rounded-[20px] p-2 pr-4 shadow-[0_0_15px_rgba(0,0,0,0.03)] border border-border/20 mb-3 group">
-            <div className="w-24 h-24 shrink-0 rounded-[14px] overflow-hidden bg-[#f4f1ea]">
+            <div className="w-24 h-24 shrink-0 rounded-[14px] overflow-hidden bg-[#f4f1ea] dark:bg-secondary">
                 <img src={product.images?.[0] || "/placeholder-product.jpg"} alt={product.name} className="w-full h-full object-cover transform transition-transform group-hover:scale-[1.05]" />
             </div>
             <div className="flex flex-col flex-1 py-1">
@@ -204,7 +204,7 @@ export default function MobileProductSections() {
     }, []);
 
     if (loading) {
-        return <div className="lg:hidden h-screen bg-[#fdfbf7] flex items-center justify-center"><div className="w-8 h-8 border-4 border-[#6b7b5c] border-t-transparent flex rounded-full animate-spin"></div></div>;
+        return <div className="lg:hidden h-screen bg-[#fdfbf7] dark:bg-background flex items-center justify-center"><div className="w-8 h-8 border-4 border-primary border-t-transparent flex rounded-full animate-spin"></div></div>;
     }
 
     return (
@@ -229,9 +229,6 @@ export default function MobileProductSections() {
                     ))}
                 </div>
             </Section>
-
-            {/* Promotional Banner */}
-            <MobilePromoBanner />
 
             {/* New Arrivals (Horizontal Cards) */}
             <Section title="New Arrivals" icon={Sparkles} viewAllLink="/products?sort=newest">

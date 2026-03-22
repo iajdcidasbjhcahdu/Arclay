@@ -73,6 +73,8 @@ export default function RootLayout({ children }) {
           <UserProvider>
             <Navbar />
             {children}
+            {/* Bottom nav spacer for mobile - prevents content from hiding behind fixed bottom nav */}
+            <div className="lg:hidden h-16" />
             <Footer />
             <ChatWidget />
           </UserProvider>
