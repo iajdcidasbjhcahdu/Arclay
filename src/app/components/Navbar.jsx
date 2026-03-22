@@ -68,13 +68,14 @@ export default function Navbar() {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const res = await fetch("/api/products");
+                const res = await fetch("/api/products?limit=1");
                 const data = await res.json();
-                if (data.success && data.products) {
-                    const cats = [...new Set(data.products.map(p => p.category).filter(Boolean))];
-                    setCategories(cats);
+                if (data.success && data.categories) {
+                    setCategories(data.categories);
                 }
-            } catch {}
+            } catch (error) {
+                console.error("Failed to fetch categories:", error);
+            }
         };
         fetchCategories();
     }, []);
@@ -147,8 +148,8 @@ export default function Navbar() {
     const shopCategories = [
         { label: "All Products", href: "/products" },
         ...categories.map(cat => ({
-            label: cat,
-            href: `/products?category=${encodeURIComponent(cat)}`,
+            label: cat.name,
+            href: `/products?category=${cat._id}`,
         })),
     ];
 
