@@ -8,6 +8,7 @@ import { Truck, Shield, RotateCcw, Award, Phone, Mail, MapPin, Sparkles } from "
 
 const siteName = getSiteName();
 const content = getBrandContent(siteName);
+const isLogoSite = process.env.NEXT_PUBLIC_SITE_LOGO || false;
 
 const brandTaglines = {
     essvora: "Artisanal Pickles & Preserves",
@@ -119,21 +120,21 @@ export default function Footer() {
                         {/* Brand Column */}
                         <div className="lg:col-span-4">
                             {/* Logo */}
-                            {isSanatva ? (
-                                <Link href="/">
-                                    <img src="sanatvaLogo.png" className="h-16" alt={siteName} />
-                                </Link>
-                            ) : (
-                                <Link href="/" className="flex items-center gap-3 group">
-                                    <div className="w-11 h-11 rounded-xl bg-olive-600 dark:bg-primary/20 flex items-center justify-center">
-                                        <Sparkles className="w-5 h-5 text-white/90 dark:text-primary" />
-                                    </div>
-                                    <div>
-                                        <span className="text-xl font-bold text-white leading-tight block">{siteName}</span>
-                                        <span className="text-xs text-white/50 leading-none">{getBrandTagline()}</span>
-                                    </div>
-                                </Link>
-                            )}
+                            <Link href="/" className="flex items-center gap-3 group">
+                                <div className="w-11 h-11 rounded-xl bg-olive-600 dark:bg-primary/20 flex items-center justify-center">
+                                    {
+                                        isLogoSite
+                                            ? <img src={isLogoSite} className="h-16" alt={siteName} />
+                                            : <Sparkles className="w-5 h-5 text-white/90 dark:text-primary" />
+                                    }
+
+                                </div>
+                                <div>
+                                    <span className="text-xl font-bold text-white leading-tight block">{siteName}</span>
+                                    <span className="text-xs text-white/50 leading-none">{getBrandTagline()}</span>
+                                </div>
+                            </Link>
+
 
                             <p className="mt-5 text-white/50 text-sm leading-relaxed max-w-xs">
                                 Crafting authentic Indian flavors since 2010. Every jar tells a story of tradition, quality, and love.
@@ -228,10 +229,10 @@ export default function Footer() {
                         <div className="flex flex-col md:flex-row justify-between items-center gap-3 text-xs text-white/40">
                             <p>
                                 © {new Date().getFullYear()}{" "}
-                                <span className="text-white/60">{siteName}</span>. All Rights Reserved.
+                                <a href="https://kunalbhatia.dev" target="_blank" rel="noopener noreferrer" className="text-white/60">{siteName}</a>. All Rights Reserved.
                             </p>
                             <div className="flex items-center gap-4">
-                                <span>Designed with ❤️ in India</span>
+                                <span>Designed By <a href="https://biharinnovation.in" target="_blank" rel="noopener noreferrer" className="text-white/60">Bihar Innovation</a></span>
                             </div>
                         </div>
                     </div>

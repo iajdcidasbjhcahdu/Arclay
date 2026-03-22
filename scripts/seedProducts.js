@@ -36,8 +36,8 @@ dotenv.config({ path: path.join(__dirname, '..', '.env') });
 const CONFIG = {
     // Admin user credentials
     admin: {
-        name: 'Amit Verma',
-        email: 'sales@sanatva.com',
+        name: 'Super Admin',
+        email: 'admin@gmail.com',
         password: 'Admin@123',
         phone: '+91 9999999999'
     },
@@ -615,7 +615,7 @@ async function seedDatabase() {
             password: hashedAdminPwd, role: 'admin', isActive: true, isEmailVerified: true
         });
 
-        return;
+        // return;
 
         users.push(admin);
 

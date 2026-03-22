@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 
 const siteName = process.env.NEXT_PUBLIC_SITE_NAME || "ESSVORA";
+const isLogoSite = process.env.NEXT_PUBLIC_SITE_LOGO || false;
 
 // Tagline per brand
 const brandTaglines = {
@@ -123,8 +124,6 @@ export default function Navbar() {
         return pathname.startsWith(path);
     };
 
-    const isLogoSite = process.env.NEXT_PUBLIC_SITE_LOGO;
-
     // Nav items
     const navItems = [
         { label: "Home", href: "/", icon: Sparkles },
@@ -135,9 +134,9 @@ export default function Navbar() {
     const moreItems = [
         ...(isAuthenticated
             ? [
-                  { label: "My Orders", href: "/orders" },
-                  { label: "My Account", href: "/account" },
-              ]
+                { label: "My Orders", href: "/orders" },
+                { label: "My Account", href: "/account" },
+            ]
             : []),
         ...(isAdmin ? [{ label: "Admin Panel", href: "/admin" }] : []),
     ];
@@ -201,26 +200,24 @@ export default function Navbar() {
                         <div className="flex items-center justify-between h-15 lg:h-17">
                             {/* Brand Logo */}
                             <Link href="/" className="flex items-center gap-2.5 group shrink-0">
-                                {isLogoSite ? (
-                                    <img src={isLogoSite} className="h-12" alt={siteName} />
-                                ) : (
-                                    <>
-                                        {/* Logo Icon */}
-                                        <div className="w-9 h-9 lg:w-11 lg:h-11 rounded-[10px] lg:rounded-xl bg-[#6b7b5c] lg:bg-olive-700 dark:bg-primary flex items-center justify-center shadow-sm">
-                                            <Sparkles className="w-5 h-5 lg:w-5.5 lg:h-5.5 text-white dark:text-primary-foreground" />
-                                        </div>
-                                        {/* Brand Text */}
-                                        <div className="flex flex-col">
-                                            <span className="font-serif text-[22px] lg:font-sans lg:text-xl font-bold text-[#2d2d2d] dark:text-foreground leading-none tracking-tight">
-                                                {siteName}
-                                            </span>
-                                            <span className="hidden lg:block text-[11px] text-primary dark:text-primary leading-none tracking-wide mt-1">
-                                                {getBrandTagline()}
-                                            </span>
-                                        </div>
-                                    </>
-                                )}
+                                <div className="w-9 h-9 lg:w-11 lg:h-11 rounded-[10px] lg:rounded-xl bg-[#6b7b5c] lg:bg-olive-700 dark:bg-primary flex items-center justify-center shadow-sm">
+                                    {
+                                        isLogoSite
+                                            ? <img src={isLogoSite} className="h-12" alt={siteName} />
+                                            : <Sparkles className="w-5 h-5 lg:w-5.5 lg:h-5.5 text-white dark:text-primary-foreground" />
+                                    }
+                                </div>
+                                {/* Brand Text */}
+                                <div className="flex flex-col">
+                                    <span className="font-serif text-[22px] lg:font-sans lg:text-xl font-bold text-[#2d2d2d] dark:text-foreground leading-none tracking-tight">
+                                        {siteName}
+                                    </span>
+                                    <span className="hidden lg:block text-[11px] text-primary dark:text-primary leading-none tracking-wide mt-1">
+                                        {getBrandTagline()}
+                                    </span>
+                                </div>
                             </Link>
+
 
                             {/* Desktop Navigation - Center */}
                             <div className="hidden lg:flex items-center gap-1">
@@ -240,18 +237,16 @@ export default function Navbar() {
                                             >
                                                 <Link
                                                     href={item.href}
-                                                    className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                                                        active || isShopHovered
-                                                            ? "bg-olive-100 dark:bg-primary/15 text-olive-800 dark:text-primary"
-                                                            : "text-foreground/70 hover:text-foreground hover:bg-muted/60"
-                                                    }`}
+                                                    className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${active || isShopHovered
+                                                        ? "bg-olive-100 dark:bg-primary/15 text-olive-800 dark:text-primary"
+                                                        : "text-foreground/70 hover:text-foreground hover:bg-muted/60"
+                                                        }`}
                                                 >
                                                     <Icon className="w-4 h-4" />
                                                     {item.label}
                                                     <ChevronDown
-                                                        className={`w-3.5 h-3.5 opacity-60 transition-transform duration-200 ${
-                                                            isShopHovered ? "rotate-180" : ""
-                                                        }`}
+                                                        className={`w-3.5 h-3.5 opacity-60 transition-transform duration-200 ${isShopHovered ? "rotate-180" : ""
+                                                            }`}
                                                     />
                                                 </Link>
 
@@ -278,11 +273,10 @@ export default function Navbar() {
                                         <Link
                                             key={item.label}
                                             href={item.href}
-                                            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                                                active
-                                                    ? "bg-olive-100 dark:bg-primary/15 text-olive-800 dark:text-primary"
-                                                    : "text-foreground/70 hover:text-foreground hover:bg-muted/60"
-                                            }`}
+                                            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${active
+                                                ? "bg-olive-100 dark:bg-primary/15 text-olive-800 dark:text-primary"
+                                                : "text-foreground/70 hover:text-foreground hover:bg-muted/60"
+                                                }`}
                                         >
                                             <Icon className="w-4 h-4" />
                                             {item.label}
@@ -295,18 +289,16 @@ export default function Navbar() {
                                     <div className="relative" ref={moreRef}>
                                         <button
                                             onClick={() => setIsMoreOpen(!isMoreOpen)}
-                                            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                                                isMoreOpen
-                                                    ? "bg-olive-100 dark:bg-primary/15 text-olive-800 dark:text-primary"
-                                                    : "text-foreground/70 hover:text-foreground hover:bg-muted/60"
-                                            }`}
+                                            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${isMoreOpen
+                                                ? "bg-olive-100 dark:bg-primary/15 text-olive-800 dark:text-primary"
+                                                : "text-foreground/70 hover:text-foreground hover:bg-muted/60"
+                                                }`}
                                         >
                                             <LayoutGrid className="w-4 h-4" />
                                             More
                                             <ChevronDown
-                                                className={`w-3.5 h-3.5 opacity-60 transition-transform duration-200 ${
-                                                    isMoreOpen ? "rotate-180" : ""
-                                                }`}
+                                                className={`w-3.5 h-3.5 opacity-60 transition-transform duration-200 ${isMoreOpen ? "rotate-180" : ""
+                                                    }`}
                                             />
                                         </button>
                                         {isMoreOpen && (
@@ -455,11 +447,10 @@ export default function Navbar() {
                         {/* Home */}
                         <Link
                             href="/"
-                            className={`flex flex-col items-center justify-center gap-1 min-w-[70px] h-[52px] rounded-[18px] transition-colors ${
-                                isActive("/")
-                                    ? "bg-[#ecf0e6] dark:bg-primary/20 text-[#6b7b5c] dark:text-primary"
-                                    : "text-muted-foreground/80 hover:bg-muted/30"
-                            }`}
+                            className={`flex flex-col items-center justify-center gap-1 min-w-[70px] h-[52px] rounded-[18px] transition-colors ${isActive("/")
+                                ? "bg-[#ecf0e6] dark:bg-primary/20 text-[#6b7b5c] dark:text-primary"
+                                : "text-muted-foreground/80 hover:bg-muted/30"
+                                }`}
                         >
                             <Home className="w-[20px] h-[20px]" />
                             <span className="text-[10px] font-semibold">Home</span>
@@ -468,11 +459,10 @@ export default function Navbar() {
                         {/* Shop */}
                         <Link
                             href="/products"
-                            className={`flex flex-col items-center justify-center gap-1 min-w-[70px] h-[52px] rounded-[18px] transition-colors ${
-                                isActive("/products")
-                                    ? "bg-[#ecf0e6] dark:bg-primary/20 text-[#6b7b5c] dark:text-primary"
-                                    : "text-muted-foreground/80 hover:bg-muted/30"
-                            }`}
+                            className={`flex flex-col items-center justify-center gap-1 min-w-[70px] h-[52px] rounded-[18px] transition-colors ${isActive("/products")
+                                ? "bg-[#ecf0e6] dark:bg-primary/20 text-[#6b7b5c] dark:text-primary"
+                                : "text-muted-foreground/80 hover:bg-muted/30"
+                                }`}
                         >
                             <Store className="w-[20px] h-[20px]" />
                             <span className="text-[10px] font-semibold">Shop</span>
@@ -481,11 +471,10 @@ export default function Navbar() {
                         {/* Cart */}
                         <Link
                             href="/cart"
-                            className={`relative flex flex-col items-center justify-center gap-1 min-w-[70px] h-[52px] rounded-[18px] transition-colors ${
-                                isActive("/cart")
-                                    ? "bg-[#ecf0e6] dark:bg-primary/20 text-[#6b7b5c] dark:text-primary"
-                                    : "text-muted-foreground/80 hover:bg-muted/30"
-                            }`}
+                            className={`relative flex flex-col items-center justify-center gap-1 min-w-[70px] h-[52px] rounded-[18px] transition-colors ${isActive("/cart")
+                                ? "bg-[#ecf0e6] dark:bg-primary/20 text-[#6b7b5c] dark:text-primary"
+                                : "text-muted-foreground/80 hover:bg-muted/30"
+                                }`}
                         >
                             <ShoppingBag className="w-[20px] h-[20px]" />
                             {cartCount > 0 && (
@@ -499,11 +488,10 @@ export default function Navbar() {
                         {/* Profile */}
                         <Link
                             href={isAuthenticated ? "/account" : "/login"}
-                            className={`flex flex-col items-center justify-center gap-1 min-w-[70px] h-[52px] rounded-[18px] transition-colors ${
-                                isActive("/account") || isActive("/login")
-                                    ? "bg-[#ecf0e6] dark:bg-primary/20 text-[#6b7b5c] dark:text-primary"
-                                    : "text-muted-foreground/80 hover:bg-muted/30"
-                            }`}
+                            className={`flex flex-col items-center justify-center gap-1 min-w-[70px] h-[52px] rounded-[18px] transition-colors ${isActive("/account") || isActive("/login")
+                                ? "bg-[#ecf0e6] dark:bg-primary/20 text-[#6b7b5c] dark:text-primary"
+                                : "text-muted-foreground/80 hover:bg-muted/30"
+                                }`}
                         >
                             <User className="w-[20px] h-[20px]" />
                             <span className="text-[10px] font-semibold">Profile</span>
