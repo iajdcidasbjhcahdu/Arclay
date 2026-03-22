@@ -1,84 +1,100 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { getBrandContent, getSiteName } from "@/config/brandContent";
+import Link from "next/link";
 
 const siteName = getSiteName();
 const content = getBrandContent(siteName);
 const storyContent = content.ourStory;
-const isVedicBro = siteName.toLowerCase().includes('vedicbro');
-const isSanatva = siteName.toLowerCase().includes('sanatva');
 
 export default function OurStory() {
+    const [featuredImage, setFeaturedImage] = useState(null);
+
+    useEffect(() => {
+        const fetchImage = async () => {
+            try {
+                const res = await fetch("/api/products?isFeatured=true&limit=1");
+                const data = await res.json();
+                if (data.success && data.products?.[0]?.images?.[0]) {
+                    setFeaturedImage(data.products[0].images[0]);
+                }
+            } catch {}
+        };
+        fetchImage();
+    }, []);
+
+    // Calculate years since 2010
+    const yearsSince = new Date().getFullYear() - 2010;
+
     return (
-        <section className="py-20 lg:py-28 bg-background relative overflow-hidden">
+        <section className="hidden lg:block py-20 lg:py-28 bg-background">
+            <div className="container mx-auto px-4 lg:px-8">
+                <div className="grid lg:grid-cols-2 gap-10 lg:gap-20 items-center">
 
-            <div className="container mx-auto px-4 lg:px-8 relative z-10">
-                <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-
-                    {/* Left - Image Grid (Dark Modern) */}
-                    <div className="relative animate-slide-in-left">
-                        <div className="grid grid-cols-2 gap-4">
-                            {/* Main Large Image Box */}
-                            <div className="col-span-2 relative aspect-[16/10] rounded-3xl overflow-hidden border border-border group">
-                                <div className={`absolute inset-0 bg-card`}></div>
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <div className="text-center p-8">
-                                        <div className="w-16 h-16 mx-auto mb-4 rounded-full border-2 border-primary flex items-center justify-center text-primary text-2xl font-bold">
-                                            E
-                                        </div>
-                                        <h3 className="text-2xl font-black text-foreground uppercase tracking-tight mb-2">
-                                            {isSanatva ? 'Sanatva Ayurveda' : (isVedicBro ? 'Pure Ayurveda' : 'Premium Craft')}
-                                        </h3>
-                                        <p className="text-muted-foreground text-sm">{isSanatva ? 'Authentic Care' : 'Since 1998'}</p>
-                                    </div>
+                    {/* Left - Image with floating stat badge */}
+                    <div className="relative">
+                        <div className="aspect-2/2 rounded-2xl overflow-hidden bg-cream-100 dark:bg-secondary">
+                            {featuredImage ? (
+                                <img
+                                    src={featuredImage}
+                                    alt="Our Story"
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : (
+                                <div className="w-full h-full bg-olive-100 dark:bg-secondary flex items-center justify-center">
+                                    <span className="text-8xl opacity-20">🫙</span>
                                 </div>
-                                <div className="absolute inset-0 border-2 border-primary/20 scale-95 opacity-0 group-hover:opacity-100 group-hover:scale-100 transition-all duration-500 rounded-2xl"></div>
-                            </div>
+                            )}
+                        </div>
 
-                            {/* Smaller Boxes */}
-                            <div className="relative aspect-square rounded-3xl overflow-hidden border border-border bg-muted flex items-center justify-center group hover:bg-card transition-colors">
-                                <div className="text-center">
-                                    <span className="text-4xl mb-2 block animate-bounce-slow">🌿</span>
-                                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Natural</span>
-                                </div>
-                            </div>
-
-                            <div className="relative aspect-square rounded-3xl overflow-hidden border border-border bg-muted flex items-center justify-center group hover:bg-card transition-colors">
-                                <div className="text-center">
-                                    <span className="text-4xl mb-2 block animate-pulse">✨</span>
-                                    <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Quality</span>
-                                </div>
-                            </div>
+                        {/* Floating stat badge - bottom right overlapping */}
+                        <div className="absolute -bottom-6 right-4 lg:-right-5 bg-card border border-border rounded-2xl shadow-lg px-8 py-6 text-center">
+                            <p className="text-4xl lg:text-5xl font-bold text-foreground leading-none">
+                                {yearsSince}+
+                            </p>
+                            <p className="text-muted-foreground text-sm mt-1">Years of Excellence</p>
                         </div>
                     </div>
 
                     {/* Right - Content */}
-                    <div className="space-y-8 animate-slide-in-right">
-                        <div>
-                            <p className="text-xs font-bold tracking-[0.3em] text-primary uppercase mb-4">
-                                {storyContent.sectionLabel}
-                            </p>
-                            <h2 className="font-heading text-4xl lg:text-5xl font-black text-foreground leading-[0.9] tracking-tight">
-                                {storyContent.title}
-                            </h2>
-                        </div>
+                    <div>
+                        {/* Label */}
+                        <span className="inline-block px-4 py-1.5 rounded-full border border-border text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-5">
+                            {storyContent.sectionLabel}
+                        </span>
 
-                        <div className="space-y-6 text-lg text-muted-foreground font-light leading-relaxed">
+                        {/* Title */}
+                        <h2 className="font-serif text-3xl md:text-4xl lg:text-[42px] font-bold text-foreground leading-tight">
+                            Crafting Authentic Flavors Since 2010
+                        </h2>
+
+                        {/* Description */}
+                        <div className="mt-6 space-y-5 text-muted-foreground leading-relaxed">
                             <p>{storyContent.description}</p>
                             <p>{storyContent.additionalText}</p>
                         </div>
 
-                        <div className="grid grid-cols-3 gap-6 pt-6 border-t border-border">
-                            {storyContent.stats.map((stat, index) => (
-                                <div key={index}>
-                                    <p className="font-heading text-3xl lg:text-4xl font-black text-foreground mb-1">
+                        {/* Stats Row */}
+                        <div className="flex gap-10 lg:gap-14 mt-8">
+                            {storyContent.stats.map((stat, i) => (
+                                <div key={i}>
+                                    <p className="text-3xl lg:text-4xl font-bold text-foreground leading-none">
                                         {stat.value}
                                     </p>
-                                    <p className="text-xs font-bold text-primary uppercase tracking-wider">
-                                        {stat.label}
-                                    </p>
+                                    <p className="text-sm text-muted-foreground mt-1">{stat.label}</p>
                                 </div>
                             ))}
+                        </div>
+
+                        {/* CTA */}
+                        <div className="mt-8">
+                            <Link
+                                href="/"
+                                className="inline-flex items-center px-7 py-3.5 rounded-xl bg-olive-700 dark:bg-primary hover:bg-olive-800 dark:hover:bg-primary/90 text-white dark:text-primary-foreground font-semibold text-sm transition-colors"
+                            >
+                                Read Our Story
+                            </Link>
                         </div>
                     </div>
                 </div>

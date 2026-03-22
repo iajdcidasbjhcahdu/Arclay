@@ -19,7 +19,7 @@ export default function TrustBadges() {
     const badges = content.whyUs.features;
 
     return (
-        <section className="py-12 bg-background border-b border-border">
+        <section className="hidden lg:block py-12 bg-background border-b border-border">
             <div className="container mx-auto px-4 lg:px-8">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                     {badges.map((badge, index) => (

@@ -55,7 +55,7 @@ export default function CategoryGrid() {
         : "Discover our wide range of handcrafted pickles, preserves, and gourmet delights";
 
     return (
-        <section className="py-20">
+        <section className="hidden lg:block py-20">
             <div className="container mx-auto px-4 lg:px-8">
                 <div className="text-center mb-12">
                     <h2 className="text-3xl lg:text-4xl font-heading font-bold text-foreground mb-4">

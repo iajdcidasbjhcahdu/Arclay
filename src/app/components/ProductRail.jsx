@@ -32,7 +32,7 @@ export default function ProductRail({ title, subtitle, icon, endpoint, viewAllLi
     if (!products.length && !loading) return null;
 
     return (
-        <section className={`py-20 ${bgWhite ? 'bg-card' : 'bg-transparent'}`}>
+        <section className={`hidden lg:block py-20 ${bgWhite ? 'bg-card' : 'bg-transparent'}`}>
             <div className="container mx-auto px-4 lg:px-8">
                 <div className="flex items-center justify-between mb-8">
                     <div className="flex items-center gap-2">

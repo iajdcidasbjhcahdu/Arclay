@@ -12,14 +12,15 @@ import {
     Phone,
     Truck,
     ChevronDown,
-    Menu,
-    X,
     Store,
     Gift,
     LayoutGrid,
     Sparkles,
     Sun,
     Moon,
+    Home,
+    Heart,
+    Bell,
 } from "lucide-react";
 
 const siteName = process.env.NEXT_PUBLIC_SITE_NAME || "ESSVORA";
@@ -42,14 +43,17 @@ const getBrandTagline = () => {
 
 export default function Navbar() {
     const { user, isAuthenticated, isAdmin, logout, loading, cartCount } = useUser();
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
     const [isMoreOpen, setIsMoreOpen] = useState(false);
+    const [isShopHovered, setIsShopHovered] = useState(false);
     const [showNavbar, setShowNavbar] = useState(true);
+    const [categories, setCategories] = useState([]);
     const { theme, setTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
     const moreRef = useRef(null);
     const userMenuRef = useRef(null);
+    const shopDropdownRef = useRef(null);
+    const shopTimeoutRef = useRef(null);
 
     const pathname = usePathname();
 
@@ -59,6 +63,21 @@ export default function Navbar() {
             ? setShowNavbar(false)
             : setShowNavbar(true);
     }, [pathname]);
+
+    // Fetch categories for shop dropdown
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const res = await fetch("/api/products");
+                const data = await res.json();
+                if (data.success && data.products) {
+                    const cats = [...new Set(data.products.map(p => p.category).filter(Boolean))];
+                    setCategories(cats);
+                }
+            } catch {}
+        };
+        fetchCategories();
+    }, []);
 
     // Close dropdowns on outside click
     useEffect(() => {
@@ -74,16 +93,27 @@ export default function Navbar() {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    // Close mobile menu on route change
+    // Close dropdowns on route change
     useEffect(() => {
-        setIsMenuOpen(false);
         setIsMoreOpen(false);
         setIsUserMenuOpen(false);
+        setIsShopHovered(false);
     }, [pathname]);
 
     const handleLogout = async () => {
         await logout();
         setIsUserMenuOpen(false);
+    };
+
+    const handleShopMouseEnter = () => {
+        if (shopTimeoutRef.current) clearTimeout(shopTimeoutRef.current);
+        setIsShopHovered(true);
+    };
+
+    const handleShopMouseLeave = () => {
+        shopTimeoutRef.current = setTimeout(() => {
+            setIsShopHovered(false);
+        }, 150);
     };
 
     if (!mounted) return null;
@@ -95,10 +125,10 @@ export default function Navbar() {
 
     const isSanatva = siteName.toLowerCase().includes("sanatva");
 
-    // Nav items — only items with existing routes
+    // Nav items
     const navItems = [
         { label: "Home", href: "/", icon: Sparkles },
-        { label: "Shop", href: "/products", icon: Store, hasDropdown: false },
+        { label: "Shop", href: "/products", icon: Store, hasDropdown: true },
         { label: "Gift Boxes", href: "/bundles", icon: Gift },
     ];
 
@@ -113,11 +143,20 @@ export default function Navbar() {
         ...(isAdmin ? [{ label: "Admin Panel", href: "/admin" }] : []),
     ];
 
+    // Default shop dropdown categories
+    const shopCategories = [
+        { label: "All Products", href: "/products" },
+        ...categories.map(cat => ({
+            label: cat,
+            href: `/products?category=${encodeURIComponent(cat)}`,
+        })),
+    ];
+
     return (
         showNavbar && (
             <>
-                {/* Top Announcement Bar */}
-                <div className="fixed top-0 left-0 right-0 z-50 bg-olive-700 dark:bg-[#1a1a1a] text-white text-xs">
+                {/* Top Announcement Bar (desktop only) */}
+                <div className="hidden lg:block fixed top-0 left-0 right-0 z-50 bg-olive-700 dark:bg-[#1a1a1a] text-white text-xs">
                     <div className="container mx-auto px-4 lg:px-8">
                         <div className="flex items-center justify-between h-9">
                             {/* Left info */}
@@ -158,7 +197,7 @@ export default function Navbar() {
                 </div>
 
                 {/* Main Navbar */}
-                <header className="fixed top-9 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border">
+                <header className="fixed top-0 lg:top-9 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border">
                     <nav className="container mx-auto px-4 lg:px-8">
                         <div className="flex items-center justify-between h-16 lg:h-[68px]">
                             {/* Brand Logo */}
@@ -189,6 +228,53 @@ export default function Navbar() {
                                 {navItems.map((item) => {
                                     const Icon = item.icon;
                                     const active = isActive(item.href);
+
+                                    // Shop item with hover dropdown
+                                    if (item.hasDropdown) {
+                                        return (
+                                            <div
+                                                key={item.label}
+                                                className="relative"
+                                                ref={shopDropdownRef}
+                                                onMouseEnter={handleShopMouseEnter}
+                                                onMouseLeave={handleShopMouseLeave}
+                                            >
+                                                <Link
+                                                    href={item.href}
+                                                    className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                                                        active || isShopHovered
+                                                            ? "bg-olive-100 dark:bg-primary/15 text-olive-800 dark:text-primary"
+                                                            : "text-foreground/70 hover:text-foreground hover:bg-muted/60"
+                                                    }`}
+                                                >
+                                                    <Icon className="w-4 h-4" />
+                                                    {item.label}
+                                                    <ChevronDown
+                                                        className={`w-3.5 h-3.5 opacity-60 transition-transform duration-200 ${
+                                                            isShopHovered ? "rotate-180" : ""
+                                                        }`}
+                                                    />
+                                                </Link>
+
+                                                {/* Shop Dropdown */}
+                                                {isShopHovered && (
+                                                    <div className="absolute left-0 top-full mt-2 w-56 bg-card border border-border rounded-xl shadow-xl py-2 animate-fade-in-up">
+                                                        {shopCategories.map((cat) => (
+                                                            <Link
+                                                                key={cat.label}
+                                                                href={cat.href}
+                                                                className="block px-4 py-2.5 text-sm text-foreground/80 hover:text-primary hover:bg-muted/60 transition-colors capitalize"
+                                                                onClick={() => setIsShopHovered(false)}
+                                                            >
+                                                                {cat.label}
+                                                            </Link>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    }
+
                                     return (
                                         <Link
                                             key={item.label}
@@ -201,9 +287,6 @@ export default function Navbar() {
                                         >
                                             <Icon className="w-4 h-4" />
                                             {item.label}
-                                            {item.hasDropdown && (
-                                                <ChevronDown className="w-3.5 h-3.5 opacity-60" />
-                                            )}
                                         </Link>
                                     );
                                 })}
@@ -340,165 +423,97 @@ export default function Navbar() {
                             </div>
 
                             {/* Mobile Right Actions */}
-                            <div className="lg:hidden flex items-center gap-1">
+                            <div className="lg:hidden flex items-center gap-0.5">
                                 {/* Search */}
                                 <button className="p-2 rounded-full text-foreground/70 hover:text-foreground transition-colors">
                                     <Search className="w-5 h-5" />
                                 </button>
 
-                                {isAuthenticated && (
-                                    <>
-                                        {/* Cart */}
-                                        <Link
-                                            href="/cart"
-                                            className="relative p-2 rounded-full text-foreground/70 hover:text-foreground transition-colors"
-                                        >
-                                            <ShoppingBag className="w-5 h-5" />
-                                            {cartCount > 0 && (
-                                                <span className="absolute top-0 right-0 bg-red-500 text-white text-[9px] font-bold h-4 min-w-[16px] px-0.5 rounded-full flex items-center justify-center border-2 border-background">
-                                                    {cartCount}
-                                                </span>
-                                            )}
-                                        </Link>
-                                    </>
-                                )}
-
-                                {/* Hamburger */}
-                                <button
-                                    onClick={() => setIsMenuOpen(!isMenuOpen)}
-                                    className="p-2 rounded-full text-foreground/70 hover:text-foreground transition-colors"
-                                >
-                                    {isMenuOpen ? (
-                                        <X className="w-5 h-5" />
-                                    ) : (
-                                        <Menu className="w-5 h-5" />
+                                {/* Notification Bell */}
+                                <button className="relative p-2 rounded-full text-foreground/70 hover:text-foreground transition-colors">
+                                    <Bell className="w-5 h-5" />
+                                    {cartCount > 0 && (
+                                        <span className="absolute top-1 right-1 bg-red-500 text-white text-[8px] font-bold h-3.5 min-w-3.5 px-0.5 rounded-full flex items-center justify-center border border-background">
+                                            {cartCount}
+                                        </span>
                                     )}
                                 </button>
+
+                                {/* Cart */}
+                                <Link
+                                    href="/cart"
+                                    className="relative p-2 rounded-full text-foreground/70 hover:text-foreground transition-colors"
+                                >
+                                    <ShoppingBag className="w-5 h-5" />
+                                    {cartCount > 0 && (
+                                        <span className="absolute top-1 right-1 bg-red-500 text-white text-[8px] font-bold h-3.5 min-w-3.5 px-0.5 rounded-full flex items-center justify-center border border-background">
+                                            {cartCount}
+                                        </span>
+                                    )}
+                                </Link>
                             </div>
                         </div>
                     </nav>
-
-                    {/* Mobile Drawer */}
-                    {isMenuOpen && (
-                        <>
-                            {/* Backdrop */}
-                            <div
-                                className="lg:hidden fixed inset-0 top-[100px] bg-black/20 backdrop-blur-sm z-40"
-                                onClick={() => setIsMenuOpen(false)}
-                            />
-                            <div className="lg:hidden absolute left-0 right-0 top-full bg-card border-b border-border shadow-2xl z-50 animate-fade-in-up">
-                                <div className="container mx-auto px-4 py-4">
-                                    <div className="flex flex-col gap-1">
-                                        {navItems.map((item) => {
-                                            const Icon = item.icon;
-                                            const active = isActive(item.href);
-                                            return (
-                                                <Link
-                                                    key={item.label}
-                                                    href={item.href}
-                                                    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium transition-colors ${
-                                                        active
-                                                            ? "bg-olive-100 dark:bg-primary/15 text-olive-800 dark:text-primary"
-                                                            : "text-foreground/80 hover:text-foreground hover:bg-muted/50"
-                                                    }`}
-                                                    onClick={() => setIsMenuOpen(false)}
-                                                >
-                                                    <Icon className="w-5 h-5" />
-                                                    {item.label}
-                                                </Link>
-                                            );
-                                        })}
-
-                                        {isAuthenticated && (
-                                            <>
-                                                <div className="h-px bg-border my-2" />
-                                                <Link
-                                                    href="/orders"
-                                                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-foreground/80 hover:text-foreground hover:bg-muted/50 transition-colors"
-                                                    onClick={() => setIsMenuOpen(false)}
-                                                >
-                                                    <Truck className="w-5 h-5" />
-                                                    Track Orders
-                                                </Link>
-                                                <Link
-                                                    href="/account"
-                                                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-foreground/80 hover:text-foreground hover:bg-muted/50 transition-colors"
-                                                    onClick={() => setIsMenuOpen(false)}
-                                                >
-                                                    <User className="w-5 h-5" />
-                                                    My Account
-                                                </Link>
-                                                {user?.role === "admin" && (
-                                                    <Link
-                                                        href="/admin"
-                                                        className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-foreground/80 hover:text-foreground hover:bg-muted/50 transition-colors"
-                                                        onClick={() => setIsMenuOpen(false)}
-                                                    >
-                                                        <LayoutGrid className="w-5 h-5" />
-                                                        Admin Panel
-                                                    </Link>
-                                                )}
-                                                <div className="h-px bg-border my-2" />
-                                                <button
-                                                    onClick={() => {
-                                                        handleLogout();
-                                                        setIsMenuOpen(false);
-                                                    }}
-                                                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-destructive hover:bg-muted/50 transition-colors text-left"
-                                                >
-                                                    Sign Out
-                                                </button>
-                                            </>
-                                        )}
-
-                                        {!isAuthenticated && (
-                                            <>
-                                                <div className="h-px bg-border my-2" />
-                                                <div className="flex flex-col gap-2 px-2">
-                                                    <Link
-                                                        href="/login"
-                                                        onClick={() => setIsMenuOpen(false)}
-                                                    >
-                                                        <button className="w-full py-3 rounded-xl border border-border text-foreground font-medium hover:bg-muted/50 transition-colors">
-                                                            Login
-                                                        </button>
-                                                    </Link>
-                                                    <Link
-                                                        href="/products"
-                                                        onClick={() => setIsMenuOpen(false)}
-                                                    >
-                                                        <button className="w-full py-3 rounded-xl bg-olive-700 dark:bg-primary text-white dark:text-primary-foreground font-semibold hover:bg-olive-800 dark:hover:bg-primary/90 transition-colors">
-                                                            Shop Now
-                                                        </button>
-                                                    </Link>
-                                                </div>
-                                            </>
-                                        )}
-
-                                        {/* Theme toggle in mobile */}
-                                        <div className="h-px bg-border my-2" />
-                                        <button
-                                            onClick={() =>
-                                                setTheme(theme === "dark" ? "light" : "dark")
-                                            }
-                                            className="flex items-center gap-3 px-4 py-3 rounded-xl text-base font-medium text-foreground/80 hover:text-foreground hover:bg-muted/50 transition-colors"
-                                        >
-                                            {theme === "dark" ? (
-                                                <Sun className="w-5 h-5" />
-                                            ) : (
-                                                <Moon className="w-5 h-5" />
-                                            )}
-                                            {theme === "dark" ? "Light Mode" : "Dark Mode"}
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </>
-                    )}
                 </header>
 
-                {/* Spacer for fixed navbar (announcement bar 36px + navbar 64px/68px) */}
-                <div className="h-[100px] lg:h-26" />
+                {/* Spacer for fixed navbar (mobile: 64px, desktop: announcement 36px + navbar 68px) */}
+                <div className="h-16 lg:h-26" />
+
+                {/* Mobile Bottom Navigation Bar */}
+                <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-t border-border safe-area-bottom">
+                    <div className="flex items-center justify-around h-16 px-2">
+                        {/* Home */}
+                        <Link
+                            href="/"
+                            className={`flex flex-col items-center justify-center gap-0.5 flex-1 py-2 ${
+                                isActive("/")
+                                    ? "text-olive-700 dark:text-primary"
+                                    : "text-muted-foreground"
+                            }`}
+                        >
+                            <Home className="w-5 h-5" />
+                            <span className="text-[10px] font-medium">Home</span>
+                        </Link>
+
+                        {/* Shop */}
+                        <Link
+                            href="/products"
+                            className={`flex flex-col items-center justify-center gap-0.5 flex-1 py-2 ${
+                                isActive("/products")
+                                    ? "text-olive-700 dark:text-primary"
+                                    : "text-muted-foreground"
+                            }`}
+                        >
+                            <Store className="w-5 h-5" />
+                            <span className="text-[10px] font-medium">Shop</span>
+                        </Link>
+
+                        {/* Wishlist */}
+                        <Link
+                            href={isAuthenticated ? "/account" : "/login"}
+                            className={`flex flex-col items-center justify-center gap-0.5 flex-1 py-2 text-muted-foreground`}
+                        >
+                            <Heart className="w-5 h-5" />
+                            <span className="text-[10px] font-medium">Wishlist</span>
+                        </Link>
+
+                        {/* Profile */}
+                        <Link
+                            href={isAuthenticated ? "/account" : "/login"}
+                            className={`flex flex-col items-center justify-center gap-0.5 flex-1 py-2 ${
+                                isActive("/account") || isActive("/login")
+                                    ? "text-olive-700 dark:text-primary"
+                                    : "text-muted-foreground"
+                            }`}
+                        >
+                            <User className="w-5 h-5" />
+                            <span className="text-[10px] font-medium">Profile</span>
+                        </Link>
+                    </div>
+                </div>
+
+                {/* Bottom nav spacer for mobile */}
+                <div className="lg:hidden h-16" />
             </>
         )
     );
