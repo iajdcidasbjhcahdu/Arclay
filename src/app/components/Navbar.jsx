@@ -124,7 +124,7 @@ export default function Navbar() {
         return pathname.startsWith(path);
     };
 
-    const isSanatva = siteName.toLowerCase().includes("sanatva");
+    const isLogoSite = process.env.NEXT_PUBLIC_SITE_LOGO;
 
     // Nav items
     const navItems = [
@@ -203,8 +203,8 @@ export default function Navbar() {
                         <div className="flex items-center justify-between h-[72px] lg:h-[68px]">
                             {/* Brand Logo */}
                             <Link href="/" className="flex items-center gap-2.5 group shrink-0">
-                                {isSanatva ? (
-                                    <img src="sanatvaLogo.png" className="h-12" alt={siteName} />
+                                {isLogoSite ? (
+                                    <img src={isLogoSite} className="h-12" alt={siteName} />
                                 ) : (
                                     <>
                                         {/* Logo Icon */}

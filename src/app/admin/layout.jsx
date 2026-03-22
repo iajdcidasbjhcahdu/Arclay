@@ -10,6 +10,7 @@ const siteName = process.env.NEXT_PUBLIC_SITE_NAME || "ESSVORA";
 const navItems = [
     { href: "/admin", label: "Dashboard", icon: "📊" },
     { href: "/admin/orders", label: "Orders", icon: "🛍️" },
+    { href: "/admin/pos", label: "POS", icon: "💳" },
     { href: "/admin/products", label: "Products", icon: "📦" },
     { href: "/admin/product-ads", label: "Product Ads", icon: "📢" },
     { href: "/admin/categories", label: "Categories", icon: "🏷️" },
