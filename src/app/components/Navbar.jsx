@@ -197,25 +197,25 @@ export default function Navbar() {
                 </div>
 
                 {/* Main Navbar */}
-                <header className="fixed top-0 lg:top-9 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border">
+                <header className="fixed top-0 lg:top-9 left-0 right-0 z-50 bg-[#fdfbf7] lg:bg-background/95 lg:backdrop-blur-md border-b-0 lg:border-b border-border transition-all">
                     <nav className="container mx-auto px-4 lg:px-8">
-                        <div className="flex items-center justify-between h-16 lg:h-[68px]">
+                        <div className="flex items-center justify-between h-[72px] lg:h-[68px]">
                             {/* Brand Logo */}
-                            <Link href="/" className="flex items-center gap-3 group shrink-0">
+                            <Link href="/" className="flex items-center gap-2.5 group shrink-0">
                                 {isSanatva ? (
                                     <img src="sanatvaLogo.png" className="h-12" alt={siteName} />
                                 ) : (
                                     <>
                                         {/* Logo Icon */}
-                                        <div className="w-10 h-10 lg:w-11 lg:h-11 rounded-xl bg-olive-700 dark:bg-primary flex items-center justify-center shadow-sm">
+                                        <div className="w-9 h-9 lg:w-11 lg:h-11 rounded-[10px] lg:rounded-xl bg-[#6b7b5c] lg:bg-olive-700 dark:bg-primary flex items-center justify-center shadow-sm">
                                             <Sparkles className="w-5 h-5 lg:w-5.5 lg:h-5.5 text-white dark:text-primary-foreground" />
                                         </div>
                                         {/* Brand Text */}
                                         <div className="flex flex-col">
-                                            <span className="text-lg lg:text-xl font-bold text-foreground leading-tight tracking-tight">
+                                            <span className="font-serif text-[22px] lg:font-sans lg:text-xl font-bold text-[#2d2d2d] dark:text-foreground leading-none tracking-tight">
                                                 {siteName}
                                             </span>
-                                            <span className="hidden lg:block text-[11px] text-primary dark:text-primary leading-none tracking-wide">
+                                            <span className="hidden lg:block text-[11px] text-primary dark:text-primary leading-none tracking-wide mt-1">
                                                 {getBrandTagline()}
                                             </span>
                                         </div>
@@ -423,30 +423,29 @@ export default function Navbar() {
                             </div>
 
                             {/* Mobile Right Actions */}
-                            <div className="lg:hidden flex items-center gap-0.5">
+                            <div className="lg:hidden flex items-center gap-2">
                                 {/* Search */}
-                                <button className="p-2 rounded-full text-foreground/70 hover:text-foreground transition-colors">
-                                    <Search className="w-5 h-5" />
+                                <button className="w-10 h-10 bg-white dark:bg-secondary rounded-full border border-border/40 shadow-sm flex flex-col items-center justify-center text-foreground transition-colors">
+                                    <Search className="w-4 h-4 text-muted-foreground" />
                                 </button>
 
                                 {/* Notification Bell */}
-                                <button className="relative p-2 rounded-full text-foreground/70 hover:text-foreground transition-colors">
-                                    <Bell className="w-5 h-5" />
-                                    {cartCount > 0 && (
-                                        <span className="absolute top-1 right-1 bg-red-500 text-white text-[8px] font-bold h-3.5 min-w-3.5 px-0.5 rounded-full flex items-center justify-center border border-background">
-                                            {cartCount}
-                                        </span>
-                                    )}
+                                <button className="relative w-10 h-10 bg-white dark:bg-secondary rounded-full border border-border/40 shadow-sm flex flex-col items-center justify-center text-foreground transition-colors">
+                                    <Bell className="w-4 h-4 text-muted-foreground" />
+                                    {/* Mockup explicitly shows 2 */}
+                                    <span className="absolute -top-1 -right-1 bg-[#e25d43] text-white text-[10px] font-bold h-4 min-w-[16px] px-0.5 rounded-full flex items-center justify-center border-[1.5px] border-white dark:border-secondary">
+                                        2
+                                    </span>
                                 </button>
 
                                 {/* Cart */}
                                 <Link
                                     href="/cart"
-                                    className="relative p-2 rounded-full text-foreground/70 hover:text-foreground transition-colors"
+                                    className="relative w-10 h-10 bg-white dark:bg-secondary rounded-full border border-border/40 shadow-sm flex flex-col items-center justify-center text-foreground transition-colors"
                                 >
-                                    <ShoppingBag className="w-5 h-5" />
+                                    <ShoppingBag className="w-4 h-4 text-muted-foreground" />
                                     {cartCount > 0 && (
-                                        <span className="absolute top-1 right-1 bg-red-500 text-white text-[8px] font-bold h-3.5 min-w-3.5 px-0.5 rounded-full flex items-center justify-center border border-background">
+                                        <span className="absolute -top-1 -right-1 bg-[#e25d43] text-white text-[10px] font-bold h-4 min-w-[16px] px-0.5 rounded-full flex items-center justify-center border-[1.5px] border-white dark:border-secondary">
                                             {cartCount}
                                         </span>
                                     )}
@@ -460,54 +459,54 @@ export default function Navbar() {
                 <div className="h-16 lg:h-26" />
 
                 {/* Mobile Bottom Navigation Bar */}
-                <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-t border-border safe-area-bottom">
-                    <div className="flex items-center justify-around h-16 px-2">
+                <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-card border-t border-border/30 shadow-[0_-4px_25px_rgba(0,0,0,0.04)] safe-area-bottom pb-1">
+                    <div className="flex items-center justify-around h-[70px] px-2.5">
                         {/* Home */}
                         <Link
                             href="/"
-                            className={`flex flex-col items-center justify-center gap-0.5 flex-1 py-2 ${
+                            className={`flex flex-col items-center justify-center gap-1 min-w-[70px] h-[52px] rounded-[18px] transition-colors ${
                                 isActive("/")
-                                    ? "text-olive-700 dark:text-primary"
-                                    : "text-muted-foreground"
+                                    ? "bg-[#ecf0e6] dark:bg-primary/20 text-[#6b7b5c] dark:text-primary"
+                                    : "text-muted-foreground/80 hover:bg-muted/30"
                             }`}
                         >
-                            <Home className="w-5 h-5" />
-                            <span className="text-[10px] font-medium">Home</span>
+                            <Home className="w-[20px] h-[20px]" />
+                            <span className="text-[10px] font-semibold">Home</span>
                         </Link>
 
                         {/* Shop */}
                         <Link
                             href="/products"
-                            className={`flex flex-col items-center justify-center gap-0.5 flex-1 py-2 ${
+                            className={`flex flex-col items-center justify-center gap-1 min-w-[70px] h-[52px] rounded-[18px] transition-colors ${
                                 isActive("/products")
-                                    ? "text-olive-700 dark:text-primary"
-                                    : "text-muted-foreground"
+                                    ? "bg-[#ecf0e6] dark:bg-primary/20 text-[#6b7b5c] dark:text-primary"
+                                    : "text-muted-foreground/80 hover:bg-muted/30"
                             }`}
                         >
-                            <Store className="w-5 h-5" />
-                            <span className="text-[10px] font-medium">Shop</span>
+                            <Store className="w-[20px] h-[20px]" />
+                            <span className="text-[10px] font-semibold">Shop</span>
                         </Link>
 
                         {/* Wishlist */}
                         <Link
                             href={isAuthenticated ? "/account" : "/login"}
-                            className={`flex flex-col items-center justify-center gap-0.5 flex-1 py-2 text-muted-foreground`}
+                            className={`flex flex-col items-center justify-center gap-1 min-w-[70px] h-[52px] rounded-[18px] transition-colors text-muted-foreground/80 hover:bg-muted/30`}
                         >
-                            <Heart className="w-5 h-5" />
-                            <span className="text-[10px] font-medium">Wishlist</span>
+                            <Heart className="w-[20px] h-[20px]" />
+                            <span className="text-[10px] font-semibold">Wishlist</span>
                         </Link>
 
                         {/* Profile */}
                         <Link
                             href={isAuthenticated ? "/account" : "/login"}
-                            className={`flex flex-col items-center justify-center gap-0.5 flex-1 py-2 ${
+                            className={`flex flex-col items-center justify-center gap-1 min-w-[70px] h-[52px] rounded-[18px] transition-colors ${
                                 isActive("/account") || isActive("/login")
-                                    ? "text-olive-700 dark:text-primary"
-                                    : "text-muted-foreground"
+                                    ? "bg-[#ecf0e6] dark:bg-primary/20 text-[#6b7b5c] dark:text-primary"
+                                    : "text-muted-foreground/80 hover:bg-muted/30"
                             }`}
                         >
-                            <User className="w-5 h-5" />
-                            <span className="text-[10px] font-medium">Profile</span>
+                            <User className="w-[20px] h-[20px]" />
+                            <span className="text-[10px] font-semibold">Profile</span>
                         </Link>
                     </div>
                 </div>

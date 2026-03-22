@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import ProductCard from "@/app/components/ProductCard";
-import { Search, SlidersHorizontal, Grid3X3, List, ChevronDown, X, ArrowLeft } from "lucide-react";
+import { Search, SlidersHorizontal, Grid3X3, List, ChevronDown, X, ArrowLeft, ShoppingBag } from "lucide-react";
 
 export default function ProductsPage() {
     const router = useRouter();
@@ -78,45 +79,47 @@ export default function ProductsPage() {
     ];
 
     return (
-        <main className="min-h-screen bg-background">
+        <main className="min-h-screen bg-[#fdfbf7] dark:bg-background lg:bg-background">
 
             {/* === MOBILE LAYOUT === */}
             <div className="lg:hidden">
-                {/* Mobile Search Bar */}
-                <div className="sticky top-25 z-30 bg-background px-4 pt-3 pb-2">
-                    <div className="flex items-center gap-3">
+                {/* Mobile Sticky Toolbar (Search + Categories) */}
+                <div className="sticky top-16 z-30 bg-[#fdfbf7] dark:bg-background pb-2">
+                    {/* Mobile Search Bar */}
+                    <div className="px-4 pt-4 pb-2 flex items-center gap-3">
                         <button
                             onClick={() => router.back()}
-                            className="shrink-0 w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:bg-muted transition-colors"
+                            className="shrink-0 w-11 h-11 bg-white dark:bg-secondary rounded-full border border-border/40 flex items-center justify-center text-foreground shadow-sm transition-colors"
                         >
-                            <ArrowLeft className="w-5 h-5" />
+                            <ArrowLeft className="w-5 h-5 text-muted-foreground" />
                         </button>
-                        <form onSubmit={handleSearch} className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <form onSubmit={handleSearch} className="relative flex-1 text-[15px]">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground/80" />
                             <input
                                 type="text"
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
                                 placeholder="Search products..."
-                                className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-border bg-background text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                                className="w-full pl-[46px] pr-4 py-3 rounded-full bg-white dark:bg-secondary border border-border/40 text-foreground placeholder:text-muted-foreground focus:outline-none shadow-sm transition-all"
                             />
                         </form>
+                        <Link href="/cart" className="shrink-0 w-11 h-11 bg-white dark:bg-secondary rounded-full border border-border/40 flex items-center justify-center text-foreground shadow-sm transition-colors relative">
+                            <ShoppingBag className="w-5 h-5 text-muted-foreground" />
+                        </Link>
                     </div>
-                </div>
 
-                {/* Mobile Category Pills - Horizontal Scroll */}
-                <div className="sticky top-39 z-30 bg-background border-b border-border">
+                    {/* Mobile Category Pills - Horizontal Scroll */}
                     <div
                         ref={categoryScrollRef}
-                        className="flex gap-2 px-4 py-3 overflow-x-auto scrollbar-hide"
+                        className="flex gap-2.5 px-4 pt-1 pb-3 overflow-x-auto scrollbar-hide"
                         style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}
                     >
                         <button
                             onClick={() => setSelectedCategory("")}
-                            className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
+                            className={`shrink-0 px-5 py-2.5 rounded-full text-[15px] font-medium transition-colors ${
                                 selectedCategory === ""
-                                    ? "bg-olive-700 dark:bg-primary text-white dark:text-primary-foreground border-olive-700 dark:border-primary"
-                                    : "bg-background text-foreground border-border hover:bg-muted"
+                                    ? "bg-[#6b7b5c] text-white shadow-sm"
+                                    : "bg-[#fcf6eb] dark:bg-secondary/60 text-[#4a553c] dark:text-foreground hover:bg-[#f3eedd] dark:hover:bg-secondary"
                             }`}
                         >
                             All Products
@@ -125,10 +128,10 @@ export default function ProductsPage() {
                             <button
                                 key={cat._id}
                                 onClick={() => setSelectedCategory(cat._id)}
-                                className={`shrink-0 px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
+                                className={`shrink-0 px-5 py-2.5 rounded-full text-[15px] font-medium transition-colors ${
                                     selectedCategory === cat._id
-                                        ? "bg-olive-700 dark:bg-primary text-white dark:text-primary-foreground border-olive-700 dark:border-primary"
-                                        : "bg-background text-foreground border-border hover:bg-muted"
+                                        ? "bg-[#6b7b5c] text-white shadow-sm"
+                                        : "bg-[#fcf6eb] dark:bg-secondary/60 text-[#4a553c] dark:text-foreground hover:bg-[#f3eedd] dark:hover:bg-secondary"
                                 }`}
                             >
                                 {cat.name}
@@ -138,35 +141,35 @@ export default function ProductsPage() {
                 </div>
 
                 {/* Mobile Toolbar: count + filter + view */}
-                <div className="flex items-center justify-between px-4 py-3">
-                    <p className="text-muted-foreground text-sm">
+                <div className="flex items-center justify-between px-4 py-4">
+                    <p className="text-muted-foreground text-[15px]">
                         {pagination.total} product{pagination.total !== 1 ? "s" : ""}
                     </p>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-3">
                         <button
                             onClick={() => setShowMobileFilters(true)}
-                            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border text-sm font-medium text-foreground hover:bg-muted transition-colors"
+                            className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-secondary rounded-full shadow-sm border border-border/50 text-[15px] font-medium text-foreground"
                         >
-                            <SlidersHorizontal className="w-4 h-4" />
+                            <SlidersHorizontal className="w-[15px] h-[15px] text-muted-foreground" />
                             Filter
                         </button>
-                        <div className="flex items-center border border-border rounded-xl overflow-hidden">
+                        <div className="flex items-center bg-white dark:bg-secondary rounded-full shadow-sm border border-border/50 p-1">
                             <button
                                 onClick={() => setViewMode("grid")}
-                                className={`p-2 transition-colors ${
+                                className={`p-1.5 rounded-full transition-colors ${
                                     viewMode === "grid"
-                                        ? "bg-foreground text-background"
-                                        : "text-muted-foreground hover:bg-muted"
+                                        ? "bg-[#e8ece1] dark:bg-primary/20 text-[#6b7b5c] dark:text-primary"
+                                        : "text-muted-foreground"
                                 }`}
                             >
                                 <Grid3X3 className="w-4 h-4" />
                             </button>
                             <button
                                 onClick={() => setViewMode("list")}
-                                className={`p-2 transition-colors ${
+                                className={`p-1.5 rounded-full transition-colors ${
                                     viewMode === "list"
-                                        ? "bg-foreground text-background"
-                                        : "text-muted-foreground hover:bg-muted"
+                                        ? "bg-[#e8ece1] dark:bg-primary/20 text-[#6b7b5c] dark:text-primary"
+                                        : "text-muted-foreground"
                                 }`}
                             >
                                 <List className="w-4 h-4" />

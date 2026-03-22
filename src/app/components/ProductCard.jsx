@@ -29,8 +29,8 @@ export default function ProductCard({ product, viewMode = "grid" }) {
     // Status badge: Bestseller (featured) or New or Hot
     const getStatusBadge = () => {
         if (product.isFeatured) return { label: "Bestseller", color: "bg-red-500" };
-        if (!hasSale && inStock) return { label: "New", color: "bg-emerald-500" };
-        if (hasSale && inStock) return { label: "Hot", color: "bg-orange-500" };
+        if (!hasSale && inStock) return { label: "New", color: "bg-[#7ba05b]" };
+        if (hasSale && inStock) return { label: "Hot", color: "bg-[#e25d43]" };
         if (!inStock) return { label: "Out of Stock", color: "bg-gray-700" };
         return null;
     };
@@ -81,38 +81,38 @@ export default function ProductCard({ product, viewMode = "grid" }) {
     return (
         <Link
             href={`/products/${product._id}`}
-            className="group flex flex-col bg-card rounded-2xl overflow-hidden border border-border hover:shadow-lg transition-all duration-300"
+            className="group flex flex-col bg-white dark:bg-card rounded-[24px] overflow-hidden shadow-[0_0_15px_rgba(0,0,0,0.03)] border border-border/20 lg:border-border hover:shadow-lg transition-all duration-300 relative"
         >
             {/* Image */}
-            <div className="relative aspect-square overflow-hidden bg-cream-100 dark:bg-secondary">
+            <div className="relative aspect-[1.1/1] overflow-hidden bg-[#f4f1ea] dark:bg-secondary">
                 {product.images?.[0] ? (
                     <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                 ) : (
-                    <div className="w-full h-full flex items-center justify-center text-4xl opacity-20">📦</div>
+                    <div className="w-full h-full flex items-center justify-center text-4xl opacity-20 absolute inset-0">📦</div>
                 )}
 
                 {/* Status Badge — top left */}
                 {statusBadge && (
-                    <span className={`absolute top-2.5 left-2.5 ${statusBadge.color} text-white text-[11px] font-bold px-2.5 py-1 rounded-lg shadow-sm`}>
+                    <span className={`absolute top-3 left-3 ${statusBadge.color} text-white text-[11px] font-medium px-3 py-1 rounded-full shadow-sm`}>
                         {statusBadge.label}
                     </span>
                 )}
 
                 {/* Discount Badge — top right */}
                 {hasSale && discountPercent > 0 && (
-                    <span className="absolute top-2.5 right-2.5 bg-emerald-600 text-white text-[11px] font-bold px-2.5 py-1 rounded-lg shadow-sm">
+                    <span className="absolute top-3 right-3 bg-[#f0a500] text-white text-[11px] font-medium px-3 py-1 rounded-full shadow-sm">
                         {discountPercent}% OFF
                     </span>
                 )}
             </div>
 
             {/* Info */}
-            <div className="p-3 lg:p-4 flex flex-col flex-1">
-                <h3 className="font-semibold text-sm lg:text-[15px] text-foreground leading-snug group-hover:text-primary transition-colors line-clamp-1">
+            <div className="p-3.5 lg:p-4 flex flex-col flex-1">
+                <h3 className="font-serif text-[16px] lg:text-[17px] font-medium text-foreground leading-snug group-hover:text-primary transition-colors line-clamp-1">
                     {product.name}
                 </h3>
                 {product.description && (
-                    <p className="text-xs lg:text-[13px] text-muted-foreground mt-0.5 lg:mt-1 line-clamp-1">
+                    <p className="text-[12px] lg:text-[13px] text-muted-foreground mt-0.5 line-clamp-1">
                         {product.description}
                     </p>
                 )}
@@ -128,15 +128,15 @@ export default function ProductCard({ product, viewMode = "grid" }) {
                 )}
 
                 {/* Price + Cart Button */}
-                <div className="flex items-center justify-between mt-2 lg:mt-2.5">
+                <div className="flex items-end justify-between mt-3">
                     <div className="flex items-baseline gap-1.5">
-                        <span className="text-base lg:text-lg font-bold text-foreground">₹{price}</span>
+                        <span className="text-[17px] lg:text-[19px] font-extrabold text-[#2d2d2d] dark:text-foreground">₹{price}</span>
                         {hasSale && originalPrice && (
-                            <span className="text-xs lg:text-sm text-muted-foreground line-through">₹{originalPrice}</span>
+                            <span className="text-[13px] text-muted-foreground line-through font-medium">₹{originalPrice}</span>
                         )}
                     </div>
-                    <div className="w-8 h-8 rounded-xl bg-olive-100 dark:bg-primary/15 text-olive-600 dark:text-primary flex items-center justify-center hover:bg-olive-500 hover:text-white dark:hover:bg-primary dark:hover:text-primary-foreground transition-colors">
-                        <ShoppingBag className="w-4 h-4" />
+                    <div className="w-9 h-9 rounded-full bg-[#e8ece1] dark:bg-primary/20 text-[#4c5d3d] dark:text-primary flex items-center justify-center hover:bg-[#6b7b5c] hover:text-white dark:hover:bg-primary dark:hover:text-primary-foreground transition-colors shadow-sm">
+                        <ShoppingBag className="w-[18px] h-[18px]" />
                     </div>
                 </div>
             </div>

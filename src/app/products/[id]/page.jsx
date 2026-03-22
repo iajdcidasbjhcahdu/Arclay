@@ -228,7 +228,7 @@ export default function ProductDetailPage({ params }) {
             {/* ============ MOBILE LAYOUT ============ */}
             <div className="lg:hidden">
                 {/* Mobile Top Bar */}
-                <div className="sticky top-25 z-30 bg-background/95 backdrop-blur-sm px-4 py-3">
+                <div className="sticky top-16 z-30 bg-background/95 backdrop-blur-sm px-4 py-3">
                     <div className="flex items-center justify-between">
                         <button
                             onClick={() => router.back()}
