@@ -83,35 +83,13 @@ export default function ProductsPage() {
 
             {/* === MOBILE LAYOUT === */}
             <div className="lg:hidden">
-                {/* Mobile Sticky Toolbar (Search + Categories) */}
-                <div className="sticky top-16 z-30 bg-[#fdfbf7] dark:bg-background pb-2">
-                    {/* Mobile Search Bar */}
-                    <div className="px-4 pt-4 pb-2 flex items-center gap-3">
-                        <button
-                            onClick={() => router.back()}
-                            className="shrink-0 w-11 h-11 bg-white dark:bg-secondary rounded-full border border-border/40 flex items-center justify-center text-foreground shadow-sm transition-colors"
-                        >
-                            <ArrowLeft className="w-5 h-5 text-muted-foreground" />
-                        </button>
-                        <form onSubmit={handleSearch} className="relative flex-1 text-[15px]">
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground/80" />
-                            <input
-                                type="text"
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                placeholder="Search products..."
-                                className="w-full pl-[46px] pr-4 py-3 rounded-full bg-white dark:bg-secondary border border-border/40 text-foreground placeholder:text-muted-foreground focus:outline-none shadow-sm transition-all"
-                            />
-                        </form>
-                        <Link href="/cart" className="shrink-0 w-11 h-11 bg-white dark:bg-secondary rounded-full border border-border/40 flex items-center justify-center text-foreground shadow-sm transition-colors relative">
-                            <ShoppingBag className="w-5 h-5 text-muted-foreground" />
-                        </Link>
-                    </div>
+                {/* Mobile Sticky Toolbar (Categories) - Sticks below fixed navbar (72px) */}
+                <div className="sticky top-[72px] z-30 bg-[#fdfbf7] dark:bg-background pb-3 pt-4">
 
                     {/* Mobile Category Pills - Horizontal Scroll */}
                     <div
                         ref={categoryScrollRef}
-                        className="flex gap-2.5 px-4 pt-1 pb-3 overflow-x-auto scrollbar-hide"
+                        className="flex gap-3 px-4 pt-2 pb-4 overflow-x-auto scrollbar-hide"
                         style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}
                     >
                         <button
@@ -141,7 +119,7 @@ export default function ProductsPage() {
                 </div>
 
                 {/* Mobile Toolbar: count + filter + view */}
-                <div className="flex items-center justify-between px-4 py-4">
+                <div className="flex items-center justify-between px-4 py-5 mb-2">
                     <p className="text-muted-foreground text-[15px]">
                         {pagination.total} product{pagination.total !== 1 ? "s" : ""}
                     </p>

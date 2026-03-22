@@ -101,14 +101,15 @@ export default function CartPage() {
     }
 
     return (
-        <div className="min-h-screen bg-background py-12 pt-4">
+        <div className="min-h-screen bg-[#fdfbf7] dark:bg-background pb-12 pt-6">
             <div className="max-w-7xl mx-auto px-4">
                 {/* Header */}
-                <div className="mb-8">
+                <div className="mb-10">
                     <h1 className="font-serif text-4xl font-bold text-foreground">
                         Shopping Cart
                     </h1>
-                    <p className="text-muted-foreground mt-2">
+                    <div className="h-1 w-20 bg-[#6b7b5c] rounded-full mt-4 mb-3" />
+                    <p className="text-muted-foreground">
                         {cart?.itemCount || 0} item(s) in your cart
                     </p>
                 </div>

@@ -29,10 +29,10 @@ function CategoryPills() {
     }, []);
 
     return (
-        <div className="px-4 py-5 bg-[#fdfbf7] dark:bg-background">
+        <div className="px-4 pt-6 pb-2 bg-[#fdfbf7] dark:bg-background">
             <div
                 ref={scrollRef}
-                className="flex gap-2.5 overflow-x-auto no-scrollbar"
+                className="flex gap-3 px-1 pt-2 pb-6 overflow-x-auto no-scrollbar"
                 style={{ scrollbarWidth: "none", msOverflowStyle: "none", WebkitOverflowScrolling: "touch" }}
             >
                 <Link

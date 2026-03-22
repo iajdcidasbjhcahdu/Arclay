@@ -61,7 +61,7 @@ export default function MyOrdersPage() {
     }
 
     return (
-        <div className="min-h-screen bg-background py-12 pt-4">
+        <div className="min-h-screen bg-background pb-12">
             <div className="max-w-7xl mx-auto px-4">
                 <h1 className="font-serif text-4xl font-bold text-foreground mb-8">
                     My Orders

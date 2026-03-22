@@ -7,7 +7,8 @@ import { useUser } from "@/context/UserContext";
 import { Button } from "@/components/ui/button";
 import ProductCard from "@/app/components/ProductCard";
 import { toast } from "react-toastify";
-import { ArrowLeft, Heart, Share2, ShoppingBag, Star, Truck, Shield, RotateCcw, Leaf } from "lucide-react";
+import { useTheme } from "next-themes";
+import { ArrowLeft, Heart, Share2, ShoppingBag, Star, Truck, Shield, RotateCcw, Leaf, Moon, Sun } from "lucide-react";
 
 export default function ProductDetailPage({ params }) {
     const { id } = use(params);
@@ -227,37 +228,8 @@ export default function ProductDetailPage({ params }) {
 
             {/* ============ MOBILE LAYOUT ============ */}
             <div className="lg:hidden">
-                {/* Mobile Top Bar */}
-                <div className="sticky top-16 z-30 bg-background/95 backdrop-blur-sm px-4 py-3">
-                    <div className="flex items-center justify-between">
-                        <button
-                            onClick={() => router.back()}
-                            className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:bg-muted transition-colors"
-                        >
-                            <ArrowLeft className="w-5 h-5" />
-                        </button>
-                        <div className="flex items-center gap-2">
-                            <button className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:bg-muted transition-colors">
-                                <Heart className="w-5 h-5" />
-                            </button>
-                            <button
-                                onClick={handleShare}
-                                className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:bg-muted transition-colors"
-                            >
-                                <Share2 className="w-5 h-5" />
-                            </button>
-                            <Link
-                                href="/cart"
-                                className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-foreground hover:bg-muted transition-colors"
-                            >
-                                <ShoppingBag className="w-5 h-5" />
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-
                 {/* Mobile Image */}
-                <div className="px-4 mb-4">
+                <div className="px-4 mb-4 mt-4">
                     <div className="relative aspect-square rounded-2xl overflow-hidden bg-cream-100 dark:bg-secondary">
                         {product.images?.[selectedImage] ? (
                             <img src={product.images[selectedImage]} alt={product.name} className="w-full h-full object-cover" />
@@ -588,8 +560,8 @@ export default function ProductDetailPage({ params }) {
                     )}
                 </div>
 
-                {/* Mobile Sticky Add to Cart */}
-                <div className="sticky bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border px-4 py-3 z-30">
+                {/* Mobile Sticky Add to Cart - fixed above bottom nav */}
+                <div className="fixed bottom-[70px] left-0 right-0 bg-background/95 backdrop-blur-md border-t border-border px-4 py-3 z-40 shadow-[0_-4px_15px_rgba(0,0,0,0.08)]">
                     <div className="flex items-center gap-3">
                         <div className="flex-1">
                             <span className="text-xl font-bold text-foreground">₹{priceInfo.price * quantity}</span>
@@ -605,6 +577,8 @@ export default function ProductDetailPage({ params }) {
                         </button>
                     </div>
                 </div>
+                {/* Spacer so content isn't hidden behind fixed Add to Cart + bottom nav */}
+                <div className="h-36" />
             </div>
 
             {/* ============ DESKTOP LAYOUT ============ */}

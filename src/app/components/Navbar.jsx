@@ -430,34 +430,26 @@ export default function Navbar() {
                                     <Search className="w-4 h-4 text-muted-foreground" />
                                 </button>
 
-                                {/* Notification Bell */}
-                                <button className="relative w-10 h-10 bg-white dark:bg-secondary rounded-full border border-border/40 shadow-sm flex flex-col items-center justify-center text-foreground transition-colors">
-                                    <Bell className="w-4 h-4 text-muted-foreground" />
-                                    {/* Mockup explicitly shows 2 */}
-                                    <span className="absolute -top-1 -right-1 bg-[#e25d43] text-white text-[10px] font-bold h-4 min-w-[16px] px-0.5 rounded-full flex items-center justify-center border-[1.5px] border-white dark:border-secondary">
-                                        2
-                                    </span>
-                                </button>
 
-                                {/* Cart */}
-                                <Link
-                                    href="/cart"
-                                    className="relative w-10 h-10 bg-white dark:bg-secondary rounded-full border border-border/40 shadow-sm flex flex-col items-center justify-center text-foreground transition-colors"
+                                {/* Theme Toggle */}
+                                <button
+                                    onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                                    aria-label="Toggle Theme"
+                                    className="w-10 h-10 bg-white dark:bg-secondary rounded-full border border-border/40 shadow-sm flex items-center justify-center text-foreground transition-colors"
                                 >
-                                    <ShoppingBag className="w-4 h-4 text-muted-foreground" />
-                                    {cartCount > 0 && (
-                                        <span className="absolute -top-1 -right-1 bg-[#e25d43] text-white text-[10px] font-bold h-4 min-w-[16px] px-0.5 rounded-full flex items-center justify-center border-[1.5px] border-white dark:border-secondary">
-                                            {cartCount}
-                                        </span>
+                                    {theme === "dark" ? (
+                                        <Sun className="w-4 h-4 text-muted-foreground" />
+                                    ) : (
+                                        <Moon className="w-4 h-4 text-muted-foreground" />
                                     )}
-                                </Link>
+                                </button>
                             </div>
                         </div>
                     </nav>
                 </header>
 
-                {/* Spacer for fixed navbar (mobile: 64px, desktop: announcement 36px + navbar 68px) */}
-                <div className="h-16 lg:h-26" />
+                {/* Spacer for fixed navbar (mobile: 80px for breathing room, desktop: announcement 36px + navbar 68px) */}
+                <div className="h-[80px] lg:h-26" />
 
                 {/* Mobile Bottom Navigation Bar */}
                 <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-card border-t border-border/30 shadow-[0_-4px_25px_rgba(0,0,0,0.04)] safe-area-bottom pb-1">
@@ -488,13 +480,22 @@ export default function Navbar() {
                             <span className="text-[10px] font-semibold">Shop</span>
                         </Link>
 
-                        {/* Wishlist */}
+                        {/* Cart */}
                         <Link
-                            href={isAuthenticated ? "/account" : "/login"}
-                            className={`flex flex-col items-center justify-center gap-1 min-w-[70px] h-[52px] rounded-[18px] transition-colors text-muted-foreground/80 hover:bg-muted/30`}
+                            href="/cart"
+                            className={`relative flex flex-col items-center justify-center gap-1 min-w-[70px] h-[52px] rounded-[18px] transition-colors ${
+                                isActive("/cart")
+                                    ? "bg-[#ecf0e6] dark:bg-primary/20 text-[#6b7b5c] dark:text-primary"
+                                    : "text-muted-foreground/80 hover:bg-muted/30"
+                            }`}
                         >
-                            <Heart className="w-[20px] h-[20px]" />
-                            <span className="text-[10px] font-semibold">Wishlist</span>
+                            <ShoppingBag className="w-[20px] h-[20px]" />
+                            {cartCount > 0 && (
+                                <span className="absolute top-1 right-3 bg-[#e25d43] text-white text-[9px] font-bold h-3.5 min-w-[14px] px-0.5 rounded-full flex items-center justify-center border-[1.5px] border-white dark:border-card">
+                                    {cartCount}
+                                </span>
+                            )}
+                            <span className="text-[10px] font-semibold">Cart</span>
                         </Link>
 
                         {/* Profile */}

@@ -46,7 +46,7 @@ export default function MyAccountPage() {
     }
 
     return (
-        <div className="min-h-screen bg-background py-12 pt-4">
+        <div className="min-h-screen bg-background pb-12">
             <div className="max-w-7xl mx-auto px-4">
                 {/* Header */}
                 <div className="mb-8">

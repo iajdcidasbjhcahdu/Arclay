@@ -63,7 +63,7 @@ export default function Footer() {
     ];
 
     return (
-        <>
+        <div className="hidden lg:block">
             {/* Features Bar */}
             <section className="bg-olive-700 dark:bg-[#1a1a1a]">
                 <div className="container mx-auto px-4 lg:px-8 py-6 lg:py-8">
@@ -237,6 +237,6 @@ export default function Footer() {
                     </div>
                 </div>
             </footer>
-        </>
+        </div>
     );
 }
