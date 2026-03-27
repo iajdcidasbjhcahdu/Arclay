@@ -1,106 +1,107 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { ArrowRight, Flame, Sparkles, Star } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
+import ProductCard from "./ProductCard";
+import { MOCK_PRODUCTS } from "@/data/mockProducts";
 
 export default function ProductRail({ title, subtitle, icon, endpoint, viewAllLink, bgWhite = false }) {
-    const router = useRouter();
-    const [products, setProducts] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [products, setProducts] = useState(MOCK_PRODUCTS.slice(0, 8)); // Initial mock
+    const [loading, setLoading] = useState(false); // Instant show
 
     useEffect(() => {
         const fetchProducts = async () => {
+            const setFallback = () => {
+                let mockData = [...MOCK_PRODUCTS];
+                if (endpoint.includes('isFeatured=true')) mockData = mockData.filter(p => p.isFeatured);
+                if (endpoint.includes('sort=newest')) mockData = mockData.slice().reverse();
+                setProducts(mockData.slice(0, 8));
+            };
+
             try {
                 const res = await fetch(endpoint);
+                if (!res.ok) {
+                    setFallback();
+                    return;
+                }
                 const data = await res.json();
-                if (data.success) {
+                if (data.success && data.products?.length > 0) {
                     setProducts(data.products);
+                } else {
+                    setFallback();
                 }
             } catch (error) {
                 console.error(`Failed to fetch products for ${title}:`, error);
+                setFallback();
             } finally {
                 setLoading(false);
             }
         };
         fetchProducts();
-    }, [endpoint]);
+    }, [endpoint, title]);
 
     if (!products.length && !loading) return null;
 
     return (
-        <section className={`hidden lg:block py-20 ${bgWhite ? 'bg-card' : 'bg-transparent'}`}>
-            <div className="container mx-auto px-4 lg:px-8">
-                <div className="flex items-center justify-between mb-8">
-                    <div className="flex items-center gap-2">
-                        {icon}
-                        <h2 className="text-2xl lg:text-3xl font-heading font-bold text-foreground">
+        <motion.section 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.8 }}
+            className={`py-16 lg:py-20 ${bgWhite ? 'bg-white' : 'bg-[#FEFBF6]'}`}
+        >
+            <div className="container mx-auto px-4 xl:px-8 max-w-7xl">
+                {/* Header */}
+                <div className="flex items-end justify-between mb-12">
+                    <div>
+                        {subtitle && (
+                            <div className="flex items-center gap-2 mb-3">
+                                <span className="text-[#D86B4B] font-bold text-[10px] uppercase tracking-[0.2em]">{subtitle}</span>
+                                <div className="h-px w-8 bg-[#D86B4B]/20" />
+                            </div>
+                        )}
+                        <h2 className="font-serif text-[32px] lg:text-[42px] font-bold text-[#2A2F25] leading-none">
                             {title}
                         </h2>
                     </div>
+
                     <Link
-                        href={viewAllLink || '/shop'}
-                        className="flex items-center gap-2 text-olive-600 font-medium hover:text-olive-700 transition-colors group"
+                        href={viewAllLink || '/products'}
+                        className="hidden lg:flex items-center gap-2 text-[#2A2F25] font-bold hover:text-[#869661] transition-all text-xs uppercase tracking-widest border-b border-[#2A2F25]/10 pb-1"
                     >
                         View All
-                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                        <ArrowRight className="w-3.5 h-3.5" />
                     </Link>
                 </div>
 
+                {/* Product Grid — NOT a horizontal scroll, matching screenshot */}
                 {loading ? (
-                    <div className="flex gap-4 overflow-hidden">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
                         {[...Array(4)].map((_, i) => (
-                            <div key={i} className="min-w-[200px] h-[300px] bg-muted rounded-2xl animate-pulse" />
+                            <div key={i} className="aspect-[3/4] bg-[#F3EFE8] rounded-2xl animate-pulse" />
                         ))}
                     </div>
                 ) : (
-                    <div className="flex gap-6 overflow-x-auto pb-6 custom-scrollbar snap-x">
-                        {products.map((product, index) => (
-                            <motion.div
-                                key={product._id}
-                                initial={{ opacity: 0, x: 20 }}
-                                whileInView={{ opacity: 1, x: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: index * 0.1 }}
-                                onClick={() => router.push(`/products/${product._id}`)}
-                                className="flex-shrink-0 w-[200px] md:w-[240px] cursor-pointer group snap-start"
-                            >
-                                <div className="rounded-2xl overflow-hidden bg-white shadow-sm mb-3 aspect-square relative border border-transparent group-hover:border-border transition-colors">
-                                    <img
-                                        src={product.images?.[0] || '/placeholder-product.jpg'}
-                                        alt={product.name}
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                    />
-                                    {/* Badges */}
-                                    <div className="absolute top-2 left-2 flex flex-col gap-1">
-                                        {/* You can add badges logic here if needed based on product properties */}
-                                    </div>
-                                </div>
-                                <h3 className="font-medium text-sm text-foreground truncate">{product.name}</h3>
-                                {product.rating && (
-                                    <div className="flex items-center gap-1 mb-1">
-                                        <Star className="w-3 h-3 fill-gold-400 text-gold-400" />
-                                        <span className="text-xs text-muted-foreground">{product.rating}</span>
-                                    </div>
-                                )}
-                                <div className="flex items-center gap-2">
-                                    <span className="font-bold text-olive-700">
-                                        ₹{product.variants?.[0]?.salePrice || product.variants?.[0]?.regularPrice}
-                                    </span>
-                                    {product.variants?.[0]?.salePrice && (
-                                        <span className="text-xs text-muted-foreground line-through">
-                                            ₹{product.variants?.[0]?.regularPrice}
-                                        </span>
-                                    )}
-                                </div>
-                            </motion.div>
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+                        {products.slice(0, 4).map((product) => (
+                            <ProductCard key={product._id} product={product} />
                         ))}
                     </div>
                 )}
+
+                {/* Mobile View All */}
+                <div className="mt-8 lg:hidden flex justify-center">
+                    <Link
+                        href={viewAllLink || '/products'}
+                        className="flex items-center justify-center w-full py-3.5 rounded-xl border border-[#ECE8E0] text-[#2A2F25] font-semibold text-sm hover:bg-[#F3EFE8] transition-colors"
+                    >
+                        View All
+                        <ArrowRight className="w-4 h-4 ml-2" />
+                    </Link>
+                </div>
             </div>
-        </section>
+        </motion.section>
     );
 }

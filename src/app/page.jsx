@@ -2,63 +2,55 @@ import HomeHero from "./components/HomeHero";
 import TrustBadges from "./components/TrustBadges";
 import CategoryGrid from "./components/CategoryGrid";
 import ProductRail from "./components/ProductRail";
-import PromoBanner from "./components/PromoBanner";
 import OurStory from "./components/OurStory";
 import SocialProof from "./components/SocialProof";
 import MobileProductSections from "./components/MobileProductSections";
-import { Flame, Sparkles, Leaf } from "lucide-react";
-import { getSiteName, getBrandContent } from "@/config/brandContent";
+import HomeBlog from "./components/HomeBlog";
+import { Flame, Sparkles } from "lucide-react";
 
 export default function Home() {
-  const siteName = getSiteName();
-  const content = getBrandContent(siteName);
-  const isSanatva = siteName.toLowerCase().includes('sanatva');
-
-  const rail1Title = isSanatva ? "Best Detoxifiers" : "Best Sellers";
-  const rail2Title = isSanatva ? "Featured Wellness" : "New Arrivals";
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-[#FEFBF6] text-[#2A2F25]">
       <main>
         {/* Full Width Hero Slider */}
         <HomeHero />
 
-        {/* Mobile: Category pills + Product grids (replaces desktop sections) */}
+        {/* Mobile: Category pills + Product grids */}
         <MobileProductSections />
 
-        {/* Global Trust Badges (desktop) */}
-        <TrustBadges />
 
-        {/* Categories Grid (desktop) */}
+        {/* Explore Categories */}
         <CategoryGrid />
 
-        {/* Best Sellers Rail (desktop) */}
+        {/* Best Sellers */}
         <ProductRail
-          title={rail1Title}
-          icon={isSanatva ? <Leaf className="w-6 h-6 text-green-500" /> : <Flame className="w-6 h-6 text-terracotta-500" />}
+          title="Best Sellers"
+          subtitle="Most Popular"
+          icon={<Flame className="w-5 h-5 text-[#D86B4B]" />}
           endpoint="/api/products?isFeatured=true&limit=8"
-          viewAllLink="/shop?filter=bestseller"
+          viewAllLink="/products?filter=bestseller"
           bgWhite={true}
         />
 
-        {/* Festive Promo Banner */}
-        <PromoBanner />
+        {/* Our Story */}
+        <OurStory />
 
-        {/* New Arrivals Rail (desktop) */}
+        {/* New Arrivals */}
         <ProductRail
-          title={rail2Title}
-          icon={isSanatva ? <Leaf className="w-6 h-6 text-teal-500" /> : <Sparkles className="w-6 h-6 text-olive-500" />}
+          title="New Arrivals"
+          subtitle="Just Launched"
+          icon={<Sparkles className="w-5 h-5 text-[#869661]" />}
           endpoint="/api/products?sort=newest&limit=8"
-          viewAllLink="/shop?filter=new"
+          viewAllLink="/products?filter=new"
           bgWhite={false}
         />
 
-        {/* Brand Story Section (desktop only) */}
-        <OurStory />
+        {/* Blog Section (Image 1 Style) */}
+        <HomeBlog />
 
-        {/* Social Proof / Reviews (desktop only) */}
+        {/* Social Proof / Reviews */}
         <SocialProof />
       </main>
     </div>
   );
 }
-

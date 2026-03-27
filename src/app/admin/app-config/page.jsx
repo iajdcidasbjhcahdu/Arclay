@@ -205,6 +205,7 @@ function HelpContactsTab({ contacts, onChange, onSave, saving }) {
                             </button>
                         </div>
                     </div>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium mb-1.5">Label</label>
@@ -578,7 +579,7 @@ function SplashScreenTab({ splashScreens, onChange, onSave, saving }) {
         <div className="space-y-4">
             <div className="flex items-center justify-between mb-4 mt-2 px-2">
                 <div>
-                    <h3 className="text-xl font-medium text-foreground">Mobile & Web Splash Screens</h3>
+                    <h3 className="text-xl font-medium text-foreground">Mobile & Web Splash Screen</h3>
                     <p className="text-sm text-muted-foreground mt-1">Configure the sequence of screens shown when users open the app/web.</p>
                 </div>
             </div>

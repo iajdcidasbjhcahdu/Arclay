@@ -66,6 +66,18 @@ const ProductSchema = new mongoose.Schema({
         maxlength: [100000, 'Description cannot be more than 100000 characters'],
         default: ''
     },
+    subtitle: {
+        type: String,
+        trim: true,
+        maxlength: 200,
+        default: ''
+    },
+    spiceLevel: {
+        type: Number,
+        min: 1,
+        max: 5,
+        default: null
+    },
     // Defines what variations exist (e.g., Color with Red/Blue/Green, Size with S/M/L)
     variationTypes: {
         type: [VariationTypeSchema],

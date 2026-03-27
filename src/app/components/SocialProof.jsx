@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { getBrandContent, getSiteName } from "@/config/brandContent";
 import { ChevronLeft, ChevronRight, Quote } from "lucide-react";
+import { motion } from "framer-motion";
 
 const siteName = getSiteName();
 const content = getBrandContent(siteName);
@@ -10,15 +11,16 @@ const socialContent = content.socialProof;
 
 export default function SocialProof() {
     const [reviews, setReviews] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false); // Silent fetch
     const [current, setCurrent] = useState(0);
 
     useEffect(() => {
         const fetchReviews = async () => {
             try {
                 const res = await fetch("/api/reviews/social-proof");
+                if (!res.ok) return; // Fallback happens automatically as reviews will be []
                 const data = await res.json();
-                if (data.success) {
+                if (data.success && data.reviews?.length > 0) {
                     setReviews(data.reviews);
                 }
             } catch (error) {
@@ -59,49 +61,58 @@ export default function SocialProof() {
     const review = displayReviews[current];
 
     return (
-        <section className="hidden lg:block py-20 lg:py-28 bg-background">
+        <motion.section 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="py-20 lg:py-28 bg-[#FEFBF6] overflow-hidden"
+        >
             <div className="container mx-auto px-4 lg:px-8">
                 {/* Heading */}
                 <div className="text-center mb-12 lg:mb-16">
-                    <h2 className="font-serif text-3xl md:text-4xl lg:text-[42px] font-bold text-foreground">
+                    <h2 className="font-serif text-[32px] md:text-4xl lg:text-[44px] font-bold text-[#2A2F25]">
                         What Our Customers Say
                     </h2>
-                    <p className="text-muted-foreground mt-3 text-sm lg:text-base max-w-lg mx-auto">
+                    <p className="text-[#767B71] mt-3 text-sm lg:text-base max-w-lg mx-auto">
                         Don&apos;t just take our word for it - hear from our satisfied customers
                     </p>
                 </div>
 
                 {/* Testimonial Card */}
-                <div className="max-w-3xl mx-auto">
+                <div className="max-w-4xl mx-auto mb-20 lg:mb-28">
                     {loading ? (
                         <div className="flex justify-center py-20">
-                            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                            <div className="w-8 h-8 border-4 border-[#869661] border-t-transparent rounded-full animate-spin"></div>
                         </div>
                     ) : review ? (
-                        <div className="bg-card rounded-2xl shadow-sm border border-border px-8 py-12 md:px-14 md:py-16 text-center transition-all duration-500">
+                        <div className="bg-white rounded-[2rem] shadow-[0_10px_40px_rgba(0,0,0,0.03)] border border-[#ECE8E0] px-6 py-12 md:px-16 md:py-20 text-center transition-all duration-500 relative overflow-hidden group">
+                           
                             {/* Quote Icon */}
-                            <div className="flex justify-center mb-6">
-                                <Quote className="w-10 h-10 lg:w-12 lg:h-12 text-olive-300 dark:text-primary/30 rotate-180" />
+                            <div className="flex justify-center mb-10">
+                                <div className="w-20 h-20 rounded-full bg-[#F0F4EC]/50 flex items-center justify-center border border-[#869661]/10">
+                                    <Quote className="w-8 h-8 text-[#869661] opacity-30" />
+                                </div>
                             </div>
 
                             {/* Quote Text */}
-                            <p className="font-serif text-lg md:text-xl lg:text-2xl text-foreground leading-relaxed max-w-2xl mx-auto">
+                            <p className="font-serif text-[20px] md:text-[24px] text-[#2A2F25] leading-relaxed max-w-2xl mx-auto">
                                 &quot;{review.text}&quot;
                             </p>
 
                             {/* Author */}
-                            <div className="flex items-center justify-center gap-3 mt-8">
-                                <div className="w-12 h-12 rounded-full bg-olive-600 dark:bg-primary/20 flex items-center justify-center text-white dark:text-primary font-bold text-lg">
+                            <div className="flex flex-col items-center justify-center gap-3 mt-10">
+                                <div className="w-12 h-12 rounded-full bg-[#E8F0E3] flex items-center justify-center text-[#647345] font-serif font-bold text-lg">
                                     {review.author[0]}
                                 </div>
-                                <div className="text-left">
-                                    <p className="font-semibold text-foreground">{review.author}</p>
+                                <div className="text-center">
+                                    <p className="font-bold text-[#2A2F25] text-[15px]">{review.author}</p>
                                     {/* Stars */}
-                                    <div className="flex gap-0.5 mt-0.5">
+                                    <div className="flex justify-center gap-0.5 mt-2">
                                         {Array.from({ length: 5 }, (_, i) => (
                                             <svg
                                                 key={i}
-                                                className={`w-4 h-4 ${i < (review.rating || 5) ? "text-amber-400 fill-amber-400" : "text-border fill-border"}`}
+                                                className={`w-3.5 h-3.5 ${i < (review.rating || 5) ? "text-[#E6B147] fill-[#E6B147]" : "text-[#ECE8E0] fill-[#ECE8E0]"}`}
                                                 viewBox="0 0 24 24"
                                             >
                                                 <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
@@ -119,9 +130,9 @@ export default function SocialProof() {
                             {/* Prev */}
                             <button
                                 onClick={goPrev}
-                                className="w-11 h-11 rounded-full border border-border flex items-center justify-center text-foreground hover:bg-muted transition-colors"
+                                className="w-10 h-10 rounded-full bg-white border border-[#ECE8E0] flex items-center justify-center text-[#2A2F25] hover:shadow-md transition-all sm:translate-x-[-100%]"
                             >
-                                <ChevronLeft className="w-5 h-5" />
+                                <ChevronLeft className="w-4 h-4" />
                             </button>
 
                             {/* Dots */}
@@ -130,10 +141,10 @@ export default function SocialProof() {
                                     <button
                                         key={i}
                                         onClick={() => setCurrent(i)}
-                                        className={`rounded-full transition-all duration-300 ${
+                                        className={`rounded-full transition-all duration-500 ${
                                             i === current
-                                                ? "w-7 h-3 bg-olive-700 dark:bg-primary"
-                                                : "w-3 h-3 bg-terracotta-300 dark:bg-primary/30"
+                                                ? "w-6 h-1.5 bg-[#869661]"
+                                                : "w-1.5 h-1.5 bg-[#ECE8E0]"
                                         }`}
                                     />
                                 ))}
@@ -142,14 +153,53 @@ export default function SocialProof() {
                             {/* Next */}
                             <button
                                 onClick={goNext}
-                                className="w-11 h-11 rounded-full border border-border flex items-center justify-center text-foreground hover:bg-muted transition-colors"
+                                className="w-10 h-10 rounded-full bg-white border border-[#ECE8E0] flex items-center justify-center text-[#2A2F25] hover:shadow-md transition-all sm:translate-x-[100%]"
                             >
-                                <ChevronRight className="w-5 h-5" />
+                                <ChevronRight className="w-4 h-4" />
                             </button>
                         </div>
                     )}
                 </div>
+
+                {/* Instagram Grid Section */}
+                <div className="border-[#ECE8E0]">
+                    <div className="text-center mb-10">
+                         <div className="flex items-center justify-center gap-2 mb-3">
+                             <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] flex items-center justify-center">
+                                 <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2.5}>
+                                     <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
+                                     <path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z" />
+                                     <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+                                 </svg>
+                             </div>
+                             <p className="text-[#D86B4B] font-bold text-sm tracking-wide">@gourmetlux</p>
+                         </div>
+                        <h2 className="font-serif text-[32px] md:text-4xl font-bold text-[#2A2F25]">
+                            Follow Our Journey
+                        </h2>
+                        <p className="text-[#767B71] text-sm mt-3">Tag us in your photos for a chance to be featured</p>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                        {[
+                            'https://images.unsplash.com/photo-1590439471364-192aa70c0b53?q=80&w=800&auto=format&fit=crop',
+                            'https://images.unsplash.com/photo-1596431940173-67c2688753fc?q=80&w=800&auto=format&fit=crop',
+                            'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?q=80&w=800&auto=format&fit=crop',
+                            'https://images.unsplash.com/photo-1542841791-efa6ebba5121?q=80&w=800&auto=format&fit=crop',
+                            'https://images.unsplash.com/photo-1605372551532-61c0e3eb4aae?q=80&w=800&auto=format&fit=crop',
+                            'https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=800&auto=format&fit=crop'
+                        ].map((url, i) => (
+                            <div key={i} className="aspect-square rounded-2xl md:rounded-3xl overflow-hidden relative group cursor-pointer bg-[#FEF9F3]">
+                                <img 
+                                    src={url} 
+                                    alt={`Instagram ${i+1}`} 
+                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-90 group-hover:opacity-100" 
+                                />
+                            </div>
+                        ))}
+                    </div>
+                </div>
             </div>
-        </section>
+        </motion.section>
     );
 }

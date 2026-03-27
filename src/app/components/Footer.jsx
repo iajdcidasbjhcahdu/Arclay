@@ -1,82 +1,44 @@
 "use client";
 
-import { getBrandContent, getSiteName } from "@/config/brandContent";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Truck, Shield, RotateCcw, Award, Phone, Mail, MapPin, Sparkles } from "lucide-react";
-
-const siteName = getSiteName();
-const content = getBrandContent(siteName);
-const isLogoSite = process.env.NEXT_PUBLIC_SITE_LOGO || false;
-
-const brandTaglines = {
-    essvora: "Artisanal Pickles & Preserves",
-    vedicbro: "Authentic Ayurvedic Products",
-    arclay: "Premium Quality Products",
-    sanatva: "Ayurvedic Medicine & Treatment",
-};
-
-const getBrandTagline = () => {
-    const name = siteName.toLowerCase().replace(/\s+/g, "");
-    if (name.includes("vedicbro")) return brandTaglines.vedicbro;
-    if (name.includes("arclay")) return brandTaglines.arclay;
-    if (name.includes("sanatva")) return brandTaglines.sanatva;
-    return brandTaglines.essvora;
-};
-
-const isSanatva = siteName.toLowerCase().includes("sanatva");
+import { Sparkles, Phone, Mail, Truck, Shield, RotateCcw, Award, Instagram, Facebook, Twitter, Youtube } from "lucide-react";
 
 export default function Footer() {
     const pathname = usePathname();
     const [showFooter, setShowFooter] = useState(true);
-    const [policies, setPolicies] = useState([]);
     const [email, setEmail] = useState("");
 
     useEffect(() => {
-        pathname.includes("login") || pathname.includes("signup") || pathname.includes("admin")
-            ? setShowFooter(false)
-            : setShowFooter(true);
+        const isAuthPage = pathname.includes("login") || pathname.includes("signup") || pathname.includes("admin");
+        setShowFooter(!isAuthPage);
     }, [pathname]);
-
-    useEffect(() => {
-        async function fetchPolicies() {
-            try {
-                const res = await fetch("/api/app-config");
-                const data = await res.json();
-                if (data.success && data.config?.legalPolicies) {
-                    setPolicies(data.config.legalPolicies);
-                }
-            } catch {
-                // Silently fail
-            }
-        }
-        fetchPolicies();
-    }, []);
 
     if (!showFooter) return null;
 
-    const features = [
-        { icon: Truck, title: "Free Shipping", desc: "On orders above ₹500" },
-        { icon: Shield, title: "Secure Payment", desc: "100% secure checkout" },
-        { icon: RotateCcw, title: "Easy Returns", desc: "30-day return policy" },
-        { icon: Award, title: "Premium Quality", desc: "Handcrafted with love" },
-    ];
-
     return (
-        <div className="hidden lg:block">
-            {/* Features Bar */}
-            <section className="bg-olive-700 dark:bg-[#1a1a1a]">
-                <div className="container mx-auto px-4 lg:px-8 py-6 lg:py-8">
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-                        {features.map(({ icon: Icon, title, desc }) => (
-                            <div key={title} className="flex items-center gap-3 lg:gap-4">
-                                <div className="w-11 h-11 lg:w-12 lg:h-12 rounded-full border-2 border-white/20 flex items-center justify-center shrink-0">
-                                    <Icon className="w-5 h-5 lg:w-5.5 lg:h-5.5 text-white/80" />
+        <div className="bg-gradient-to-b from-[#1C2018] to-[#12140F] text-white overflow-hidden relative">
+            {/* Subtle glow effect */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[300px] bg-[#869661]/5 blur-[120px] rounded-full pointer-events-none" />
+
+            {/* Trust Strip */}
+            <section className="py-14 border-b border-white/5 relative z-10">
+                <div className="container mx-auto px-6 xl:px-8 max-w-7xl">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+                        {[
+                            { icon: Truck, title: "Free Shipping", desc: "On orders above ₹500" },
+                            { icon: Shield, title: "Secure Payment", desc: "100% secure checkout" },
+                            { icon: RotateCcw, title: "Easy Returns", desc: "30-day return policy" },
+                            { icon: Award, title: "Premium Quality", desc: "Handcrafted with love" },
+                        ].map((item, i) => (
+                            <div key={i} className="flex items-center gap-5 group transition-transform hover:translate-x-1">
+                                <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center border border-white/5 group-hover:bg-[#869661]/20 group-hover:border-[#869661]/20 transition-all">
+                                    <item.icon className="w-5 h-5 text-white/40 group-hover:text-[#869661] transition-colors" strokeWidth={1.5} />
                                 </div>
-                                <div>
-                                    <h4 className="text-white text-sm lg:text-[15px] font-semibold leading-tight">{title}</h4>
-                                    <p className="text-white/50 text-xs lg:text-[13px] mt-0.5">{desc}</p>
+                                <div className="flex flex-col">
+                                    <h4 className="text-white font-bold text-sm tracking-tight">{item.title}</h4>
+                                    <p className="text-white/40 text-[11px] font-medium leading-none mt-1.5">{item.desc}</p>
                                 </div>
                             </div>
                         ))}
@@ -84,155 +46,149 @@ export default function Footer() {
                 </div>
             </section>
 
-            {/* Newsletter */}
-            <section className="bg-olive-800 dark:bg-[#111111]">
-                <div className="container mx-auto px-4 lg:px-8 py-10 lg:py-14">
-                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 lg:gap-16">
-                        <div>
-                            <h3 className="font-serif text-2xl lg:text-[28px] font-bold text-white">
-                                Subscribe to Our Newsletter
-                            </h3>
-                            <p className="text-white/50 text-sm lg:text-[15px] mt-1.5">
-                                Get exclusive offers, recipes, and updates delivered to your inbox.
-                            </p>
-                        </div>
-                        <div className="flex gap-3 w-full lg:w-auto">
-                            <input
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                placeholder="Enter your email"
-                                className="flex-1 lg:w-72 px-5 py-3.5 rounded-xl border border-white/20 bg-white/10 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-white/20 text-sm"
-                            />
-                            <button className="px-6 lg:px-8 py-3.5 rounded-xl bg-olive-600 dark:bg-primary hover:bg-olive-500 dark:hover:bg-primary/90 text-white dark:text-primary-foreground font-semibold text-sm transition-colors shrink-0">
-                                Subscribe
-                            </button>
+            {/* Newsletter Section - Glassmorphic Card */}
+            <section className="py-24 relative z-10 px-6">
+                <div className="container mx-auto max-w-7xl">
+                    <div className="bg-white/[0.03] backdrop-blur-xl rounded-[40px] border border-white/10 p-10 lg:p-16 relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-[#D86B4B]/10 blur-[80px] rounded-full -translate-y-1/2 translate-x-1/2 group-hover:bg-[#D86B4B]/20 transition-colors duration-700" />
+                        
+                        <div className="grid lg:grid-cols-2 gap-12 items-center relative z-10">
+                            <div>
+                                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#869661]/20 border border-[#869661]/20 text-[#869661] text-[10px] font-bold uppercase tracking-widest mb-4">
+                                    <Sparkles className="w-3 h-3" />
+                                    The Gourmet Club
+                                </div>
+                                <h3 className="font-serif text-[36px] lg:text-[48px] font-bold mb-4 leading-tight text-white">Join Our Inner Circle</h3>
+                                <p className="text-white/60 text-base max-w-md leading-relaxed">
+                                    Unlock exclusive artisanal recipes, first access to seasonal batches, and member-only rewards.
+                                </p>
+                            </div>
+                            <div className="flex flex-col sm:flex-row gap-3 w-full">
+                                <input
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    placeholder="your@email.com"
+                                    className="flex-1 px-8 py-5 rounded-2xl bg-white/5 border border-white/10 text-white placeholder:text-white/20 focus:outline-none focus:border-[#869661]/50 focus:bg-white/10 text-sm transition-all"
+                                />
+                                <button className="px-10 py-5 rounded-2xl bg-[#D86B4B] hover:bg-[#C05A3D] text-white font-bold text-sm transition-all shadow-xl shadow-[#D86B4B]/20 hover:shadow-[#D86B4B]/40 hover:-translate-y-0.5 active:translate-y-0">
+                                    Subscribe Now
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
 
             {/* Main Footer */}
-            <footer className="bg-olive-800 dark:bg-[#111111] text-white">
-                <div className="container mx-auto px-4 lg:px-8 py-12 lg:py-16">
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8">
+            <footer className="pt-12 pb-12 relative z-10">
+                <div className="container mx-auto px-6 xl:px-8 max-w-7xl">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-16 lg:gap-12">
 
                         {/* Brand Column */}
                         <div className="lg:col-span-4">
-                            {/* Logo */}
-                            <Link href="/" className="flex items-center gap-3 group">
-                                <div className="w-11 h-11 rounded-xl bg-olive-600 dark:bg-primary/20 flex items-center justify-center">
-                                    {
-                                        isLogoSite
-                                            ? <img src={isLogoSite} className="h-16" alt={siteName} />
-                                            : <Sparkles className="w-5 h-5 text-white/90 dark:text-primary" />
-                                    }
-
+                            <Link href="/" className="flex items-center gap-4 mb-8 group">
+                                <div className="w-12 h-12 bg-[#869661] rounded-2xl flex items-center justify-center text-white shrink-0 shadow-lg shadow-[#869661]/20 group-hover:rotate-6 transition-transform">
+                                    <Sparkles className="w-6 h-6 text-white" />
                                 </div>
-                                <div>
-                                    <span className="text-xl font-bold text-white leading-tight block">{siteName}</span>
-                                    <span className="text-xs text-white/50 leading-none">{getBrandTagline()}</span>
+                                <div className="flex flex-col">
+                                    <span className="font-serif text-[32px] font-bold text-white leading-none">GourmetLux</span>
+                                    <span className="text-[11px] font-bold tracking-[0.2em] text-[#869661] mt-1 uppercase">Artisanal Excellence</span>
                                 </div>
                             </Link>
 
-
-                            <p className="mt-5 text-white/50 text-sm leading-relaxed max-w-xs">
-                                Crafting authentic Indian flavors since 2010. Every jar tells a story of tradition, quality, and love.
+                            <p className="text-white/50 text-[15px] leading-relaxed max-w-sm mb-10">
+                                Honoring centuries of Indian culinary heritage with meticulously handcrafted pickles, preserves, and artisanal delicacies.
                             </p>
 
-                            {/* Contact Info */}
-                            <div className="mt-6 space-y-3">
-                                <div className="flex items-center gap-3 text-white/60 text-sm">
-                                    <Phone className="w-4 h-4 shrink-0" />
-                                    <span>+91 98765 43210</span>
+                            <div className="space-y-6">
+                                <div className="flex items-center gap-4 text-[14px] text-white/60 hover:text-[#869661] transition-colors cursor-pointer group">
+                                    <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-[#869661]/10">
+                                        <Phone className="w-4 h-4" />
+                                    </div>
+                                    +91 98765 43210
                                 </div>
-                                <div className="flex items-center gap-3 text-white/60 text-sm">
-                                    <Mail className="w-4 h-4 shrink-0" />
-                                    <span>hello@{siteName.toLowerCase().replace(/\s+/g, "")}.com</span>
-                                </div>
-                                <div className="flex items-start gap-3 text-white/60 text-sm">
-                                    <MapPin className="w-4 h-4 shrink-0 mt-0.5" />
-                                    <span>123 Flavor Street, Mumbai,<br />Maharashtra 400001</span>
+                                <div className="flex items-center gap-4 text-[14px] text-white/60 hover:text-[#869661] transition-colors cursor-pointer group">
+                                    <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center group-hover:bg-[#869661]/10">
+                                        <Mail className="w-4 h-4" />
+                                    </div>
+                                    hello@gourmetlux.com
                                 </div>
                             </div>
                         </div>
 
-                        {/* Links Columns */}
-                        <div className="lg:col-span-8 grid grid-cols-2 md:grid-cols-4 gap-8">
-
-                            {/* Shop */}
+                        {/* Link Columns */}
+                        <div className="lg:col-span-8 grid grid-cols-2 md:grid-cols-4 gap-12 lg:gap-8">
                             <div>
-                                <h4 className="text-white font-semibold text-[15px] mb-4">Shop</h4>
-                                <ul className="space-y-3">
-                                    <li><Link href="/products" className="text-white/50 hover:text-white text-sm transition-colors">All Products</Link></li>
-                                    <li><Link href="/products?sort=newest" className="text-white/50 hover:text-white text-sm transition-colors">New Arrivals</Link></li>
-                                    <li><Link href="/products?isFeatured=true" className="text-white/50 hover:text-white text-sm transition-colors">Bestsellers</Link></li>
-                                    <li><Link href="/bundles" className="text-white/50 hover:text-white text-sm transition-colors">Gift Hampers</Link></li>
-                                    <li><Link href="/products" className="text-white/50 hover:text-white text-sm transition-colors">Offers</Link></li>
+                                <h4 className="font-bold text-[13px] text-white mb-8 uppercase tracking-[0.2em]">Curation</h4>
+                                <ul className="space-y-4">
+                                    {["All Products", "New Arrivals", "Bestsellers", "Gift Hampers", "Offers"].map(item => (
+                                        <li key={item}><Link href="/products" className="text-white/40 hover:text-[#869661] text-[14px] transition-all hover:translate-x-1 inline-block">{item}</Link></li>
+                                    ))}
                                 </ul>
                             </div>
 
-                            {/* Company */}
                             <div>
-                                <h4 className="text-white font-semibold text-[15px] mb-4">Company</h4>
-                                <ul className="space-y-3">
-                                    <li><Link href="/" className="text-white/50 hover:text-white text-sm transition-colors">About Us</Link></li>
-                                    <li><Link href="/" className="text-white/50 hover:text-white text-sm transition-colors">Our Story</Link></li>
-                                    <li><Link href="/" className="text-white/50 hover:text-white text-sm transition-colors">Blog & Recipes</Link></li>
-                                    <li><Link href="/" className="text-white/50 hover:text-white text-sm transition-colors">Careers</Link></li>
-                                    <li><Link href="/" className="text-white/50 hover:text-white text-sm transition-colors">Press</Link></li>
+                                <h4 className="font-bold text-[13px] text-white mb-8 uppercase tracking-[0.2em]">Our Story</h4>
+                                <ul className="space-y-4">
+                                    <li><Link href="/about" className="text-white/40 hover:text-[#869661] text-[14px] transition-all hover:translate-x-1 inline-block">About Us</Link></li>
+                                    <li><Link href="/about/story" className="text-white/40 hover:text-[#869661] text-[14px] transition-all hover:translate-x-1 inline-block">The Process</Link></li>
+                                    <li><Link href="/blog" className="text-white/40 hover:text-[#869661] text-[14px] transition-all hover:translate-x-1 inline-block">Artisanal Blog</Link></li>
+                                    <li><Link href="/careers" className="text-white/40 hover:text-[#869661] text-[14px] transition-all hover:translate-x-1 inline-block">Careers</Link></li>
                                 </ul>
                             </div>
 
-                            {/* Support */}
                             <div>
-                                <h4 className="text-white font-semibold text-[15px] mb-4">Support</h4>
-                                <ul className="space-y-3">
-                                    <li><Link href="/" className="text-white/50 hover:text-white text-sm transition-colors">Contact Us</Link></li>
-                                    <li><Link href="/" className="text-white/50 hover:text-white text-sm transition-colors">FAQs</Link></li>
-                                    <li><Link href="/" className="text-white/50 hover:text-white text-sm transition-colors">Shipping Info</Link></li>
-                                    <li><Link href="/" className="text-white/50 hover:text-white text-sm transition-colors">Returns</Link></li>
-                                    {/* Only show Track Order if it links to a real route */}
-                                    <li><Link href="/orders" className="text-white/50 hover:text-white text-sm transition-colors">Track Order</Link></li>
+                                <h4 className="font-bold text-[13px] text-white mb-8 uppercase tracking-[0.2em]">Concierge</h4>
+                                <ul className="space-y-4">
+                                    <li><Link href="/contact" className="text-white/40 hover:text-[#869661] text-[14px] transition-all hover:translate-x-1 inline-block">Contact Us</Link></li>
+                                    <li><Link href="/faqs" className="text-white/40 hover:text-[#869661] text-[14px] transition-all hover:translate-x-1 inline-block">FAQs</Link></li>
+                                    <li><Link href="/orders" className="text-white/40 hover:text-[#869661] text-[14px] transition-all hover:translate-x-1 inline-block">Track Order</Link></li>
+                                    <li><Link href="/wholesale" className="text-white/40 hover:text-[#869661] text-[14px] transition-all hover:translate-x-1 inline-block">Wholesale</Link></li>
                                 </ul>
                             </div>
 
-                            {/* Legal / Policies */}
                             <div>
-                                <h4 className="text-white font-semibold text-[15px] mb-4">Legal</h4>
-                                <ul className="space-y-3">
-                                    {policies.length > 0 ? (
-                                        policies.map((policy) => (
-                                            <li key={policy.slug}>
-                                                <Link href={`/policy/${policy.slug}`} className="text-white/50 hover:text-white text-sm transition-colors">
-                                                    {policy.title}
-                                                </Link>
-                                            </li>
-                                        ))
-                                    ) : (
-                                        <>
-                                            <li><Link href="/" className="text-white/50 hover:text-white text-sm transition-colors">Privacy Policy</Link></li>
-                                            <li><Link href="/" className="text-white/50 hover:text-white text-sm transition-colors">Terms of Service</Link></li>
-                                            <li><Link href="/" className="text-white/50 hover:text-white text-sm transition-colors">Refund Policy</Link></li>
-                                            <li><Link href="/" className="text-white/50 hover:text-white text-sm transition-colors">Cookie Policy</Link></li>
-                                        </>
-                                    )}
+                                <h4 className="font-bold text-[13px] text-white mb-8 uppercase tracking-[0.2em]">Legacy</h4>
+                                <ul className="space-y-4">
+                                    {["Privacy Policy", "Terms of Service", "Refund Policy", "Cookie Policy"].map(item => (
+                                        <li key={item}><Link href="/policy" className="text-white/40 hover:text-[#869661] text-[14px] transition-all hover:translate-x-1 inline-block">{item}</Link></li>
+                                    ))}
                                 </ul>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                {/* Bottom Bar */}
-                <div className="border-t border-white/10">
-                    <div className="container mx-auto px-4 lg:px-8 py-5">
-                        <div className="flex flex-col md:flex-row justify-between items-center gap-3 text-xs text-white/40">
-                            <p>
-                                © {new Date().getFullYear()}{" "}
-                                <a href="https://kunalbhatia.dev" target="_blank" rel="noopener noreferrer" className="text-white/60">{siteName}</a>. All Rights Reserved.
+                    {/* Bottom Bar */}
+                    <div className="mt-24 pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8">
+                        <div className="flex flex-col gap-2">
+                             <p className="text-white/60 text-[13px]">
+                                © {new Date().getFullYear()} GourmetLux Collection. All rights reserved.
                             </p>
-                            <div className="flex items-center gap-4">
-                                <span>Designed By <a href="https://biharinnovation.in" target="_blank" rel="noopener noreferrer" className="text-white/60">Bihar Innovation</a></span>
+                            <p className="text-white/40 text-[11px] font-medium tracking-wide">
+                                Crafting Tradition, Serving Excellence since 2010.
+                            </p>
+                        </div>
+                        
+                        <div className="flex flex-col lg:flex-row items-center gap-8">
+                                <div className="flex items-center gap-4 relative overflow-visible" style={{ filter: 'url(#global-gooey)' }}>
+                                    {[Instagram, Facebook, Twitter, Youtube].map((Icon, i) => (
+                                        <button key={i} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/50 hover:bg-[#869661] hover:text-white transition-all border border-white/5 group relative">
+                                            <Icon className="w-4 h-4 relative z-10" />
+                                            <div className="absolute inset-0 bg-[#869661] scale-0 group-hover:scale-100 rounded-full transition-transform duration-500 -z-0" />
+                                        </button>
+                                    ))}
+                                </div>
+                            <div className="hidden lg:block h-8 w-px bg-white/10" />
+                            <div className="flex flex-wrap items-center justify-center gap-3 relative overflow-visible" style={{ filter: 'url(#global-gooey)' }}>
+                                <span className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-bold text-white/40 tracking-widest uppercase hover:text-white transition-all relative group">
+                                    <span className="relative z-10">FSSAI Certified</span>
+                                    <div className="absolute inset-0 bg-[#869661]/20 scale-0 group-hover:scale-100 rounded-xl transition-transform duration-500 -z-0" />
+                                </span>
+                                <span className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-bold text-white/40 tracking-widest uppercase hover:text-white transition-all relative group">
+                                    <span className="relative z-10">100% Organic</span>
+                                    <div className="absolute inset-0 bg-[#869661]/20 scale-0 group-hover:scale-100 rounded-xl transition-transform duration-500 -z-0" />
+                                </span>
                             </div>
                         </div>
                     </div>

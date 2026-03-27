@@ -3,223 +3,124 @@
 
 @custom-variant dark (&:is(.dark *));
 
-@theme inline {
+@theme {
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-inter);
   --font-serif: var(--font-playfair);
   --font-mono: var(--font-geist-mono);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
+  
+  --color-primary-50: #f2f5ef;
+  --color-primary-100: #e2e8db;
+  --color-primary-500: #6B7D5C;
+  --color-primary-600: #556647;
+  --color-primary-700: #424f37;
+  
+  --color-accent-400: #d8be8d;
+  --color-accent-500: #C8A96A;
+  --color-accent-600: #b3924f;
+
   --color-ring: var(--ring);
-  --color-input: var(--input);
   --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
+  --color-input: var(--input);
   --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
+  --color-muted-foreground: var(--muted-foreground);
   --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  /* Border Radii */
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
-  --radius-4xl: calc(var(--radius) + 16px);
-
-  /* ESSVORA Brand Colors */
-  --color-olive: #556B2F;
-  --color-olive-light: #6B8B3D;
-  --color-olive-dark: #3D4F22;
-  --color-mustard: #D4A643;
-  --color-mustard-light: #E5C06A;
-  --color-chili: #8B1A1A;
-  --color-chili-light: #A52A2A;
-  --color-copper: #B8860B;
-  --color-copper-light: #D4A643;
-  --color-ivory: #FAF8F5;
-  --color-cream: #F5F0E8;
-  --color-charcoal: #2D2D2D;
-  --color-charcoal-light: #4A4A4A;
-/* } */
-
-/* ESSVORA Color Palette 
-   =====================
-   Primary (Dark Olive Green): #556B2F - Main brand color, buttons, CTAs
-   Secondary (Royal Mustard Yellow): #D4A643 - Accents, highlights
-   Accent (Deep Chili Red): #8B1A1A - Logo accent, emphasis
-/* MODERN DARK PREMEIUM THEME */
-/* LIGHT THEME (Default CSS, overrides applied by next-themes class='dark') */
-/* Shared Theme Variables */
---radius: 0.75rem;
-
-/* Color Palette - Ported from Vite Project */
---color-cream-50: #FFFBF5;
---color-cream-100: #FFF8ED;
---color-cream-200: #FFF3E0;
---color-cream-300: #FFE8CC;
---color-cream-400: #FFD9A8;
---color-cream-500: #FFC785;
-
---color-olive-50: #F5F7F0;
---color-olive-100: #E8EDE0;
---color-olive-200: #D4DDC4;
---color-olive-300: #B5C49A;
---color-olive-400: #96A770;
---color-olive-500: #7A8A52;
---color-olive-600: #5E6B3D;
---color-olive-700: #46502E;
---color-olive-800: #2F3620;
---color-olive-900: #1A1E12;
-
---color-terracotta-50: #FDF5F3;
---color-terracotta-100: #FAE8E3;
---color-terracotta-200: #F5D0C5;
---color-terracotta-300: #EDB09E;
---color-terracotta-400: #E0856A;
---color-terracotta-500: #D45D3D;
---color-terracotta-600: #B84A2E;
---color-terracotta-700: #963A25;
---color-terracotta-800: #7A311F;
---color-terracotta-900: #5C2618;
-
---color-gold-50: #FFFBEB;
---color-gold-100: #FEF3C7;
---color-gold-200: #FDE68A;
---color-gold-300: #FCD34D;
---color-gold-400: #FBBF24;
---color-gold-500: #F59E0B;
---color-gold-600: #D97706;
-
-/* Default Theme Mapping */
---background: var(--color-cream-50);
---foreground: #1A1E12;
-/* Olive 900 for high contrast text */
-
---card: #FFFFFF;
---card-foreground: #1A1E12;
-
---popover: #FFFFFF;
---popover-foreground: #1A1E12;
-
---primary: var(--color-olive-500);
---primary-foreground: #FFFFFF;
-
---secondary: var(--color-cream-200);
---secondary-foreground: var(--color-olive-900);
-
---muted: var(--color-olive-100);
---muted-foreground: var(--color-olive-600);
-
---accent: var(--color-terracotta-500);
---accent-foreground: #FFFFFF;
-
---destructive: #EF4444;
---destructive-foreground: #FFFFFF;
-
---border: var(--color-olive-200);
---input: var(--color-olive-200);
---ring: var(--color-olive-500);
-
---chart-1: var(--color-olive-500);
---chart-2: var(--color-olive-600);
---chart-3: var(--color-terracotta-500);
---chart-4: var(--color-gold-400);
---chart-5: var(--color-olive-300);
-
---sidebar: var(--color-cream-50);
---sidebar-foreground: var(--color-olive-900);
---sidebar-primary: var(--color-olive-500);
---sidebar-primary-foreground: #FFFFFF;
---sidebar-accent: var(--color-cream-200);
---sidebar-accent-foreground: var(--color-olive-900);
---sidebar-border: var(--color-olive-200);
---sidebar-ring: var(--color-olive-500);
 }
 
-/* MODERN DARK PREMIUM THEME - Warm Earth Tones */
+:root {
+  --background: #FEFBF6;
+  --foreground: #2A2F25;
+
+  --card: #FFFFFF;
+  --card-foreground: #2A2F25;
+
+  --popover: #FFFFFF;
+  --popover-foreground: #2A2F25;
+
+  --primary: #869661; 
+  --primary-foreground: #FFFFFF;
+
+  --primary-light: #F0F4EC;
+  --primary-dark: #647345;
+
+  --secondary: #D86B4B; /* Coral Orange for Buy Now / Badges */
+  --secondary-foreground: #FFFFFF;
+
+  --muted: #F3EFE8;
+  --muted-foreground: #767B71;
+
+  --accent: #D86B4B; 
+  --accent-foreground: #FFFFFF;
+
+  --border: #ECE8E0;
+  --input: #ECE8E0;
+  --ring: #869661;
+  --radius: 1rem; 
+}
+
 .dark {
-  --background: #1A1814;
-  /* Warm charcoal with olive undertone */
-  --foreground: #F5F0E8;
-  /* Warm off-white / cream */
+  --background: #181A15;
+  --foreground: #FEFBF6;
 
-  --card: #242018;
-  /* Warm dark surface */
-  --card-foreground: #F5F0E8;
+  --card: #20231D;
+  --card-foreground: #FEFBF6;
 
-  --popover: #242018;
-  --popover-foreground: #F5F0E8;
+  --popover: #20231D;
+  --popover-foreground: #FEFBF6;
 
-  --primary: #96A770;
-  /* Muted olive green - elegant, not neon */
-  --primary-foreground: #1A1814;
+  --primary: #A3B37D;
+  --primary-foreground: #181A15;
 
-  --secondary: #2E2A22;
-  /* Warm dark surface highlight */
-  --secondary-foreground: #E8E0D4;
+  --primary-light: #2A3121;
+  --primary-dark: #C2D19D;
 
-  --muted: #222018;
-  --muted-foreground: #9C9484;
-  /* Warm muted text */
+  --secondary: #E37B5C;
+  --secondary-foreground: #FFFFFF;
 
-  --accent: #D4A643;
-  /* Warm gold / mustard accent */
-  --accent-foreground: #1A1814;
+  --muted: #2A2F25;
+  --muted-foreground: #A1A69C;
 
-  --destructive: #DC2626;
-  --destructive-foreground: #FFFFFF;
+  --accent: #E37B5C;
+  --accent-foreground: #FFFFFF;
 
-  --border: #33302A;
-  /* Warm border */
-  --input: #33302A;
-  --ring: #96A770;
-
-  --chart-1: #96A770;
-  --chart-2: #D4A643;
-  --chart-3: #B5C49A;
-  --chart-4: #E0856A;
-  --chart-5: #7A8A52;
-
-  --sidebar: #1A1814;
-  --sidebar-foreground: #F5F0E8;
-  --sidebar-primary: #96A770;
-  --sidebar-primary-foreground: #1A1814;
-  --sidebar-accent: #242018;
-  --sidebar-accent-foreground: #F5F0E8;
-  --sidebar-border: #33302A;
-  --sidebar-ring: #96A770;
+  --border: #33382E;
+  --input: #33382E;
+  --ring: #A3B37D;
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
-
+  
   html {
     scroll-behavior: smooth;
   }
 
-  /* ESSVORA Default Typography */
   body {
     @apply bg-background text-foreground;
     font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
@@ -227,133 +128,32 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
+  h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-playfair), Georgia, serif;
     font-weight: 600;
-    line-height: 1.2;
-  }
-
-  /* VedicBro Typography Override */
-  [data-theme="vedicbro"] body {
-    font-family: var(--font-kumbh), system-ui, -apple-system, sans-serif;
-  }
-
-  [data-theme="vedicbro"] h1,
-  [data-theme="vedicbro"] h2,
-  [data-theme="vedicbro"] h3,
-  [data-theme="vedicbro"] h4,
-  [data-theme="vedicbro"] h5,
-  [data-theme="vedicbro"] h6 {
-    font-family: var(--font-kumbh), system-ui, sans-serif;
-    font-weight: 700;
-    letter-spacing: -0.02em;
   }
 }
 
-/* Custom Component Classes from Vite Project */
 @layer components {
-
-  /* Premium Button Styles */
   .btn-premium {
-    @apply relative overflow-hidden rounded-2xl px-6 py-3.5 font-medium transition-all duration-300;
-    @apply bg-linear-to-r from-olive-500 to-olive-600 text-white;
-    @apply shadow-sm hover:shadow-md hover:-translate-y-0.5;
+    @apply relative overflow-hidden rounded-2xl px-6 py-3 font-medium transition-all duration-300;
+    @apply bg-primary text-primary-foreground;
+    @apply shadow-lg hover:shadow-xl hover:scale-[1.03] hover:bg-primary/90;
   }
 
-  .btn-premium::before {
-    content: '';
-    @apply absolute inset-0 bg-linear-to-r from-white/20 to-transparent opacity-0 transition-opacity duration-300;
-  }
-
-  .btn-premium:hover::before {
-    @apply opacity-100;
-  }
-
-  .btn-terracotta {
-    @apply relative overflow-hidden rounded-2xl px-6 py-3.5 font-medium transition-all duration-300;
-    @apply bg-linear-to-r from-terracotta-400 to-terracotta-500 text-white;
-    @apply shadow-sm hover:shadow-md hover:-translate-y-0.5;
+  .btn-accent {
+    @apply relative overflow-hidden rounded-2xl px-6 py-3 font-medium transition-all duration-300;
+    @apply bg-accent text-accent-foreground;
+    @apply shadow-lg hover:shadow-xl hover:scale-[1.03] hover:bg-accent/90;
   }
 
   .btn-glass {
-    @apply relative overflow-hidden rounded-2xl px-6 py-3.5 font-medium transition-all duration-300;
-    @apply bg-white/80 backdrop-blur-xl border border-white/50;
-    @apply text-olive-700 hover:bg-white hover:shadow-sm;
+    @apply relative overflow-hidden rounded-2xl px-6 py-3 font-medium transition-all duration-300;
+    @apply bg-white/60 backdrop-blur-md border border-white/40;
+    @apply text-foreground hover:bg-white/80 hover:shadow-lg dark:bg-black/40 dark:border-white/10 dark:text-white dark:hover:bg-black/60;
   }
 
-  /* Premium Card Styles */
-  .card-premium {
-    @apply bg-white rounded-3xl shadow-sm transition-all duration-300;
-    @apply hover:shadow-md hover:-translate-y-1;
-  }
-
-  .card-glass {
-    @apply bg-white/70 backdrop-blur-xl rounded-3xl border border-white/60;
-    @apply shadow-sm transition-all duration-300;
-  }
-
-  /* Product Card */
-  .product-card {
-    @apply bg-white rounded-3xl overflow-hidden shadow-sm transition-all duration-500;
-    @apply hover:shadow-md hover:-translate-y-2;
-  }
-
-  .product-card-image {
-    @apply relative overflow-hidden bg-linear-to-b from-cream-100 to-cream-50;
-  }
-
-  /* Input Styles */
-  .input-premium {
-    @apply w-full px-5 py-4 rounded-2xl bg-cream-100 border-2 border-transparent;
-    @apply text-foreground placeholder:text-muted-foreground/60;
-    @apply focus:outline-none focus:border-olive-400 focus:bg-white;
-    @apply transition-all duration-300;
-  }
-
-  /* Chip Styles */
-  .chip {
-    @apply inline-flex items-center px-4 py-2 rounded-full text-sm font-medium;
-    @apply bg-cream-200 text-olive-700 transition-all duration-300;
-    @apply hover:bg-olive-100 hover:text-olive-800;
-  }
-
-  .chip-active {
-    @apply bg-olive-500 text-white;
-    @apply hover:bg-olive-600 hover:text-white;
-  }
-
-  /* Badge Styles */
-  .badge-premium {
-    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold;
-    @apply bg-terracotta-100 text-terracotta-700;
-  }
-
-  /* Divider */
-  .divider-premium {
-    @apply h-px bg-linear-to-r from-transparent via-cream-300 to-transparent;
-  }
-}
-
-/* Custom Utility Classes */
-@layer utilities {
-
-  /* Background Patterns - ESSVORA */
-  .bg-pattern {
-    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23556B2F' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-  }
-
-  /* VedicBro Pattern Override */
-  [data-theme="vedicbro"] .bg-pattern {
-    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%2362A22E' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-  }
-
-  /* Doodle Background Pattern */
-  .doodle-bg {
-    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg stroke='%237A8A52' stroke-width='0.5' stroke-opacity='0.08'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  .glass-panel {
+    @apply bg-white/70 backdrop-blur-md border border-white/50 shadow-lg dark:bg-black/40 dark:border-white/10;
   }
 }

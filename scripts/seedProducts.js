@@ -45,7 +45,7 @@ const CONFIG = {
     // Counts
     usersCount: 10,
     productsCount: 50,
-    categoriesCount: 10,
+    categoriesCount: 5,
     bundlesCount: 5,
     productAdsCount: 10,
     couponsCount: 8,
@@ -89,16 +89,11 @@ const CONFIG = {
 // SAMPLE DATA
 // ============================================
 const CATEGORIES = [
-    { name: 'Electronics', description: 'Latest gadgets and electronic devices' },
-    { name: 'Clothing', description: 'Fashion and apparel for all occasions' },
-    { name: 'Home & Kitchen', description: 'Everything for your home and kitchen needs' },
-    { name: 'Sports & Outdoors', description: 'Gear for sports and outdoor activities' },
-    { name: 'Books', description: 'Wide selection of books and literature' },
-    { name: 'Beauty & Personal Care', description: 'Beauty products and personal care items' },
-    { name: 'Toys & Games', description: 'Fun toys and games for all ages' },
-    { name: 'Jewelry & Accessories', description: 'Elegant jewelry and fashion accessories' },
-    { name: 'Automotive', description: 'Car accessories and automotive parts' },
-    { name: 'Health & Wellness', description: 'Health supplements and wellness products' }
+    { name: 'Pickles', description: 'Traditional handcrafted pickles made with ancestral recipes' },
+    { name: 'Snacks', description: 'Premium artisanal snacks and savory delights' },
+    { name: 'Combos', description: 'Curated combinations of our best-selling products' },
+    { name: 'Gift Boxes', description: 'Luxury hampers and gift sets for every occasion' },
+    { name: 'Festive', description: 'Special seasonal offerings and celebration packs' }
 ];
 
 const SAMPLE_USERS = [
@@ -133,95 +128,41 @@ const PRODUCT_ADS = [
 ];
 
 const PRODUCT_TEMPLATES = {
-    Electronics: [
-        { name: 'Wireless Bluetooth Headphones', variations: [{ name: 'Color', options: ['Black', 'White', 'Blue', 'Red'] }] },
-        { name: 'Smart Watch Pro', variations: [{ name: 'Color', options: ['Black', 'Silver', 'Gold'] }, { name: 'Size', options: ['40mm', '44mm'] }] },
-        { name: 'Portable Power Bank 20000mAh', variations: [{ name: 'Color', options: ['Black', 'White'] }] },
-        { name: 'Wireless Charging Pad', variations: [{ name: 'Color', options: ['Black', 'White'] }] },
-        { name: 'Bluetooth Speaker', variations: [{ name: 'Color', options: ['Black', 'Blue', 'Red', 'Green'] }] },
-        { name: 'USB-C Hub Adapter', variations: [{ name: 'Ports', options: ['4-in-1', '7-in-1', '10-in-1'] }] },
-        { name: 'Mechanical Gaming Keyboard', variations: [{ name: 'Switch Type', options: ['Red', 'Blue', 'Brown'] }] },
-        { name: 'Wireless Gaming Mouse', variations: [{ name: 'Color', options: ['Black', 'White', 'RGB'] }] },
-        { name: 'Webcam HD 1080p', variations: [{ name: 'Resolution', options: ['720p', '1080p', '4K'] }] },
-        { name: 'Noise Cancelling Earbuds', variations: [{ name: 'Color', options: ['Black', 'White', 'Navy'] }] }
+    Pickles: [
+        { name: 'Royal Mango Pickle', variations: [{ name: 'Weight', options: ['250g', '500g', '1kg'] }] },
+        { name: 'Zesty Lime Pickle', variations: [{ name: 'Weight', options: ['250g', '500g', '1kg'] }] },
+        { name: 'Fire Chili Pickle', variations: [{ name: 'Weight', options: ['250g', '500g', '1kg'] }] },
+        { name: 'Garlic Reserve Pickle', variations: [{ name: 'Weight', options: ['250g', '500g'] }] },
+        { name: 'Stuffed Red Chili Pickle', variations: [{ name: 'Weight', options: ['500g', '1kg'] }] },
+        { name: 'Sweet & Spicy Lemon Pickle', variations: [{ name: 'Weight', options: ['250g', '500g', '1kg'] }] },
+        { name: 'Ginger & Green Chili', variations: [{ name: 'Weight', options: ['250g', '500g'] }] },
+        { name: 'Amla (Gooseberry) Pickle', variations: [{ name: 'Weight', options: ['250g', '500g', '1kg'] }] }
     ],
-    Clothing: [
-        { name: 'Premium Cotton T-Shirt', variations: [{ name: 'Color', options: ['Black', 'White', 'Navy', 'Gray'] }, { name: 'Size', options: ['S', 'M', 'L', 'XL', 'XXL'] }] },
-        { name: 'Slim Fit Jeans', variations: [{ name: 'Color', options: ['Blue', 'Black', 'Gray'] }, { name: 'Size', options: ['28', '30', '32', '34', '36'] }] },
-        { name: 'Hoodie Sweatshirt', variations: [{ name: 'Color', options: ['Black', 'Gray', 'Navy', 'Maroon'] }, { name: 'Size', options: ['S', 'M', 'L', 'XL'] }] },
-        { name: 'Casual Button-Down Shirt', variations: [{ name: 'Color', options: ['White', 'Blue', 'Pink'] }, { name: 'Size', options: ['S', 'M', 'L', 'XL'] }] },
-        { name: 'Athletic Shorts', variations: [{ name: 'Color', options: ['Black', 'Navy', 'Gray'] }, { name: 'Size', options: ['S', 'M', 'L', 'XL'] }] },
-        { name: 'Winter Jacket', variations: [{ name: 'Color', options: ['Black', 'Navy', 'Olive'] }, { name: 'Size', options: ['S', 'M', 'L', 'XL'] }] },
-        { name: 'Formal Blazer', variations: [{ name: 'Color', options: ['Black', 'Navy', 'Charcoal'] }, { name: 'Size', options: ['S', 'M', 'L', 'XL'] }] },
-        { name: 'Polo Shirt', variations: [{ name: 'Color', options: ['White', 'Black', 'Navy', 'Red'] }, { name: 'Size', options: ['S', 'M', 'L', 'XL'] }] }
+    Snacks: [
+        { name: 'Artisanal Masala Makhana', variations: [{ name: 'Size', options: ['100g', '250g'] }] },
+        { name: 'Roasted Cashews (Gold Edition)', variations: [{ name: 'Size', options: ['200g', '500g'] }] },
+        { name: 'Premium Almonds (Smoked)', variations: [{ name: 'Size', options: ['200g', '500g'] }] },
+        { name: 'Traditional Sev Mix', variations: [{ name: 'Size', options: ['250g', '500g'] }] },
+        { name: 'Beetroot & Kale Chips', variations: [{ name: 'Size', options: ['50g', '150g'] }] },
+        { name: 'Peri Peri Makhana', variations: [{ name: 'Size', options: ['100g', '250g'] }] }
     ],
-    'Home & Kitchen': [
-        { name: 'Non-Stick Cookware Set', variations: [{ name: 'Pieces', options: ['5-Piece', '10-Piece', '15-Piece'] }] },
-        { name: 'Electric Kettle', variations: [{ name: 'Capacity', options: ['1L', '1.5L', '2L'] }] },
-        { name: 'Blender Pro', variations: [{ name: 'Color', options: ['Black', 'Silver', 'Red'] }] },
-        { name: 'Air Fryer', variations: [{ name: 'Capacity', options: ['3.5L', '5L', '7L'] }] },
-        { name: 'Coffee Maker', variations: [{ name: 'Type', options: ['Drip', 'Espresso', 'French Press'] }] },
-        { name: 'Microwave Oven', variations: [{ name: 'Capacity', options: ['20L', '25L', '30L'] }] },
-        { name: 'Food Processor', variations: [{ name: 'Power', options: ['500W', '750W', '1000W'] }] },
-        { name: 'Vacuum Cleaner', variations: [{ name: 'Type', options: ['Corded', 'Cordless', 'Robot'] }] }
+    Combos: [
+        { name: 'Heritage Duo (Mango & Lime)', variations: [{ name: 'Pack', options: ['Standard'] }] },
+        { name: 'Spice Route Collection', variations: [{ name: 'Pack', options: ['Large'] }] },
+        { name: 'Snack & Sip Combo', variations: [{ name: 'Pack', options: ['Regular'] }] },
+        { name: 'The Pickle Lover Set', variations: [{ name: 'Pack', options: ['Triple Pack'] }] }
     ],
-    'Sports & Outdoors': [
-        { name: 'Yoga Mat Premium', variations: [{ name: 'Color', options: ['Purple', 'Blue', 'Black', 'Pink'] }, { name: 'Thickness', options: ['4mm', '6mm', '8mm'] }] },
-        { name: 'Dumbbell Set', variations: [{ name: 'Weight', options: ['5kg', '10kg', '15kg', '20kg'] }] },
-        { name: 'Running Shoes', variations: [{ name: 'Color', options: ['Black', 'White', 'Blue'] }, { name: 'Size', options: ['7', '8', '9', '10', '11'] }] },
-        { name: 'Resistance Bands Set', variations: [{ name: 'Resistance', options: ['Light', 'Medium', 'Heavy'] }] },
-        { name: 'Camping Tent', variations: [{ name: 'Capacity', options: ['2-Person', '4-Person', '6-Person'] }] },
-        { name: 'Hiking Backpack', variations: [{ name: 'Capacity', options: ['30L', '45L', '60L'] }] },
-        { name: 'Fitness Tracker', variations: [{ name: 'Color', options: ['Black', 'Blue', 'Pink'] }] },
-        { name: 'Jump Rope', variations: [{ name: 'Type', options: ['Basic', 'Weighted', 'Speed'] }] }
+    'Gift Boxes': [
+        { name: 'Gourmet Celebration Box', variations: [{ name: 'Box Type', options: ['Premium', 'Luxury'] }] },
+        { name: 'The Artisanal Hamper', variations: [{ name: 'Box Type', options: ['Standard', 'Exquisite'] }] },
+        { name: 'Royal Gifting Suite', variations: [{ name: 'Box Type', options: ['Grand'] }] },
+        { name: 'Signature Mini Hamper', variations: [{ name: 'Box Type', options: ['Mini'] }] }
     ],
-    Books: [
-        { name: 'Programming Mastery Guide', variations: [{ name: 'Format', options: ['Paperback', 'Hardcover', 'E-book'] }] },
-        { name: 'Business Strategy Handbook', variations: [{ name: 'Format', options: ['Paperback', 'Hardcover'] }] },
-        { name: 'Self-Help Collection', variations: [{ name: 'Format', options: ['Paperback', 'Hardcover', 'Audiobook'] }] },
-        { name: 'Fiction Bestseller Novel', variations: [{ name: 'Format', options: ['Paperback', 'Hardcover', 'E-book'] }] },
-        { name: 'Cookbook Deluxe Edition', variations: [{ name: 'Format', options: ['Paperback', 'Hardcover'] }] },
-        { name: 'Science Encyclopedia', variations: [{ name: 'Format', options: ['Hardcover'] }] }
-    ],
-    'Beauty & Personal Care': [
-        { name: 'Skincare Set', variations: [{ name: 'Skin Type', options: ['Normal', 'Oily', 'Dry', 'Combination'] }] },
-        { name: 'Hair Dryer Pro', variations: [{ name: 'Color', options: ['Black', 'Rose Gold', 'White'] }] },
-        { name: 'Electric Razor', variations: [{ name: 'Type', options: ['Rotary', 'Foil'] }] },
-        { name: 'Perfume Collection', variations: [{ name: 'Size', options: ['30ml', '50ml', '100ml'] }] },
-        { name: 'Makeup Brush Set', variations: [{ name: 'Pieces', options: ['12-Piece', '18-Piece', '24-Piece'] }] },
-        { name: 'Face Mask Pack', variations: [{ name: 'Type', options: ['Hydrating', 'Brightening', 'Anti-Aging'] }] }
-    ],
-    'Toys & Games': [
-        { name: 'Building Blocks Set', variations: [{ name: 'Pieces', options: ['100', '250', '500', '1000'] }] },
-        { name: 'Board Game Classic', variations: [{ name: 'Type', options: ['Strategy', 'Family', 'Party'] }] },
-        { name: 'Remote Control Car', variations: [{ name: 'Scale', options: ['1:24', '1:18', '1:12'] }] },
-        { name: 'Puzzle Collection', variations: [{ name: 'Pieces', options: ['500', '1000', '2000'] }] },
-        { name: 'Action Figure Set', variations: [{ name: 'Theme', options: ['Superheroes', 'Sci-Fi', 'Fantasy'] }] },
-        { name: 'Educational Toy Kit', variations: [{ name: 'Age', options: ['3-5', '6-8', '9-12'] }] }
-    ],
-    'Jewelry & Accessories': [
-        { name: 'Silver Necklace', variations: [{ name: 'Length', options: ['16 inch', '18 inch', '20 inch'] }] },
-        { name: 'Leather Watch', variations: [{ name: 'Color', options: ['Brown', 'Black', 'Tan'] }] },
-        { name: 'Sunglasses Premium', variations: [{ name: 'Style', options: ['Aviator', 'Wayfarer', 'Round'] }] },
-        { name: 'Gold Bracelet', variations: [{ name: 'Size', options: ['Small', 'Medium', 'Large'] }] },
-        { name: 'Pearl Earrings', variations: [{ name: 'Type', options: ['Stud', 'Drop', 'Hoop'] }] },
-        { name: 'Leather Belt', variations: [{ name: 'Color', options: ['Black', 'Brown'] }, { name: 'Size', options: ['S', 'M', 'L', 'XL'] }] }
-    ],
-    Automotive: [
-        { name: 'Car Phone Mount', variations: [{ name: 'Type', options: ['Dashboard', 'Vent', 'Windshield'] }] },
-        { name: 'Car Vacuum Cleaner', variations: [{ name: 'Type', options: ['Corded', 'Cordless'] }] },
-        { name: 'LED Headlight Bulbs', variations: [{ name: 'Size', options: ['H4', 'H7', 'H11', '9005'] }] },
-        { name: 'Dash Cam', variations: [{ name: 'Resolution', options: ['1080p', '2K', '4K'] }] },
-        { name: 'Car Seat Cover Set', variations: [{ name: 'Material', options: ['Leather', 'Fabric', 'Mesh'] }] },
-        { name: 'Tire Inflator', variations: [{ name: 'Type', options: ['Digital', 'Analog'] }] }
-    ],
-    'Health & Wellness': [
-        { name: 'Vitamin Supplements', variations: [{ name: 'Type', options: ['Multivitamin', 'Vitamin D', 'Vitamin C', 'B-Complex'] }] },
-        { name: 'Protein Powder', variations: [{ name: 'Flavor', options: ['Chocolate', 'Vanilla', 'Strawberry'] }, { name: 'Size', options: ['1kg', '2kg', '5kg'] }] },
-        { name: 'Essential Oils Set', variations: [{ name: 'Pieces', options: ['6-Pack', '12-Pack', '20-Pack'] }] },
-        { name: 'Massage Gun', variations: [{ name: 'Power', options: ['Standard', 'Pro', 'Elite'] }] },
-        { name: 'Blood Pressure Monitor', variations: [{ name: 'Type', options: ['Arm', 'Wrist'] }] },
-        { name: 'First Aid Kit', variations: [{ name: 'Size', options: ['Basic', 'Standard', 'Comprehensive'] }] }
+    Festive: [
+        { name: 'Diwali Celebration Basket', variations: [{ name: 'Size', options: ['Regular', 'Family'] }] },
+        { name: 'Holi Joy Platter', variations: [{ name: 'Size', options: ['Standard'] }] },
+        { name: 'Rakhi Sweets & Savories', variations: [{ name: 'Size', options: ['Small', 'Medium'] }] },
+        { name: 'Wedding Favors Box', variations: [{ name: 'Size', options: ['Custom'] }] }
     ]
 };
 
@@ -556,9 +497,17 @@ async function hashPassword(password) {
 // MAIN SEEDING FUNCTION
 // ============================================
 async function seedDatabase() {
-    const MONGODB_URI = process.env.MONGODB_URI + '/' + (process.env.NEXT_PUBLIC_SITE_NAME || 'arclay').toLowerCase();
-
+    let MONGODB_URI = process.env.MONGODB_URI;
     if (!MONGODB_URI) { console.error('❌ Error: MONGODB_URI not set.'); process.exit(1); }
+
+    // Ensure database name and options are added correctly
+    const dbName = (process.env.NEXT_PUBLIC_SITE_NAME || 'arclay').toLowerCase();
+    if (!MONGODB_URI.includes('.net/')) {
+        MONGODB_URI = MONGODB_URI.replace('.net', `.net/${dbName}`);
+    }
+    if (!MONGODB_URI.includes('?')) {
+        MONGODB_URI += '?retryWrites=true&w=majority';
+    }
 
     console.log('🚀 Starting database seeding...\n');
     console.log('📋 Configuration:', CONFIG);

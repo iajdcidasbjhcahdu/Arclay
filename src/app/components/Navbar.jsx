@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { useUser } from "@/context/UserContext";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useTheme } from "next-themes";
+import { motion, AnimatePresence } from "framer-motion";
 import {
     Search,
     ShoppingBag,
@@ -12,65 +12,57 @@ import {
     Phone,
     Truck,
     ChevronDown,
-    Store,
-    LayoutGrid,
-    Sparkles,
-    Sun,
-    Moon,
-    Home,
     Heart,
-    Bell,
+    Home,
+    Sparkles,
+    Package,
+    Gift,
+    Percent,
+    BookOpen,
+    ChevronRight,
+    Bell
 } from "lucide-react";
-
-const siteName = process.env.NEXT_PUBLIC_SITE_NAME || "ESSVORA";
-const isLogoSite = process.env.NEXT_PUBLIC_SITE_LOGO || false;
-
-// Tagline per brand
-const brandTaglines = {
-    essvora: "Artisanal Pickles & Preserves",
-    vedicbro: "Authentic Ayurvedic Products",
-    arclay: "Premium Quality Products",
-    sanatva: "Ayurvedic Medicine & Treatment",
-};
-
-const getBrandTagline = () => {
-    const name = siteName.toLowerCase().replace(/\s+/g, "");
-    if (name.includes("vedicbro")) return brandTaglines.vedicbro;
-    if (name.includes("arclay")) return brandTaglines.arclay;
-    if (name.includes("sanatva")) return brandTaglines.sanatva;
-    return brandTaglines.essvora;
-};
+import { MOCK_CATEGORIES } from "@/data/mockProducts";
+import SearchOverlay from "./SearchOverlay";
+import NotificationDropdown from "./NotificationDropdown";
+import CartSidebar from "./CartSidebar";
 
 export default function Navbar() {
     const { user, isAuthenticated, isAdmin, logout, loading, cartCount } = useUser();
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-    const [isMoreOpen, setIsMoreOpen] = useState(false);
     const [isShopHovered, setIsShopHovered] = useState(false);
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+    const [isCartOpen, setIsCartOpen] = useState(false);
     const [showNavbar, setShowNavbar] = useState(true);
-    const [categories, setCategories] = useState([]);
-    const { theme, setTheme } = useTheme();
+    const [categories, setCategories] = useState(MOCK_CATEGORIES);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [isScrolled, setIsScrolled] = useState(false);
     const [mounted, setMounted] = useState(false);
-    const moreRef = useRef(null);
     const userMenuRef = useRef(null);
-    const shopDropdownRef = useRef(null);
-    const shopTimeoutRef = useRef(null);
-
     const pathname = usePathname();
 
     useEffect(() => {
         setMounted(true);
+        const handleScroll = () => {
+            setIsScrolled(window.scrollY > 20);
+        };
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
+
+    useEffect(() => {
         pathname.includes("login") || pathname.includes("signup") || pathname.includes("admin")
             ? setShowNavbar(false)
             : setShowNavbar(true);
     }, [pathname]);
 
-    // Fetch categories for shop dropdown
     useEffect(() => {
         const fetchCategories = async () => {
             try {
                 const res = await fetch("/api/products?limit=1");
                 const data = await res.json();
-                if (data.success && data.categories) {
+                if (data.success && data.categories?.length > 0) {
                     setCategories(data.categories);
                 }
             } catch (error) {
@@ -80,25 +72,18 @@ export default function Navbar() {
         fetchCategories();
     }, []);
 
-    // Close dropdowns on outside click
     useEffect(() => {
         const handleClickOutside = (e) => {
-            if (moreRef.current && !moreRef.current.contains(e.target)) {
-                setIsMoreOpen(false);
-            }
-            if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
-                setIsUserMenuOpen(false);
-            }
+            if (userMenuRef.current && !userMenuRef.current.contains(e.target)) setIsUserMenuOpen(false);
         };
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    // Close dropdowns on route change
     useEffect(() => {
-        setIsMoreOpen(false);
         setIsUserMenuOpen(false);
         setIsShopHovered(false);
+        setIsMobileMenuOpen(false);
     }, [pathname]);
 
     const handleLogout = async () => {
@@ -106,399 +91,285 @@ export default function Navbar() {
         setIsUserMenuOpen(false);
     };
 
-    const handleShopMouseEnter = () => {
-        if (shopTimeoutRef.current) clearTimeout(shopTimeoutRef.current);
-        setIsShopHovered(true);
-    };
-
-    const handleShopMouseLeave = () => {
-        shopTimeoutRef.current = setTimeout(() => {
-            setIsShopHovered(false);
-        }, 150);
-    };
-
     if (!mounted) return null;
 
-    const isActive = (path) => {
-        if (path === "/") return pathname === "/";
-        return pathname.startsWith(path);
-    };
+    const isActive = (path) => pathname === path || pathname.startsWith(`${path}/`);
 
-    // Nav items
-    const navItems = [
-        { label: "Home", href: "/", icon: Sparkles },
-        { label: "Shop", href: "/products", icon: Store, hasDropdown: true },
-    ];
-
-    // More dropdown items
-    const moreItems = [
-        ...(isAuthenticated
-            ? [
-                { label: "My Orders", href: "/orders" },
-                { label: "My Account", href: "/account" },
-            ]
-            : []),
-        ...(isAdmin ? [{ label: "Admin Panel", href: "/admin" }] : []),
-    ];
-
-    // Default shop dropdown categories
     const shopCategories = [
         { label: "All Products", href: "/products" },
-        ...categories.map(cat => ({
-            label: cat.name,
-            href: `/products?category=${cat._id}`,
-        })),
+        ...(Array.isArray(categories) ? categories.map(cat => ({ 
+            label: cat?.name || "Category", 
+            href: `/products?category=${cat?._id || cat || ""}` 
+        })) : []),
+    ];
+
+    const mobileNavItems = [
+        { href: "/", icon: Home, label: "Home" },
+        { href: "/products", icon: Search, label: "Shop" },
+        { href: "/wishlist", icon: Heart, label: "Wishlist" },
+        { href: "/account", icon: User, label: "Profile" }
     ];
 
     return (
         showNavbar && (
             <>
-                {/* Top Announcement Bar (desktop only) */}
-                <div className="hidden lg:block fixed top-0 left-0 right-0 z-50 bg-olive-700 dark:bg-[#1a1a1a] text-white text-xs">
-                    <div className="container mx-auto px-4 lg:px-8">
-                        <div className="flex items-center justify-between h-9">
-                            {/* Left info */}
-                            <div className="flex items-center gap-5">
-                                <div className="flex items-center gap-1.5">
-                                    <Phone className="w-3 h-3" />
-                                    <span>+91 98765 43210</span>
-                                </div>
-                                <div className="hidden sm:flex items-center gap-1.5">
-                                    <Truck className="w-3.5 h-3.5" />
-                                    <span>Free shipping on orders above ₹500</span>
-                                </div>
+                <div className={`w-full sticky top-0 z-50 transition-all duration-300`}>
+                    {/* Top Announcement Bar */}
+                    <div className="hidden lg:block w-full bg-[#2A2F25] text-white text-[12px] py-1.5 font-medium border-b border-white/5">
+                        <div className="container mx-auto px-6 xl:px-8 flex justify-between items-center max-w-7xl">
+                            <div className="flex gap-6 items-center">
+                                <span className="flex items-center gap-1.5 opacity-80 hover:opacity-100 transition-opacity">
+                                    <Phone className="w-3.5 h-3.5" /> +91 98765 43210
+                                </span>
+                                <span className="w-px h-3 bg-white/20" />
+                                <span className="flex items-center gap-1.5 opacity-80 hover:opacity-100 transition-opacity">
+                                    <Truck className="w-3.5 h-3.5" /> Free shipping on orders above ₹500
+                                </span>
                             </div>
-                            {/* Right links */}
-                            <div className="flex items-center gap-4">
-                                {isAuthenticated && (
-                                    <Link
-                                        href="/orders"
-                                        className="hover:text-cream-300 transition-colors"
-                                    >
-                                        Track Order
-                                    </Link>
-                                )}
-                                <button
-                                    onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                                    className="p-1 rounded hover:bg-white/10 transition-colors"
-                                    aria-label="Toggle Theme"
-                                >
-                                    {theme === "dark" ? (
-                                        <Sun className="w-3.5 h-3.5" />
-                                    ) : (
-                                        <Moon className="w-3.5 h-3.5" />
-                                    )}
-                                </button>
+                            <div className="flex gap-5 items-center">
+                                <Link href="/blog" className="opacity-70 hover:opacity-100 transition-opacity">Blog</Link>
+                                <Link href="/help" className="opacity-70 hover:opacity-100 transition-opacity">Help</Link>
+                                <Link href="/orders" className="opacity-70 hover:opacity-100 transition-opacity">Track Order</Link>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                {/* Main Navbar */}
-                <header className="fixed top-0 lg:top-9 left-0 right-0 z-50 bg-[#fdfbf7] dark:bg-background lg:bg-background/95 lg:backdrop-blur-md border-b-0 lg:border-b border-border transition-all">
-                    <nav className="container mx-auto px-4 lg:px-8">
-                        <div className="flex items-center justify-between h-15 lg:h-17">
-                            {/* Brand Logo */}
-                            <Link href="/" className="flex items-center gap-2.5 group shrink-0">
-                                <div className="w-9 h-9 lg:w-11 lg:h-11 rounded-[10px] lg:rounded-xl bg-[#6b7b5c] lg:bg-olive-700 dark:bg-primary flex items-center justify-center shadow-sm">
-                                    {
-                                        isLogoSite
-                                            ? <img src={isLogoSite} className="h-12" alt={siteName} />
-                                            : <Sparkles className="w-5 h-5 lg:w-5.5 lg:h-5.5 text-white dark:text-primary-foreground" />
-                                    }
+                    {/* Main Navbar */}
+                    <header className={`w-full transition-all duration-300 border-b border-border/50 relative z-40 ${
+                        isScrolled 
+                            ? 'bg-white/80 backdrop-blur-md shadow-[0_8px_30px_rgb(0,0,0,0.04)] h-[72px]' 
+                            : 'bg-white shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] h-[84px]'
+                    }`}>
+                        <nav className="w-full max-w-7xl mx-auto px-4 xl:px-8 flex items-center justify-between h-full">
+                            
+                            {/* Logo Area */}
+                            <Link href="/" className="flex items-center gap-1 sm:gap-3 shrink-0 max-w-[45%]">
+                                <div className="w-8 h-8 sm:w-11 sm:h-11 bg-[#7A8B56] rounded-lg sm:rounded-xl flex items-center justify-center text-white shrink-0 shadow-lg shadow-[#7A8B56]/20">
+                                    <Sparkles className="w-4 h-4 sm:w-6 sm:h-6" strokeWidth={1.5} />
                                 </div>
-                                {/* Brand Text */}
-                                <div className="flex flex-col">
-                                    <span className="font-serif text-[22px] lg:font-sans lg:text-xl font-bold text-[#2d2d2d] dark:text-foreground leading-none tracking-tight">
-                                        {siteName}
+                                <div className="flex flex-col min-w-0">
+                                    <span className="font-serif text-[14px] xs:text-[16px] sm:text-[26px] font-bold tracking-tight text-[#2A2F25] leading-none truncate">
+                                        GourmetLux
                                     </span>
-                                    <span className="hidden lg:block text-[11px] text-primary dark:text-primary leading-none tracking-wide mt-1">
-                                        {getBrandTagline()}
+                                    <span className="hidden sm:block text-[9px] sm:text-[11px] font-semibold tracking-wide text-[#7A8B56] mt-0.5 text-nowrap">
+                                        Artisanal Pickles & Preserves
                                     </span>
                                 </div>
                             </Link>
 
+                            {/* Center Navigation Links (Desktop) */}
+                            <div className="hidden lg:flex items-center gap-2">
+                                <Link href="/" className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${isActive('/') ? 'bg-[#F0F4EC] text-[#3A4B29]' : 'text-foreground hover:bg-[#F0F4EC]/50 hover:text-[#3A4B29]'}`}>
+                                    <Home className="w-4 h-4" strokeWidth={2} /> Home
+                                </Link>
 
-                            {/* Desktop Navigation - Center */}
-                            <div className="hidden lg:flex items-center gap-1">
-                                {navItems.map((item) => {
-                                    const Icon = item.icon;
-                                    const active = isActive(item.href);
-
-                                    // Shop item with hover dropdown
-                                    if (item.hasDropdown) {
-                                        return (
-                                            <div
-                                                key={item.label}
-                                                className="relative"
-                                                ref={shopDropdownRef}
-                                                onMouseEnter={handleShopMouseEnter}
-                                                onMouseLeave={handleShopMouseLeave}
-                                            >
-                                                <Link
-                                                    href={item.href}
-                                                    className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${active || isShopHovered
-                                                        ? "bg-olive-100 dark:bg-primary/15 text-olive-800 dark:text-primary"
-                                                        : "text-foreground/70 hover:text-foreground hover:bg-muted/60"
-                                                        }`}
-                                                >
-                                                    <Icon className="w-4 h-4" />
-                                                    {item.label}
-                                                    <ChevronDown
-                                                        className={`w-3.5 h-3.5 opacity-60 transition-transform duration-200 ${isShopHovered ? "rotate-180" : ""
-                                                            }`}
-                                                    />
-                                                </Link>
-
-                                                {/* Shop Dropdown */}
-                                                {isShopHovered && (
-                                                    <div className="absolute left-0 top-full mt-2 w-56 bg-card border border-border rounded-xl shadow-xl py-2 animate-fade-in-up">
-                                                        {shopCategories.map((cat) => (
-                                                            <Link
-                                                                key={cat.label}
-                                                                href={cat.href}
-                                                                className="block px-4 py-2.5 text-sm text-foreground/80 hover:text-primary hover:bg-muted/60 transition-colors capitalize"
-                                                                onClick={() => setIsShopHovered(false)}
-                                                            >
-                                                                {cat.label}
-                                                            </Link>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        );
-                                    }
-
-                                    return (
-                                        <Link
-                                            key={item.label}
-                                            href={item.href}
-                                            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${active
-                                                ? "bg-olive-100 dark:bg-primary/15 text-olive-800 dark:text-primary"
-                                                : "text-foreground/70 hover:text-foreground hover:bg-muted/60"
-                                                }`}
-                                        >
-                                            <Icon className="w-4 h-4" />
-                                            {item.label}
-                                        </Link>
-                                    );
-                                })}
-
-                                {/* More Dropdown */}
-                                {moreItems.length > 0 && (
-                                    <div className="relative" ref={moreRef}>
-                                        <button
-                                            onClick={() => setIsMoreOpen(!isMoreOpen)}
-                                            className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${isMoreOpen
-                                                ? "bg-olive-100 dark:bg-primary/15 text-olive-800 dark:text-primary"
-                                                : "text-foreground/70 hover:text-foreground hover:bg-muted/60"
-                                                }`}
-                                        >
-                                            <LayoutGrid className="w-4 h-4" />
-                                            More
-                                            <ChevronDown
-                                                className={`w-3.5 h-3.5 opacity-60 transition-transform duration-200 ${isMoreOpen ? "rotate-180" : ""
-                                                    }`}
-                                            />
-                                        </button>
-                                        {isMoreOpen && (
-                                            <div className="absolute left-0 top-full mt-2 w-48 bg-card border border-border rounded-xl shadow-xl py-1.5 animate-fade-in-up">
-                                                {moreItems.map((item) => (
-                                                    <Link
-                                                        key={item.label}
-                                                        href={item.href}
-                                                        className="block px-4 py-2.5 text-sm text-foreground/80 hover:text-primary hover:bg-muted/60 transition-colors"
-                                                        onClick={() => setIsMoreOpen(false)}
-                                                    >
-                                                        {item.label}
-                                                    </Link>
-                                                ))}
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Desktop Right Actions */}
-                            <div className="hidden lg:flex items-center gap-1.5">
-                                {/* Search */}
-                                <button className="p-2.5 rounded-full text-foreground/70 hover:text-foreground hover:bg-muted/60 transition-colors">
-                                    <Search className="w-5 h-5" />
-                                </button>
-
-                                {loading ? (
-                                    <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin ml-2"></div>
-                                ) : isAuthenticated ? (
-                                    <>
-                                        {/* Cart */}
-                                        <Link
-                                            href="/cart"
-                                            className="relative p-2.5 rounded-full text-foreground/70 hover:text-foreground hover:bg-muted/60 transition-colors"
-                                        >
-                                            <ShoppingBag className="w-5 h-5" />
-                                            {cartCount > 0 && (
-                                                <span className="absolute top-0.5 right-0.5 bg-red-500 text-white text-[9px] font-bold h-4 min-w-[16px] px-0.5 rounded-full flex items-center justify-center border-2 border-background">
-                                                    {cartCount}
-                                                </span>
-                                            )}
-                                        </Link>
-
-                                        {/* User Profile */}
-                                        <div className="relative" ref={userMenuRef}>
-                                            <button
-                                                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                                                className="p-2.5 rounded-full text-foreground/70 hover:text-foreground hover:bg-muted/60 transition-colors"
-                                            >
-                                                <User className="w-5 h-5" />
-                                            </button>
-                                            {isUserMenuOpen && (
-                                                <div className="absolute right-0 top-full mt-2 w-52 bg-card border border-border rounded-xl shadow-xl py-1.5 animate-fade-in-up">
-                                                    <div className="px-4 py-3 border-b border-border">
-                                                        <p className="font-semibold text-foreground text-sm truncate">
-                                                            {user?.name}
-                                                        </p>
-                                                        <p className="text-xs text-muted-foreground truncate">
-                                                            {user?.email}
-                                                        </p>
-                                                    </div>
-                                                    <Link
-                                                        href="/account"
-                                                        className="block px-4 py-2.5 text-sm text-foreground/80 hover:text-primary hover:bg-muted/60 transition-colors"
-                                                        onClick={() => setIsUserMenuOpen(false)}
-                                                    >
-                                                        Account
-                                                    </Link>
-                                                    <Link
-                                                        href="/orders"
-                                                        className="block px-4 py-2.5 text-sm text-foreground/80 hover:text-primary hover:bg-muted/60 transition-colors"
-                                                        onClick={() => setIsUserMenuOpen(false)}
-                                                    >
-                                                        Orders
-                                                    </Link>
-                                                    {user?.role === "admin" && (
-                                                        <Link
-                                                            href="/admin"
-                                                            className="block px-4 py-2.5 text-sm text-foreground/80 hover:text-primary hover:bg-muted/60 transition-colors"
-                                                            onClick={() => setIsUserMenuOpen(false)}
-                                                        >
-                                                            Admin
+                                <div className="relative group" onMouseEnter={() => setIsShopHovered(true)} onMouseLeave={() => setIsShopHovered(false)}>
+                                    <Link href="/products" className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${isActive('/products') || isShopHovered ? 'bg-[#F0F4EC] text-[#3A4B29]' : 'text-foreground hover:bg-[#F0F4EC]/50 hover:text-[#3A4B29]'}`}>
+                                        <Package className="w-4 h-4" strokeWidth={2} /> Shop <ChevronDown className="w-3.5 h-3.5 opacity-60" />
+                                    </Link>
+                                    <AnimatePresence>
+                                        {isShopHovered && (
+                                            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }} className="absolute left-0 top-full pt-2 w-56">
+                                                <div className="bg-white border border-border shadow-xl rounded-2xl py-3 overflow-hidden">
+                                                    {shopCategories.map(cat => (
+                                                        <Link key={cat.label} href={cat.href} className="block px-5 py-2.5 text-sm font-medium text-foreground hover:bg-[#F0F4EC] hover:text-[#3A4B29] transition-colors">
+                                                            {cat.label}
                                                         </Link>
-                                                    )}
-                                                    <div className="border-t border-border mt-1 pt-1">
-                                                        <button
-                                                            onClick={handleLogout}
-                                                            className="w-full text-left px-4 py-2.5 text-sm text-destructive hover:bg-muted/60 transition-colors"
-                                                        >
-                                                            Sign Out
-                                                        </button>
-                                                    </div>
+                                                    ))}
                                                 </div>
-                                            )}
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+
+                                <Link href="/bundles" className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${isActive('/bundles') ? 'bg-[#F0F4EC] text-[#3A4B29]' : 'text-foreground hover:bg-[#F0F4EC]/50 hover:text-[#3A4B29]'}`}>
+                                    <Gift className="w-4 h-4" strokeWidth={2} /> Gift Boxes
+                                </Link>
+
+                                <Link href="/offers" className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all ${isActive('/offers') ? 'bg-[#F0F4EC] text-[#3A4B29]' : 'text-foreground hover:bg-[#F0F4EC]/50 hover:text-[#3A4B29]'}`}>
+                                    <Percent className="w-4 h-4" strokeWidth={2} /> Offers
+                                </Link>
+
+                                <div className="relative group">
+                                    <button className="flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold text-foreground hover:bg-[#F0F4EC]/50 hover:text-[#3A4B29] transition-all">
+                                        <BookOpen className="w-4 h-4" strokeWidth={2} /> More <ChevronDown className="w-3.5 h-3.5 opacity-60" />
+                                    </button>
+                                    <div className="absolute left-0 top-full pt-2 w-52 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+                                        <div className="bg-white border border-border shadow-xl rounded-2xl py-3 overflow-hidden">
+                                            <Link href="/about" className="block px-5 py-2 text-sm font-medium text-foreground hover:bg-[#F0F4EC] hover:text-[#3A4B29] transition-colors text-nowrap">About Us</Link>
+                                            <Link href="/about/story" className="block px-5 py-2 text-sm font-medium text-foreground hover:bg-[#F0F4EC] hover:text-[#3A4B29] transition-colors text-nowrap">Our Story</Link>
+                                            <Link href="/blog" className="block px-5 py-2 text-sm font-medium text-foreground hover:bg-[#F0F4EC] hover:text-[#3A4B29] transition-colors">Blog & Recipes</Link>
+                                            <Link href="/careers" className="block px-5 py-2 text-sm font-medium text-foreground hover:bg-[#F0F4EC] hover:text-[#3A4B29] transition-colors">Careers</Link>
+                                            <Link href="/press" className="block px-5 py-2 text-sm font-medium text-foreground hover:bg-[#F0F4EC] hover:text-[#3A4B29] transition-colors">Press</Link>
+                                            <Link href="/faqs" className="block px-5 py-2 text-sm font-medium text-foreground hover:bg-[#F0F4EC] hover:text-[#3A4B29] transition-colors border-t border-border/40 mt-1">FAQs</Link>
+                                            <Link href="/wholesale" className="block px-5 py-2 text-sm font-medium text-foreground hover:bg-[#F0F4EC] hover:text-[#3A4B29] transition-colors">Wholesale</Link>
                                         </div>
-                                    </>
-                                ) : (
-                                    <div className="flex items-center gap-3 ml-2">
-                                        <Link
-                                            href="/login"
-                                            className="text-sm font-semibold text-foreground hover:text-primary transition-colors"
-                                        >
-                                            Login
-                                        </Link>
-                                        <Link href="/products">
-                                            <button className="bg-olive-700 dark:bg-primary hover:bg-olive-800 dark:hover:bg-primary/90 text-white dark:text-primary-foreground font-semibold rounded-full px-5 h-9 text-sm shadow-sm hover:shadow-md transition-all">
-                                                Shop Now
-                                            </button>
-                                        </Link>
                                     </div>
-                                )}
-                            </div>
+                                </div>
+                            </div>                            {/* Right Area - Luxury Liquid Icons */}
+                            <div className="flex items-center gap-2 sm:gap-4 px-3 sm:px-6 py-2 sm:py-2.5 bg-[#869661]/5 backdrop-blur-md rounded-full border border-[#869661]/10 relative shrink min-w-0">
+                                {[
+                                    { icon: Search, onClick: () => setIsSearchOpen(true), label: "Search" },
+                                    { icon: Bell, onClick: () => setIsNotificationsOpen(!isNotificationsOpen), label: "Notifications", hasBadge: true, count: 2 },
+                                    { icon: ShoppingBag, onClick: () => setIsCartOpen(true), label: "Cart", hasBadge: true, count: cartCount },
+                                    { icon: User, href: isAuthenticated ? "/account" : "/login", label: "Profile", loading: loading, hiddenClass: "hidden sm:flex" }
+                                ].map((action, idx) => (
+                                    <div key={action.label} className={`relative group flex items-center justify-center shrink-0 ${action.hiddenClass || ""}`}>
+                                        {action.href ? (
+                                            <Link href={action.href} className="p-2 sm:p-2.5 rounded-full hover:bg-[#869661]/10 transition-all text-[#2A2F25] block relative z-10">
+                                                {action.loading ? (
+                                                    <div className="w-5 h-5 sm:w-[1.4rem] sm:h-[1.4rem] border-2 border-[#869661] border-t-transparent rounded-full animate-spin" />
+                                                ) : (
+                                                    <action.icon className="w-5 h-5 sm:w-[1.4rem] sm:h-[1.4rem]" strokeWidth={1.5} />
+                                                )}
+                                            </Link>
+                                        ) : (
+                                            <button onClick={action.onClick} className="p-2 sm:p-2.5 rounded-full hover:bg-[#869661]/10 transition-all text-[#2A2F25] relative z-10">
+                                                <action.icon className="w-5 h-5 sm:w-[1.4rem] sm:h-[1.4rem]" strokeWidth={1.5} />
+                                                {action.hasBadge && action.count > 0 && (
+                                                    <span className="absolute top-0 right-0 sm:-top-0.5 sm:-right-0.5 w-4 h-4 sm:w-5 sm:h-5 bg-[#D86B4B] text-white text-[9px] sm:text-[10px] flex items-center justify-center rounded-full font-bold ring-2 ring-white z-20 shadow-sm">
+                                                        {action.count}
+                                                    </span>
+                                                )}
+                                            </button>
+                                        )}
+                                        {/* Liquid Blob on Hover (Targeting the gooey filter) */}
+                                        <div className="absolute inset-0 bg-[#869661]/15 rounded-full scale-0 group-hover:scale-100 transition-transform duration-500 -z-10" style={{ filter: 'url(#global-gooey)' }} />
+                                    </div>
+                                ))}
+                                
+                                <div className="w-px h-4 sm:h-5 bg-[#869661]/20 mx-1 sm:mx-2 shrink-0" />
 
-                            {/* Mobile Right Actions */}
-                            <div className="lg:hidden flex items-center gap-2">
-                                {/* Search */}
-                                <button className="w-10 h-10 bg-white dark:bg-secondary rounded-full border border-border/40 shadow-sm flex flex-col items-center justify-center text-foreground transition-colors">
-                                    <Search className="w-4 h-4 text-muted-foreground" />
-                                </button>
-
-
-                                {/* Theme Toggle */}
-                                <button
-                                    onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                                    aria-label="Toggle Theme"
-                                    className="w-10 h-10 bg-white dark:bg-secondary rounded-full border border-border/40 shadow-sm flex items-center justify-center text-foreground transition-colors"
+                                {/* Mobile Hamburger */}
+                                <button 
+                                    onClick={() => setIsMobileMenuOpen(true)}
+                                    className="lg:hidden p-2.5 rounded-full bg-[#869661] text-white relative z-10 shadow-sm shrink-0"
                                 >
-                                    {theme === "dark" ? (
-                                        <Sun className="w-4 h-4 text-muted-foreground" />
-                                    ) : (
-                                        <Moon className="w-4 h-4 text-muted-foreground" />
-                                    )}
+                                    <Package className="w-5 h-5 sm:w-[1.4rem] sm:h-[1.4rem]" strokeWidth={2} />
                                 </button>
                             </div>
-                        </div>
-                    </nav>
-                </header>
 
-                {/* Spacer for fixed navbar */}
-                <div className="h-15 lg:h-26" />
-
-                {/* Mobile Bottom Navigation Bar */}
-                <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-card border-t border-border/30 shadow-[0_-4px_25px_rgba(0,0,0,0.04)] safe-area-bottom pb-1">
-                    <div className="flex items-center justify-around h-[70px] px-2.5">
-                        {/* Home */}
-                        <Link
-                            href="/"
-                            className={`flex flex-col items-center justify-center gap-1 min-w-[70px] h-[52px] rounded-[18px] transition-colors ${isActive("/")
-                                ? "bg-[#ecf0e6] dark:bg-primary/20 text-[#6b7b5c] dark:text-primary"
-                                : "text-muted-foreground/80 hover:bg-muted/30"
-                                }`}
-                        >
-                            <Home className="w-[20px] h-[20px]" />
-                            <span className="text-[10px] font-semibold">Home</span>
-                        </Link>
-
-                        {/* Shop */}
-                        <Link
-                            href="/products"
-                            className={`flex flex-col items-center justify-center gap-1 min-w-[70px] h-[52px] rounded-[18px] transition-colors ${isActive("/products")
-                                ? "bg-[#ecf0e6] dark:bg-primary/20 text-[#6b7b5c] dark:text-primary"
-                                : "text-muted-foreground/80 hover:bg-muted/30"
-                                }`}
-                        >
-                            <Store className="w-[20px] h-[20px]" />
-                            <span className="text-[10px] font-semibold">Shop</span>
-                        </Link>
-
-                        {/* Cart */}
-                        <Link
-                            href="/cart"
-                            className={`relative flex flex-col items-center justify-center gap-1 min-w-[70px] h-[52px] rounded-[18px] transition-colors ${isActive("/cart")
-                                ? "bg-[#ecf0e6] dark:bg-primary/20 text-[#6b7b5c] dark:text-primary"
-                                : "text-muted-foreground/80 hover:bg-muted/30"
-                                }`}
-                        >
-                            <ShoppingBag className="w-[20px] h-[20px]" />
-                            {cartCount > 0 && (
-                                <span className="absolute top-1 right-3 bg-[#e25d43] text-white text-[9px] font-bold h-3.5 min-w-[14px] px-0.5 rounded-full flex items-center justify-center border-[1.5px] border-white dark:border-card">
-                                    {cartCount}
-                                </span>
-                            )}
-                            <span className="text-[10px] font-semibold">Cart</span>
-                        </Link>
-
-                        {/* Profile */}
-                        <Link
-                            href={isAuthenticated ? "/account" : "/login"}
-                            className={`flex flex-col items-center justify-center gap-1 min-w-[70px] h-[52px] rounded-[18px] transition-colors ${isActive("/account") || isActive("/login")
-                                ? "bg-[#ecf0e6] dark:bg-primary/20 text-[#6b7b5c] dark:text-primary"
-                                : "text-muted-foreground/80 hover:bg-muted/30"
-                                }`}
-                        >
-                            <User className="w-[20px] h-[20px]" />
-                            <span className="text-[10px] font-semibold">Profile</span>
-                        </Link>
-                    </div>
+                        </nav>
+                    </header>
+                    <NotificationDropdown isOpen={isNotificationsOpen} onClose={() => setIsNotificationsOpen(false)} />
                 </div>
 
+                {/* Overlays */}
+                <SearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+                <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+
+                {/* Mobile Menu Overlay */}
+                <AnimatePresence>
+                    {isMobileMenuOpen && (
+                        <motion.div
+                            initial={{ opacity: 0, x: "100%" }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: "100%" }}
+                            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                            className="fixed inset-0 z-[100] bg-white/90 backdrop-blur-xl lg:hidden flex flex-col"
+                        >
+                            <div className="p-6 flex justify-between items-center border-b border-[#ECE8E0]/50">
+                                <Link href="/" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-2">
+                                    <div className="w-8 h-8 bg-[#869661] rounded-lg flex items-center justify-center text-white font-serif font-bold italic">G</div>
+                                    <span className="font-serif text-xl font-bold tracking-tight text-[#2A2F25]">GourmetLux</span>
+                                </Link>
+                                <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 text-[#2A2F25] hover:bg-[#F3EFE8] rounded-full transition-colors">
+                                    <ChevronRight className="w-6 h-6 rotate-90" />
+                                </button>
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto px-6 py-8">
+                                <nav className="space-y-8">
+                                    <div>
+                                        <h3 className="text-[10px] uppercase tracking-[0.2em] text-[#767B71] font-bold mb-4">Shop Collections</h3>
+                                        <div className="grid grid-cols-1 gap-3">
+                                            {categories.map((cat) => (
+                                                <Link
+                                                    key={cat._id}
+                                                    href={`/products?category=${cat._id}`}
+                                                    onClick={() => setIsMobileMenuOpen(false)}
+                                                    className="flex items-center justify-between p-4 bg-[#F3EFE8]/50 rounded-2xl hover:bg-[#869661] hover:text-white transition-all group relative overflow-hidden"
+                                                >
+                                                    <span className="font-serif text-lg font-bold relative z-10">{cat.name}</span>
+                                                    <ChevronRight className="w-5 h-5 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all relative z-10" />
+                                                    <div className="absolute inset-0 bg-[#869661] scale-x-0 group-hover:scale-x-100 transition-transform origin-left -z-0" />
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </nav>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                {/* Mobile Bottom Navigation (Refined Liquid Glass) */}
+                {!pathname.includes("/products/") || pathname.split("/").length < 3 ? (
+                    <div className="lg:hidden fixed bottom-6 left-1/2 -translate-x-1/2 w-[92%] max-w-[360px] z-[120] pointer-events-auto">
+
+                    <div className="bg-white/80 backdrop-blur-[24px] rounded-[2.5rem] border border-[#869661]/25 shadow-[0_25px_60px_-15px_rgba(42,47,37,0.2)] p-1.5 relative overflow-visible">
+                        
+                        {/* 1. Underlying Liquid Layer (Gooey Filter applies ONLY here) */}
+                        <div className="absolute inset-1.5 z-0" style={{ filter: 'url(#global-gooey)' }}>
+                            {mobileNavItems.map((nav, idx) => {
+                                const active = isActive(nav.href);
+                                return (
+                                    <div key={`bg-${nav.label}`} className="absolute top-0 bottom-0 flex items-center justify-center" style={{ left: `${idx * 25}%`, width: '25%' }}>
+                                        {/* Static "base" blobs for the active pill to merge into */}
+                                        <div className={`w-8 h-8 rounded-full transition-all duration-500 ${active ? 'bg-white opacity-100 scale-110' : 'bg-white/5 opacity-0 scale-75'}`} />
+                                        
+                                        {active && (
+                                            <motion.div
+                                                layoutId="liquid-pill-mobile-v2"
+                                                className="absolute w-[52px] h-[52px] xs:w-[60px] xs:h-[60px] bg-white rounded-full shadow-[0_4px_15px_rgba(134,150,97,0.3)]"
+                                                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                                            />
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+
+                        {/* 2. Content Layer (Icons - NO FILTER HERE for maximum sharpness/visibility) */}
+                        <div className="grid grid-cols-4 w-full h-[64px] relative z-20 items-center px-1">
+                            {mobileNavItems.map((nav) => {
+                                const active = isActive(nav.href);
+                                
+                                // Search icon opens the overlay instead of navigating
+                                if (nav.label === "Shop") {
+                                    return (
+                                        <button 
+                                            key={nav.label} 
+                                            onClick={() => setIsSearchOpen(true)}
+                                            className="relative flex items-center justify-center h-full group"
+                                        >
+                                            <div className={`relative z-10 flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300 text-[#2A2F25]/40 hover:text-[#869661]`}>
+                                                <nav.icon className="w-5.5 h-5.5 xs:w-6.5 xs:h-6.5" strokeWidth={1.5} />
+                                            </div>
+                                        </button>
+                                    );
+                                }
+                                
+                                return (
+                                    <Link 
+                                        key={nav.label} 
+                                        href={nav.href} 
+                                        className="relative flex items-center justify-center h-full group"
+                                    >
+                                        <div className={`relative z-10 flex items-center justify-center w-12 h-12 rounded-full transition-all duration-300 ${
+                                            active 
+                                                ? 'text-[#3A4B29] scale-110' 
+                                                : 'text-[#2A2F25]/40 hover:text-[#869661]'
+                                        }`}>
+                                            <nav.icon className="w-5.5 h-5.5 xs:w-6.5 xs:h-6.5" strokeWidth={active ? 2.5 : 1.5} />
+                                        </div>
+                                    </Link>
+                                );
+                            })}
+                        </div>
+                        </div>
+                    </div>
+                ) : null}
             </>
         )
     );

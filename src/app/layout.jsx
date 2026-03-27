@@ -57,11 +57,13 @@ export const metadata = {
   keywords: "pickles, Indian food, gourmet snacks, mango pickle, masala cashews, traditional recipes",
 };
 
+import ClientTransition from "./components/ClientTransition";
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${playfair.variable} ${inter.variable} ${geistMono.variable} ${kumbhSans.variable} antialiased`}
+        className={`${playfair.variable} ${inter.variable} ${geistMono.variable} ${kumbhSans.variable} antialiased overflow-x-hidden`}
       >
         <ToastContainer />
         <ThemeProvider
@@ -72,11 +74,24 @@ export default function RootLayout({ children }) {
         >
           <UserProvider>
             <Navbar />
-            {children}
+            <ClientTransition>
+              {children}
+            </ClientTransition>
             {/* Bottom nav spacer for mobile - prevents content from hiding behind fixed bottom nav */}
             <div className="lg:hidden h-16" />
             <Footer />
             <ChatWidget />
+            
+            {/* Global SVG Gooey Filter for Liquid Effects */}
+            <svg className="fixed pointer-events-none opacity-0 invisible w-0 h-0" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <filter id="global-gooey">
+                  <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur" />
+                  <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -8" result="gooey" />
+                  <feComposite in="SourceGraphic" in2="gooey" operator="atop" />
+                </filter>
+              </defs>
+            </svg>
           </UserProvider>
         </ThemeProvider>
       </body>

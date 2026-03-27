@@ -1,9 +1,15 @@
 import mongoose from 'mongoose';
 
-const MONGODB_URI = process.env.MONGODB_URI + '/' + process.env.NEXT_PUBLIC_SITE_NAME.toLowerCase();
+const rawURI = process.env.MONGODB_URI || "";
+const siteName = (process.env.NEXT_PUBLIC_SITE_NAME || "arclay").toLowerCase();
+
+let MONGODB_URI = rawURI;
+if (rawURI && !rawURI.includes('.net/')) {
+    MONGODB_URI = rawURI.replace('.net', `.net/${siteName}`);
+}
 
 if (!MONGODB_URI) {
-    throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
+    throw new Error('Please define the MONGODB_URI environment variable inside .env');
 }
 
 let cached = global.mongoose;
@@ -20,6 +26,8 @@ async function connectDB() {
     if (!cached.promise) {
         const opts = {
             bufferCommands: false,
+            serverSelectionTimeoutMS: 5000,
+            connectTimeoutMS: 10000,
         };
 
         cached.promise = mongoose.connect(MONGODB_URI, opts).then((mongoose) => {

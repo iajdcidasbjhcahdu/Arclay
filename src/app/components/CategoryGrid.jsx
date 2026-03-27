@@ -1,22 +1,36 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import CategoryCard from "./CategoryCard";
+import Link from "next/link";
 import { motion } from "framer-motion";
-import { getSiteName, getBrandContent } from "@/config/brandContent";
+import { MOCK_CATEGORIES } from "@/data/mockProducts";
 
 export default function CategoryGrid() {
-    const router = useRouter();
-    const [categories, setCategories] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [categories, setCategories] = useState([
+        {
+            _id: 'all-products',
+            name: 'All Products',
+            productCount: 45,
+            image: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?q=80&w=2670&auto=format&fit=crop'
+        },
+        ...MOCK_CATEGORIES
+    ]);
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const fetchCategories = async () => {
             try {
                 const res = await fetch("/api/products?limit=1");
                 const data = await res.json();
-                if (data.success) {
-                    setCategories(data.categories);
+                if (data.success && data.categories?.length > 0) {
+                    const allCat = {
+                        _id: 'all-products',
+                        name: 'All Products',
+                        productCount: data.pagination?.total || 45,
+                        image: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?q=80&w=2670&auto=format&fit=crop'
+                    };
+                    setCategories([allCat, ...data.categories]);
                 }
             } catch (error) {
                 console.error("Failed to fetch categories:", error);
@@ -29,11 +43,15 @@ export default function CategoryGrid() {
 
     if (loading) {
         return (
-            <section className="py-20">
-                <div className="container mx-auto px-4 lg:px-8">
+            <section className="py-8 lg:py-16">
+                <div className="container mx-auto px-6 max-w-7xl">
+                    <div className="text-center mb-12">
+                        <div className="h-10 w-64 bg-black/5 animate-pulse mx-auto rounded mb-4" />
+                        <div className="h-4 w-96 bg-black/5 animate-pulse mx-auto rounded" />
+                    </div>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
                         {[...Array(6)].map((_, i) => (
-                            <div key={i} className="aspect-square bg-muted rounded-3xl animate-pulse" />
+                            <div key={i} className="aspect-[4/5] bg-black/5 rounded-3xl animate-pulse" />
                         ))}
                     </div>
                 </div>
@@ -43,53 +61,46 @@ export default function CategoryGrid() {
 
     if (!categories.length) return null;
 
-    const siteName = getSiteName();
-    const isSanatva = siteName.toLowerCase().includes('sanatva');
-    const content = getBrandContent(siteName);
-
-    // Instead of hardcoding, we can use the productHighlight titles from brandContent.
-    // If not defined, fallback to a smart default.
-    const title = content.productHighlight?.sectionTitle || "Explore Categories";
-    const subtitle = isSanatva
-        ? "Explore Sanatva Ayurvedic’s natural liver detox and health range."
-        : "Discover our wide range of handcrafted pickles, preserves, and gourmet delights";
-
     return (
-        <section className="hidden lg:block py-20">
-            <div className="container mx-auto px-4 lg:px-8">
-                <div className="text-center mb-12">
-                    <h2 className="text-3xl lg:text-4xl font-heading font-bold text-foreground mb-4">
-                        {title}
-                    </h2>
-                    <p className="text-muted-foreground max-w-2xl mx-auto">
-                        {subtitle}
-                    </p>
+        <section className="py-8 lg:py-16">
+            <div className="container mx-auto px-6 max-w-7xl">
+                
+                <div className="flex flex-row items-center justify-between mb-6 lg:mb-8 px-1 lg:px-0">
+                    <motion.h2 
+                        initial={{ opacity: 0, x: -10 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once:true }}
+                        className="font-sans text-[22px] lg:text-[28px] font-extrabold text-[#1A1D23] tracking-tight"
+                    >
+                        Popular
+                    </motion.h2>
+                    <motion.div 
+                        initial={{ opacity: 0, x: 10 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once:true }} transition={{ delay: 0.1 }}
+                    >
+                        <Link href="/products" className="text-[13px] font-bold text-[#8B5CF6] hover:text-[#7C3AED] transition-colors">
+                            Show all
+                        </Link>
+                    </motion.div>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-                    {categories.map((category, index) => (
-                        <motion.button
-                            key={category._id}
+                <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-100px" }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                    className="flex overflow-x-auto overflow-y-hidden hide-scrollbar snap-x snap-mandatory gap-2 lg:gap-6 pb-8 -mx-6 px-6 lg:mx-0 lg:px-0 lg:grid lg:grid-cols-6 lg:overflow-visible"
+                >
+                    {categories.slice(0, 6).map((category, index) => (
+                        <motion.div 
+                            key={category._id} 
                             initial={{ opacity: 0, y: 20 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
-                            transition={{ delay: index * 0.05 }}
-                            onClick={() => router.push(`/shop?category=${category._id}`)}
-                            className="group relative aspect-square rounded-3xl overflow-hidden shadow-sm hover:shadow-lg transition-all"
+                            transition={{ delay: index * 0.1, duration: 0.5 }}
+                            className="w-[110px] sm:w-auto sm:min-w-[180px] snap-start shrink-0 lg:col-span-1"
                         >
-                            <img
-                                src={category.image || '/placeholder-category.jpg'}
-                                alt={category.name}
-                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                            <div className="absolute bottom-4 left-4 right-4 text-left">
-                                <p className="text-white font-semibold text-lg">{category.name}</p>
-                                <p className="text-white/70 text-sm">{category.productCount || 0} products</p>
-                            </div>
-                        </motion.button>
+                            <CategoryCard category={category} index={index} />
+                        </motion.div>
                     ))}
-                </div>
+                </motion.div>
             </div>
         </section>
     );
