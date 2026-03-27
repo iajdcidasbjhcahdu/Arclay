@@ -160,8 +160,9 @@ export default function Footer() {
                     </div>
 
                     {/* Bottom Bar */}
-                    <div className="mt-24 pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8">
-                        <div className="flex flex-col gap-2">
+                    <div className="mt-24 pt-12 border-t border-white/5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 items-center gap-10">
+                        {/* Copyright Section */}
+                        <div className="flex flex-col gap-2 order-2 md:order-1 items-center md:items-start">
                              <p className="text-white/60 text-[13px]">
                                 © {new Date().getFullYear()} GourmetLux Collection. All rights reserved.
                             </p>
@@ -170,26 +171,40 @@ export default function Footer() {
                             </p>
                         </div>
                         
-                        <div className="flex flex-col lg:flex-row items-center gap-8">
-                                <div className="flex items-center gap-4 relative overflow-visible" style={{ filter: 'url(#global-gooey)' }}>
-                                    {[Instagram, Facebook, Twitter, Youtube].map((Icon, i) => (
-                                        <button key={i} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/50 hover:bg-[#869661] hover:text-white transition-all border border-white/5 group relative">
-                                            <Icon className="w-4 h-4 relative z-10" />
-                                            <div className="absolute inset-0 bg-[#869661] scale-0 group-hover:scale-100 rounded-full transition-transform duration-500 -z-0" />
-                                        </button>
-                                    ))}
-                                </div>
-                            <div className="hidden lg:block h-8 w-px bg-white/10" />
-                            <div className="flex flex-wrap items-center justify-center gap-3 relative overflow-visible" style={{ filter: 'url(#global-gooey)' }}>
-                                <span className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-bold text-white/40 tracking-widest uppercase hover:text-white transition-all relative group">
+                        {/* Social & Certs Section */}
+                        <div className="flex flex-col items-center gap-6 order-1 lg:order-2">
+                             <div className="flex items-center gap-4 relative">
+                                {[Instagram, Facebook, Twitter, Youtube].map((Icon, i) => (
+                                    <button key={i} className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/50 hover:bg-[#869661] hover:text-white transition-all border border-white/5 group relative overflow-hidden">
+                                        <Icon className="w-4 h-4 relative z-10" />
+                                        <div className="absolute inset-0 bg-[#869661] scale-0 group-hover:scale-100 rounded-full transition-transform duration-500" />
+                                    </button>
+                                ))}
+                            </div>
+                            <div className="flex flex-wrap items-center justify-center gap-3">
+                                <span className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-bold text-white/40 tracking-widest uppercase hover:text-white transition-all group relative overflow-hidden cursor-default">
                                     <span className="relative z-10">FSSAI Certified</span>
-                                    <div className="absolute inset-0 bg-[#869661]/20 scale-0 group-hover:scale-100 rounded-xl transition-transform duration-500 -z-0" />
+                                    <div className="absolute inset-0 bg-[#869661]/20 scale-0 group-hover:scale-100 rounded-xl transition-transform duration-500" />
                                 </span>
-                                <span className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-bold text-white/40 tracking-widest uppercase hover:text-white transition-all relative group">
+                                <span className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-[10px] font-bold text-white/40 tracking-widest uppercase hover:text-white transition-all group relative overflow-hidden cursor-default">
                                     <span className="relative z-10">100% Organic</span>
-                                    <div className="absolute inset-0 bg-[#869661]/20 scale-0 group-hover:scale-100 rounded-xl transition-transform duration-500 -z-0" />
+                                    <div className="absolute inset-0 bg-[#869661]/20 scale-0 group-hover:scale-100 rounded-xl transition-transform duration-500" />
                                 </span>
                             </div>
+                        </div>
+
+                        {/* Attribution Section */}
+                        <div className="flex justify-center md:justify-end order-3">
+                            <Link 
+                                href="https://biharinnovation.in" 
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="group flex flex-col items-center md:items-end gap-1.5"
+                            >
+                                <span className="text-white/30 text-[10px] uppercase font-bold tracking-[0.2em] group-hover:text-[#869661] transition-colors">Design & Developed by</span>
+                                <span className="font-serif text-[18px] text-white/60 group-hover:text-white transition-all">Bihar Innovation</span>
+                                <div className="h-px w-0 group-hover:w-full bg-[#869661] transition-all duration-500" />
+                            </Link>
                         </div>
                     </div>
                 </div>
