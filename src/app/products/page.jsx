@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { ProductCardSkeleton } from "@/app/components/ProductSkeleton";
 import ProductCard from "@/app/components/ProductCard";
@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Search, SlidersHorizontal, Grid3X3, LayoutList, ChevronDown, X } from "lucide-react";
 import { MOCK_PRODUCTS, MOCK_CATEGORIES } from "@/data/mockProducts";
 
-export default function ProductsPage() {
+function ProductsPageContent() {
     const searchParams = useSearchParams();
     const initialCategory = searchParams.get("category") || "";
     const initialSearch = searchParams.get("search") || "";
@@ -402,5 +402,17 @@ export default function ProductsPage() {
                 </div>
             )}
         </main>
+    );
+}
+
+export default function ProductsPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-[#FEFBF6] flex items-center justify-center">
+                <div className="w-10 h-10 border-4 border-[#869661] border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        }>
+            <ProductsPageContent />
+        </Suspense>
     );
 }
